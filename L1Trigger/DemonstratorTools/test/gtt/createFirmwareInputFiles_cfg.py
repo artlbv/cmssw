@@ -44,8 +44,8 @@ for filePath in options.inputFiles:
 
 process = cms.Process("GTTFileWriter")
 
-process.load('Configuration.Geometry.GeometryExtended2026D88Reco_cff')
-process.load('Configuration.Geometry.GeometryExtended2026D88_cff')
+process.load('Configuration.Geometry.GeometryExtended2026D77Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2026D77_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -70,6 +70,7 @@ process.load("L1Trigger.L1TTrackMatch.l1tTrackerEmuHTMiss_cfi")
 process.load("L1Trigger.L1TTrackMatch.l1tTrackerEmuEtMiss_cfi")
 process.load('L1Trigger.DemonstratorTools.GTTFileWriter_cff')
 
+<<<<<<< HEAD
 process.l1tGTTInputProducer.debug = cms.int32(options.debug)
 process.l1tVertexProducer.l1TracksInputTag = cms.InputTag("l1tGTTInputProducer","Level1TTTracksConverted")
 process.l1tVertexProducer.VertexReconstruction.Algorithm = cms.string("fastHistoEmulation")
@@ -82,6 +83,13 @@ process.l1tTrackJetsEmulation.VertexInputTag = cms.InputTag("l1tVertexProducer",
 process.l1tTrackerEmuEtMiss.L1VertexInputTag = cms.InputTag("l1tVertexProducer", "l1verticesEmulation")
 process.l1tTrackerEmuEtMiss.debug = options.debug
 
+=======
+process.L1GTTInputProducer.debug = cms.int32(options.debug)
+process.VertexProducer.l1TracksInputTag = cms.InputTag("L1GTTInputProducer","Level1TTTracksConverted")
+process.VertexProducer.VertexReconstruction.Algorithm = cms.string("fastHistoEmulation")
+process.VertexProducer.VertexReconstruction.VxMinTrackPt = cms.double(0.0)
+process.VertexProducer.debug = options.debug
+>>>>>>> 263692eef2b (Change the track z0 format used by the vertexing algorithm to be an integer rather than an ap_fixed type. Use this new format internally. Also do some other cleanup tasks.)
 if options.debug:
     process.MessageLogger.cerr.INFO.limit = cms.untracked.int32(1000000000)
     process.MessageLogger.suppressInfo = cms.untracked.vstring('CondDBESSource', 'PoolDBESSource')
@@ -95,4 +103,8 @@ process.GTTFileWriter.format = cms.untracked.string(options.format)
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.Timing = cms.Service("Timing", summaryOnly = cms.untracked.bool(True))
 
+<<<<<<< HEAD
 process.p = cms.Path(process.l1tGTTInputProducer * process.l1tVertexProducer * process.l1tTrackSelectionProducer * process.l1tTrackJetsEmulation * process.l1tTrackerEmuHTMiss * process.l1tTrackerEmuEtMiss * process.GTTFileWriter)
+=======
+process.p = cms.Path(process.L1GTTInputProducer * process.VertexProducer * process.GTTFileWriter)
+>>>>>>> 263692eef2b (Change the track z0 format used by the vertexing algorithm to be an integer rather than an ap_fixed type. Use this new format internally. Also do some other cleanup tasks.)
