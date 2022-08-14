@@ -14,26 +14,26 @@ namespace l1t::demo::codecs {
     return htSumWord;
   }
 
-  // Encodes htsum collection onto 1 output link
-  std::array<std::vector<ap_uint<64>>, 1> encodeHtSums(const edm::View<l1t::EtSum>& htSums) {
-    std::vector<ap_uint<64>> htSumWords;
+  // Encodes etsum collection onto 1 output link
+  std::array<std::vector<ap_uint<64>>, 1> encodeHtSums(const edm::View<l1t::EtSum>& etSums) {
+    std::vector<ap_uint<64>> etSumWords;
 
-    for (const auto& htSum : htSums)
-      htSumWords.push_back(encodeHtSum(htSum));
+    for (const auto& etSum : etSums)
+      etSumWords.push_back(encodeHtSum(etSum));
 
     std::array<std::vector<ap_uint<64>>, 1> linkData;
 
     for (size_t i = 0; i < linkData.size(); i++) {
-      // Pad etsum vectors -> full packet length (48 frames, but only 1 htsum max)
-      htSumWords.resize(1, 0);
-      linkData.at(i) = htSumWords;
+      // Pad etsum vectors -> full packet length (48 frames, but only 1 etsum max)
+      etSumWords.resize(1, 0);
+      linkData.at(i) = etSumWords;
     }
 
     return linkData;
   }
 
   std::vector<l1t::EtSum> decodeHtSums(const std::vector<ap_uint<64>>& frames) {
-    std::vector<l1t::EtSum> htSums;
+    std::vector<l1t::EtSum> etSums;
 
     for (const auto& x : frames) {
       if (not x.test(0))
@@ -46,10 +46,10 @@ namespace l1t::demo::codecs {
                    0,
                    l1tmhtemu::MHTphi_t(x(l1tmhtemu::kMHTPhiMSB, l1tmhtemu::kMHTPhiLSB)).to_int(),
                    0);
-      htSums.push_back(s);
+      etSums.push_back(s);
     }
 
-    return htSums;
+    return etSums;
   }
 
 }  // namespace l1t::demo::codecs
