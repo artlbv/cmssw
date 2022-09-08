@@ -18,6 +18,11 @@
 // Namespace that defines constants and types used by the EtMiss Emulation
 // Includes functions for writing LUTs and converting to integer representations
 namespace l1tmetemu {
+  
+  const unsigned int kInternalPtWidth{14};
+  const unsigned int kPtMagSize{9};
+  const unsigned int kEtExtra{4};
+  const unsigned int kGlobalPhiExtra{3};
 
   const unsigned int kInternalPtWidth{14};
   const unsigned int kPtMagSize{9};
@@ -51,6 +56,9 @@ namespace l1tmetemu {
   // Enough symmetry in cos and sin between 0 and pi/2 to get all possible values
   // of cos and sin phi
   const double kMaxCosLUTPhi{M_PI / 2};
+
+  const unsigned int kNSector{9};
+  const unsigned int kNQuadrants{4};
 
   const unsigned int kNSector{9};
   const unsigned int kNQuadrants{4};

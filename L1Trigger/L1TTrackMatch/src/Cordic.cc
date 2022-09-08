@@ -187,5 +187,11 @@ EtMiss Cordic::toPolar(Et_t x, Et_t y) const {
         << "Et: " << ret_etmiss.Et.to_double() << " phi (int): " << ret_etmiss.Phi.to_int() << "\n";
   }
 
+<<<<<<< HEAD
+=======
+  E2t_t tempMET = in_x * magNormalisationLUT[cordicSteps - 1];
+  ret_etmiss.Et = tempMET;
+  ret_etmiss.Phi = phi.to_double() / kStepMETwordPhi;
+>>>>>>> 5b7a4fb9b2b (initial MET update)
   return ret_etmiss;
 }

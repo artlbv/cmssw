@@ -76,6 +76,7 @@ L1TrackerEtMissEmulatorProducer::L1TrackerEtMissEmulatorProducer(const edm::Para
     : trackToken_(consumes<L1TTTrackRefCollectionType>(iConfig.getParameter<edm::InputTag>("L1TrackInputTag"))),
       vtxAssocTrackToken_(
           consumes<L1TTTrackRefCollectionType>(iConfig.getParameter<edm::InputTag>("L1TrackAssociatedInputTag"))) {
+
   phiQuadrants_ = l1tmetemu::generatePhiSliceLUT(l1tmetemu::kNQuadrants);
   phiShifts_ = l1tmetemu::generatePhiSliceLUT(l1tmetemu::kNSector);
 
@@ -136,8 +137,8 @@ void L1TrackerEtMissEmulatorProducer::produce(edm::Event& iEvent, const edm::Eve
 
   // Initialize sector sums, need 0 initialization in case a sector has no
   // tracks
-  l1tmetemu::Et_t sumPx[l1tmetemu::kNSector * 2] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  l1tmetemu::Et_t sumPy[l1tmetemu::kNSector * 2] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  l1tmetemu::E2t_t sumPx[l1tmetemu::kNSector * 2] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  l1tmetemu::E2t_t sumPy[l1tmetemu::kNSector * 2] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   int link_totals[l1tmetemu::kNSector * 2] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   int sector_totals[l1tmetemu::kNSector] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -147,6 +148,7 @@ void L1TrackerEtMissEmulatorProducer::produce(edm::Event& iEvent, const edm::Eve
   for (const auto& track : *L1TTTrackHandle) {
     if (std::find(L1TTTrackAssociatedHandle->begin(), L1TTTrackAssociatedHandle->end(), track) !=
         L1TTTrackAssociatedHandle->end()) {
+
       bool EtaSector = (track->getTanlWord() & (1 << (TTTrack_TrackWord::TrackBitWidths::kTanlSize - 1)));
 
       ap_uint<TTTrack_TrackWord::TrackBitWidths::kRinvSize - 1> ptEmulationBits = track->getTrackWord()(
