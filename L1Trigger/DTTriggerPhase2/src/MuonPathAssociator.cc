@@ -400,7 +400,7 @@ void MuonPathAssociator::correlateMPaths(edm::Handle<DTDigiCollection> dtdigis,
                 if (std::abs(x_inSL3 - x_wire) > std::abs(x_inSL3 - x_wire_left)) {
                   x_wire = x_wire_left;  //choose the closest laterality
                   lat = 0;
-                }
+                }                
                 if (std::abs(x_inSL3 - x_wire) < minx) {
                   // different layer than the stored in best, hit added, matched_digis++;. This approach in somewhat
                   // buggy, as we could have stored as best LayerX -> LayerY -> LayerX, and this should
@@ -412,22 +412,28 @@ void MuonPathAssociator::correlateMPaths(edm::Handle<DTDigiCollection> dtdigis,
                     next_tdc = best_tdc;
                     next_layer = best_layer;
                     next_lat = best_lat;
-                    matched_digis++;
-                  }
-                  best_wire = (*digiIt).wire();
-                  best_tdc = (*digiIt).time();
-                  best_layer = dtLId.layer();
-                  best_lat = lat;
 
+                    best_wire = (*digiIt).wire();
+                    best_tdc = (*digiIt).time();
+                    best_layer = dtLId.layer();
+                    best_lat = lat;
+                    matched_digis++;
+                  } else if (dtLId.layer() == best_layer) { // same layer than stored, just substituting the hit, no matched_digis++;
+                    best_wire = (*digiIt).wire();
+                    best_tdc = (*digiIt).time();
+                    best_layer = dtLId.layer();
+                    best_lat = lat;
+                  }
                 } else if ((std::abs(x_inSL3 - x_wire) >= minx) && (std::abs(x_inSL3 - x_wire) < min2x)) {
                   // same layer than the stored in best, no hit added
-                  if (dtLId.layer() == best_layer)
+                  if (dtLId.layer() == best_layer) 
                     continue;
                   // different layer than the stored in next, hit added. This approach in somewhat
                   // buggy, as we could have stored as next LayerX -> LayerY -> LayerX, and this should
                   // count only as 2 hits. However, as we confirm with at least 2 hits, having 2 or more
                   // makes no difference
-                  matched_digis++;
+                  else if (dtLId.layer() != next_layer) 
+                    matched_digis++;
                   // whether the layer is the same for this hit and the stored in next, we substitute
                   // the one stored and modify the min distance
                   min2x = std::abs(x_inSL3 - x_wire);
@@ -640,21 +646,28 @@ void MuonPathAssociator::correlateMPaths(edm::Handle<DTDigiCollection> dtdigis,
                     next_tdc = best_tdc;
                     next_layer = best_layer;
                     next_lat = best_lat;
+
+                    best_wire = (*digiIt).wire();
+                    best_tdc = (*digiIt).time();
+                    best_layer = dtLId.layer();
+                    best_lat = lat;
                     matched_digis++;
+                  } else if (dtLId.layer() == best_layer) { // same layer than stored, just substituting the hit, no matched_digis++;
+                    best_wire = (*digiIt).wire();
+                    best_tdc = (*digiIt).time();
+                    best_layer = dtLId.layer();
+                    best_lat = lat;
                   }
-                  best_wire = (*digiIt).wire();
-                  best_tdc = (*digiIt).time();
-                  best_layer = dtLId.layer();
-                  best_lat = lat;
                 } else if ((std::abs(x_inSL1 - x_wire) >= minx) && (std::abs(x_inSL1 - x_wire) < min2x)) {
                   // same layer than the stored in best, no hit added
-                  if (dtLId.layer() == best_layer)
+                  if (dtLId.layer() == best_layer) 
                     continue;
                   // different layer than the stored in next, hit added. This approach in somewhat
                   // buggy, as we could have stored as next LayerX -> LayerY -> LayerX, and this should
                   // count only as 2 hits. However, as we confirm with at least 2 hits, having 2 or more
                   // makes no difference
-                  matched_digis++;
+                  else if (dtLId.layer() != next_layer) 
+                    matched_digis++;
                   // whether the layer is the same for this hit and the stored in next, we substitute
                   // the one stored and modify the min distance
                   min2x = std::abs(x_inSL1 - x_wire);
