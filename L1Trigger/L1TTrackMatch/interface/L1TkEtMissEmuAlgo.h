@@ -21,11 +21,6 @@ namespace l1tmetemu {
   
   const unsigned int kInternalPtWidth{14};
   const unsigned int kPtMagSize{9};
-  const unsigned int kEtExtra{4};
-  const unsigned int kGlobalPhiExtra{3};
-
-  const unsigned int kInternalPtWidth{14};
-  const unsigned int kPtMagSize{9};
   const unsigned int kMETSize{16};  // For output Magnitude default 16
   const unsigned int kMETMagSize{11};
   const unsigned int kMETPhiSize{13};  // For Output Phi default 13
@@ -60,10 +55,7 @@ namespace l1tmetemu {
   const unsigned int kNSector{9};
   const unsigned int kNQuadrants{4};
 
-  const unsigned int kNSector{9};
-  const unsigned int kNQuadrants{4};
-
-  // Simple struct used for ouput of cordic
+    // Simple struct used for ouput of cordic
   struct EtMiss {
     METWord_t Et;
     METWordphi_t Phi;
