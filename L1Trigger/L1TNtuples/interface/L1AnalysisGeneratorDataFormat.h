@@ -37,6 +37,11 @@ namespace L1Analysis {
       jetEta.resize(0);
       jetPhi.resize(0);
       jetM.resize(0);
+      jetPartonFlavour.resize(0);
+      jetHadronFlavour.resize(0);
+
+      genMetTrue = 0;
+      genMetCalo = 0;
     }
 
     // ---- L1AnalysisGeneratorDataFormat information.
@@ -61,6 +66,11 @@ namespace L1Analysis {
     std::vector<float> jetEta;
     std::vector<float> jetPhi;
     std::vector<float> jetM;
+    std::vector<int> jetPartonFlavour;
+    std::vector<int> jetHadronFlavour;
+
+    float genMetTrue;
+    float genMetCalo;
   };
 }  // namespace L1Analysis
 #endif

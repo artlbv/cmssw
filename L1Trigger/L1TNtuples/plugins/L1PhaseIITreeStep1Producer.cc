@@ -161,6 +161,8 @@ private:
   edm::EDGetTokenT<std::vector<l1t::EtSum>> scPFL1PuppiMHT_;
   edm::EDGetTokenT<std::vector<l1t::PFJet>> scPFL1PuppiExtended_;
   edm::EDGetTokenT<edm::ValueMap<float>> scBJetNN_;
+  edm::EDGetTokenT<std::vector<l1t::PFJet>> scPFL1PuppiExtended_;
+  edm::EDGetTokenT<edm::ValueMap<float>> scBJetNN_;
 
   //edm::EDGetTokenT<float> z0PuppiToken_;
   //edm::EDGetTokenT<l1t::VertexCollection> l1vertextdrToken_;
@@ -474,13 +476,11 @@ void L1PhaseIITreeStep1Producer::analyze(const edm::Event& iEvent, const edm::Ev
 
   if (scPFL1PuppisExtended.isValid()) {
     l1Extra->SetPFJetExtended(scPFL1PuppisExtended, scBJetNN, maxL1Extra_);
-    if (!scBJetNN.isValid()) {
-      edm::LogWarning("MissingProduct")
-          << "L1PhaseII BJetNN ID not found. SC Jets will be filled, but B tagging NN score will be empty" << std::endl;
+    if ( !scBJetNN.isValid() ) {
+      edm::LogWarning("MissingProduct") << "L1PhaseII BJetNN ID not found. SC Jets will be filled, but B tagging NN score will be empty" << std::endl;
     }
   } else {
-    edm::LogWarning("MissingProduct") << "L1PhaseII scJets from Extended Puppi not found. Branch will not be filled"
-                                      << std::endl;
+    edm::LogWarning("MissingProduct") << "L1PhaseII scJets from Extended Puppi not found. Branch will not be filled" << std::endl;
   }
 
   if (scPFL1PuppiMHTs.isValid()) {

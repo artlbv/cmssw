@@ -509,9 +509,7 @@ void L1Analysis::L1AnalysisPhaseIIStep1::SetPFJet(const edm::Handle<l1t::PFJetCo
   }
 }
 
-void L1Analysis::L1AnalysisPhaseIIStep1::SetPFJetExtended(const edm::Handle<l1t::PFJetCollection> PFJet,
-                                                          const edm::Handle<edm::ValueMap<float>> bJetNN,
-                                                          unsigned maxL1Extra) {
+void L1Analysis::L1AnalysisPhaseIIStep1::SetPFJetExtended(const edm::Handle<l1t::PFJetCollection> PFJet, const edm::Handle<edm::ValueMap<float>> bJetNN, unsigned maxL1Extra) {
   bool validBJetNN = bJetNN.isValid();
   edm::RefProd<l1t::PFJetCollection> refProdPFJet(PFJet);
   for (l1t::PFJetCollection::const_iterator it = PFJet->begin();
@@ -524,15 +522,18 @@ void L1Analysis::L1AnalysisPhaseIIStep1::SetPFJetExtended(const edm::Handle<l1t:
     l1extra_.seededConeExtendedPuppiJetPhi.push_back(it->phi());
     l1extra_.seededConeExtendedPuppiJetBx.push_back(0);
     l1extra_.nSeededConeExtendedPuppiJets++;
-    if (validBJetNN) {
+    if ( validBJetNN ) {
       size_t index = std::distance(PFJet->begin(), it);
       edm::Ref<l1t::PFJetCollection> pfJetRef(refProdPFJet, index);
       l1extra_.seededConeExtendedPuppiJetBJetNN.push_back((*bJetNN)[pfJetRef]);
+
     }
   }
+
 }
 
-void L1Analysis::L1AnalysisPhaseIIStep1::SetL1seededConeMHT(const edm::Handle<std::vector<l1t::EtSum>> l1SeededConeMHT) {
+void L1Analysis::L1AnalysisPhaseIIStep1::SetL1seededConeMHT(
+    const edm::Handle<std::vector<l1t::EtSum> > l1SeededConeMHT) {
   l1t::EtSum HT = l1SeededConeMHT->at(0);
   l1t::EtSum MHT = l1SeededConeMHT->at(1);
   l1extra_.seededConePuppiHT = HT.pt();
