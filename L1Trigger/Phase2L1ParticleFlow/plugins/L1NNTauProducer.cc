@@ -25,9 +25,8 @@ public:
   ~L1NNTauProducer() override;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-  static std::unique_ptr<tensorflow::SessionCache> initializeGlobalCache(const edm::ParameterSet&);
-  static void globalEndJob(const tensorflow::SessionCache*){};
-
+  static std::unique_ptr<TauNNTFCache> initializeGlobalCache(const edm::ParameterSet&);
+  static void globalEndJob(const TauNNTFCache*);
 private:
   std::unique_ptr<TauNNId> fTauNNId_;
   std::unique_ptr<TauNNIdHW> fTauNNIdHW_;
@@ -44,22 +43,18 @@ private:
               std::unique_ptr<PFTauCollection>& outputTaus);
 
   void printParts(std::vector<l1t::PFCandidate> &parts);
+  //void printTau(l1t::PFTau &iTau,result_t & iNN);
   void printTau(uint32_t &iPt,uint32_t &iEta,uint32_t &iPhi,uint32_t &iNN);
-
-
   FILE *file1_;
   FILE *file2_;
-
   double fSeedPt_;
   double fConeSize_;
   double fTauSize_;
   int fMaxTaus_;
   int fNParticles_;
-
   bool fHW;
   bool fEMSeed;
   bool fDebug;
-
   edm::EDGetTokenT<vector<l1t::PFCandidate>> fL1PFToken_;
 };
 
@@ -79,12 +74,13 @@ L1NNTauProducer::L1NNTauProducer(const edm::ParameterSet& cfg, const tensorflow:
 
   if (fHW) {
     fTauNNIdHW_ = std::make_unique<TauNNIdHW>();
-    fTauNNIdHW_->initialize("input_1:0", fNParticles_);   
+    fTauNNIdHW_->initialize("input_1:0", fNParticles_);
+    //file1_ = fopen("intput.txt", "w");     
+    //file2_ = fopen("output.txt", "w");     
   } else {
     fTauNNId_ = std::make_unique<TauNNId>(
         lNNFile.find("v0") == std::string::npos ? "input_1:0" : "dense_1_input:0", cache, lNNFile, fNParticles_);
   }
-
   produces<l1t::PFTauCollection>("L1PFTausNN");
 }
 
@@ -96,13 +92,19 @@ std::unique_ptr<TauNNTFCache> L1NNTauProducer::initializeGlobalCache(const edm::
   cache->graphDef = tensorflow::loadGraphDef(fp.fullPath());
   return std::unique_ptr<TauNNTFCache>(cache);
 }
-
 void L1NNTauProducer::globalEndJob(const TauNNTFCache* cache) {
   if (cache->graphDef != nullptr) {
     delete cache->graphDef;
   }
+  /*
+  if(file1_) { 
+    fclose(file1_); file1_ = nullptr;
+  }
+  if(file2_) { 
+    fclose(file2_); file2_ = nullptr;
+  }
+  */
 }
-
 void L1NNTauProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   edm::Handle<l1t::PFCandidateCollection> l1PFCandidates;
   iEvent.getByToken(fL1PFToken_, l1PFCandidates);
@@ -118,17 +120,14 @@ void L1NNTauProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     PFTau dummy;
     lTaus->push_back(dummy);
   }
-
   std::sort(lTaus->begin(), lTaus->end(), [](l1t::PFTau i, l1t::PFTau j) { return (i.pt() > j.pt()); });
   iEvent.put(std::move(lTaus), "L1PFTausNN");
 }
-
 void L1NNTauProducer::process_SW(const l1t::PFCandidateCollection& parts,
                                  std::unique_ptr<l1t::PFTauCollection>& iTaus) {
   std::vector<unique_ptr<l1t::PFCandidate>> pfChargedHadrons;
   std::vector<unique_ptr<l1t::PFCandidate>> pfChargedHadrons_sort_v;
   std::vector<unique_ptr<l1t::PFCandidate>> pfChargedHadrons_seeds_v;
-
   for (const auto& l1PFCand : parts)
     if ((l1PFCand.id() == l1t::PFCandidate::ChargedHadron || l1PFCand.id() == l1t::PFCandidate::Electron) &&
         std::abs(l1PFCand.eta()) < track_trigger_eta_max)
@@ -169,7 +168,6 @@ void L1NNTauProducer::addTau(const l1t::PFCandidate& iCand,
   int lId = 0;
   float z0 = 0;
   float dxy = 0;
-
   for (const auto& l1PFCand : iParts) {
     if (reco::deltaR2(iCand, l1PFCand) > fConeSize_ * fConeSize_)
       continue;
@@ -187,7 +185,6 @@ void L1NNTauProducer::addTau(const l1t::PFCandidate& iCand,
     }
     pfTauCands.push_back(l1PFCand);
   }
-  
   if (lTot.Pt() < fSeedPt_)
     return;
   std::sort(
