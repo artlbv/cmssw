@@ -26,16 +26,16 @@ namespace l1t {
     PFTau() {}
     enum { unidentified = 0, oneprong = 1, oneprongpi0 = 2, threeprong = 3 };
     PFTau(const LorentzVector& p,
-	  float iVector[80],
+          float iVector[80],
           float iso = -1,
           float fulliso = -1,
           int id = 0,
           int hwpt = 0,
           int hweta = 0,
           int hwphi = 0)
-      : PFTau(PolarLorentzVector(p), iVector, iso, id, hwpt, hweta, hwphi) {}
+        : PFTau(PolarLorentzVector(p), iVector, iso, id, hwpt, hweta, hwphi) {}
     PFTau(const PolarLorentzVector& p,
-	  float iVector[80],
+          float iVector[80],
           float iso = -1,
           float fulliso = -1,
           int id = 0,
@@ -51,7 +51,7 @@ namespace l1t {
 
     float z0() const { return vz(); }
     float dxy() const { return dxy_; }
-    const float* NNValues()  const {return NNValues_; }
+    const float* NNValues() const { return NNValues_; }
 
     bool passMass() const { return (mass() < 2 + pt() / PTSCALING_MASSCUT); }
     bool passLooseNN() const {

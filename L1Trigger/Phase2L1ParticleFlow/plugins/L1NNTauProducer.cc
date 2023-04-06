@@ -27,6 +27,7 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
   static std::unique_ptr<TauNNTFCache> initializeGlobalCache(const edm::ParameterSet&);
   static void globalEndJob(const TauNNTFCache*);
+
 private:
   std::unique_ptr<TauNNId> fTauNNId_;
   std::unique_ptr<TauNNIdHW> fTauNNIdHW_;
@@ -42,11 +43,11 @@ private:
               const l1t::PFCandidateCollection& iParts,
               std::unique_ptr<PFTauCollection>& outputTaus);
 
-  void printParts(std::vector<l1t::PFCandidate> &parts);
+  void printParts(std::vector<l1t::PFCandidate>& parts);
   //void printTau(l1t::PFTau &iTau,result_t & iNN);
-  void printTau(uint32_t &iPt,uint32_t &iEta,uint32_t &iPhi,uint32_t &iNN);
-  FILE *file1_;
-  FILE *file2_;
+  void printTau(uint32_t& iPt, uint32_t& iEta, uint32_t& iPhi, uint32_t& iNN);
+  FILE* file1_;
+  FILE* file2_;
   double fSeedPt_;
   double fConeSize_;
   double fTauSize_;
@@ -75,8 +76,8 @@ L1NNTauProducer::L1NNTauProducer(const edm::ParameterSet& cfg, const tensorflow:
   if (fHW) {
     fTauNNIdHW_ = std::make_unique<TauNNIdHW>();
     fTauNNIdHW_->initialize("input_1:0", fNParticles_);
-    //file1_ = fopen("intput.txt", "w");     
-    //file2_ = fopen("output.txt", "w");     
+    //file1_ = fopen("intput.txt", "w");
+    //file2_ = fopen("output.txt", "w");
   } else {
     fTauNNId_ = std::make_unique<TauNNId>(
         lNNFile.find("v0") == std::string::npos ? "input_1:0" : "dense_1_input:0", cache, lNNFile, fNParticles_);
@@ -190,7 +191,7 @@ void L1NNTauProducer::addTau(const l1t::PFCandidate& iCand,
   std::sort(
       pfTauCands.begin(), pfTauCands.end(), [](l1t::PFCandidate i, l1t::PFCandidate j) { return (i.pt() > j.pt()); });
   float NN = fTauNNId_->compute(iCand, pfTauCands);
-  float *lNNVector = fTauNNId_->NNVectorVar();
+  float* lNNVector = fTauNNId_->NNVectorVar();
   //std::cout << "non HW NN " << lNNVector[0] << " : " <<  lNNVector[1] << " : " <<  lNNVector[2] << std::endl;
   math::PtEtaPhiMLorentzVector tempP4(lCand.Pt(), lCand.Eta(), lCand.Phi(), lCand.M() * lCand.M());
   l1t::PFTau l1PFTau(tempP4, lNNVector, NN, 0, lId);
@@ -277,8 +278,10 @@ void L1NNTauProducer::makeTau_HW(const l1t::PFCandidate& seed,
   if (pt < fSeedPt_)
     return;
   result_t NN = fTauNNIdHW_->compute(seed, parts);
-  input_t *lNNVector = fTauNNIdHW_->NNVectorVar();
-  float pNNVec[80]; for(unsigned i0 = 0; i0 < 80; i0++) pNNVec[i0] = float(lNNVector[i0]);
+  input_t* lNNVector = fTauNNIdHW_->NNVectorVar();
+  float pNNVec[80];
+  for (unsigned i0 = 0; i0 < 80; i0++)
+    pNNVec[i0] = float(lNNVector[i0]);
   //std::cout << "HW NN " << lNNVector[0] << " : " <<  lNNVector[1] << " : " <<  lNNVector[2] << std::endl;
   //std::cout << "HW NN " << pNNVec   [0] << " : " <<  pNNVec   [1] << " : " <<  pNNVec   [2] << std::endl;
   L1TauEmu::etaphi_t eta = etaphi_t(seed.eta() * L1TauEmu::etaphi_base);
@@ -286,30 +289,32 @@ void L1NNTauProducer::makeTau_HW(const l1t::PFCandidate& seed,
   math::PtEtaPhiMLorentzVector tempP4(
       float(pt), float(eta) / L1TauEmu::etaphi_base, float(phi) / L1TauEmu::etaphi_base, float(mass));
   l1t::PFTau l1PFTau(tempP4, pNNVec, NN, 0, lId);
-  l1PFTau.setZ0(float(z0) * 0.05);//L1TauEmu::z0_base);
-  l1PFTau.setDxy(float(dxy) * 0.05);//L1TauEmu::dxy_base);
+  l1PFTau.setZ0(float(z0) * 0.05);    //L1TauEmu::z0_base);
+  l1PFTau.setDxy(float(dxy) * 0.05);  //L1TauEmu::dxy_base);
 
   uint32_t lPt = pt.to_uint();
   uint32_t lEta = eta.to_uint();
   uint32_t lPhi = phi.to_uint();
-  uint32_t lNN  = NN.to_uint();
+  uint32_t lNN = NN.to_uint();
   //printTau(lPt,lEta,lPhi,lNN);
   iTaus->push_back(l1PFTau);
 }
-void L1NNTauProducer::printParts(std::vector<l1t::PFCandidate> &parts) { 
+void L1NNTauProducer::printParts(std::vector<l1t::PFCandidate>& parts) {
   for (unsigned i0 = 0; i0 < parts.size(); i0++) {
     fprintf(file1_, " %16lx", parts[i0].encodedPuppi64());
-    if(i0 % 36 == 35)   fprintf(file1_, "\n");
-    if(i0 == 6*36-1) break;
+    if (i0 % 36 == 35)
+      fprintf(file1_, "\n");
+    if (i0 == 6 * 36 - 1)
+      break;
     //std::cout << "--> test " << parts[i0].encodedPuppi64();
     //if(i0 % 36 == 35)   std::cout << std::endl;
   }
-  for (unsigned i0 = parts.size(); i0 < 6*36-1; i0++) {
-    unsigned long int dummy = 0; 
+  for (unsigned i0 = parts.size(); i0 < 6 * 36 - 1; i0++) {
+    unsigned long int dummy = 0;
     fprintf(file1_, " %16lx", dummy);
   }
 }
-void L1NNTauProducer::printTau(uint32_t &iPt,uint32_t &iEta,uint32_t &iPhi,uint32_t &iNN) { 
+void L1NNTauProducer::printTau(uint32_t& iPt, uint32_t& iEta, uint32_t& iPhi, uint32_t& iNN) {
   fprintf(file2_, " %08x", iPt);
   fprintf(file2_, " %08x", iEta);
   fprintf(file2_, " %08x", iPhi);
@@ -330,10 +335,12 @@ void L1NNTauProducer::process_HW(const l1t::PFCandidateCollection& parts,
   //printParts(work);
   std::vector<l1t::PFCandidate> seeds;
   uint lSeed = l1t::PFCandidate::ChargedHadron;
-  if(fEMSeed) lSeed = l1t::PFCandidate::Photon;
+  if (fEMSeed)
+    lSeed = l1t::PFCandidate::Photon;
   std::copy_if(work.begin(), work.end(), std::back_inserter(seeds), [&](const l1t::PFCandidate& part) {
-      return ((part.id() == l1t::PFCandidate::Electron || part.id() == l1t::PFCandidate::ChargedHadron || part.id() == lSeed) &&
-	      std::abs(part.eta()) < track_trigger_eta_max);
+    return ((part.id() == l1t::PFCandidate::Electron || part.id() == l1t::PFCandidate::ChargedHadron ||
+             part.id() == lSeed) &&
+            std::abs(part.eta()) < track_trigger_eta_max);
   });
   // It would be nice to transform the inputs to the etaphi_base of the FW here, as in the line below
   // However the phi may wrap around if the etaphi_base > 1, so don't do it...
