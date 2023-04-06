@@ -6,7 +6,7 @@
 #ifndef W4_H_
 #define W4_H_
 
-model_default_t w4[10] = {0.41375983,
+weight_default_t w4[10] = {0.41375983,
                           -0.10875144,
                           0.31972024,
                           -0.56211764,
