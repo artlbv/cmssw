@@ -11,7 +11,7 @@ namespace l1t {
   static constexpr float PFTAU_NN_SLOPE = 0.2;
   static constexpr float PFTAU_NN_OVERALL_SCALE = 1. / 20.1;
 
-  static constexpr float PFTAU_NN_LOOSE_CUT = 0.05;
+  static constexpr float PFTAU_NN_LOOSE_CUT = 0.28;
   static constexpr float PFTAU_NN_TIGHT_CUT = 0.25;
 
   static constexpr float PFTAU_PF_LOOSE_CUT = 10.0;
@@ -54,10 +54,7 @@ namespace l1t {
     const float* NNValues() const { return NNValues_; }
 
     bool passMass() const { return (mass() < 2 + pt() / PTSCALING_MASSCUT); }
-    bool passLooseNN() const {
-      return iso_ * (PFTAU_NN_OFFSET + PFTAU_NN_SLOPE * (min(pt(), PFTAU_NN_PT_CUTOFF))) * PFTAU_NN_OVERALL_SCALE >
-             PFTAU_NN_LOOSE_CUT;
-    }
+    bool passLooseNN() const { return iso_ > PFTAU_NN_LOOSE_CUT; }
     bool passLooseNNMass() const {
       if (!passMass())
         return false;
