@@ -165,7 +165,7 @@ void L1Analysis::L1AnalysisPhaseIIStep1::SetEG(const edm::Handle<l1t::EGammaBxCo
 
 // TrkEG (seeded by Phase 2 Objects)
 void L1Analysis::L1AnalysisPhaseIIStep1::SetTkEG(const edm::Handle<l1t::TkElectronCollection> tkElectron,
-                                                 const edm::Handle<l1t::TkElectronCollection> tkElectronHGC,
+                                                 //const edm::Handle<l1t::TkElectronCollection> tkElectronHGC,
                                                  unsigned maxL1Extra) {
   for (l1t::TkElectronCollection::const_iterator it = tkElectron->begin();
        it != tkElectron->end() && l1extra_.nTkElectrons < maxL1Extra;
@@ -197,6 +197,7 @@ void L1Analysis::L1AnalysisPhaseIIStep1::SetTkEG(const edm::Handle<l1t::TkElectr
     }
   }
 
+  /*
   for (l1t::TkElectronCollection::const_iterator it = tkElectronHGC->begin();
        it != tkElectronHGC->end() && l1extra_.nTkElectrons < maxL1Extra;
        it++) {
@@ -226,10 +227,11 @@ void L1Analysis::L1AnalysisPhaseIIStep1::SetTkEG(const edm::Handle<l1t::TkElectr
       l1extra_.nTkElectrons++;
     }
   }
+  */
 }
 
 void L1Analysis::L1AnalysisPhaseIIStep1::SetTkEM(const edm::Handle<l1t::TkEmCollection> tkPhoton,
-                                                 const edm::Handle<l1t::TkEmCollection> tkPhotonHGC,
+                                                 //const edm::Handle<l1t::TkEmCollection> tkPhotonHGC,
                                                  unsigned maxL1Extra) {
   for (l1t::TkEmCollection::const_iterator it = tkPhoton->begin();
        it != tkPhoton->end() && l1extra_.nTkPhotons < maxL1Extra;
@@ -260,6 +262,8 @@ void L1Analysis::L1AnalysisPhaseIIStep1::SetTkEM(const edm::Handle<l1t::TkEmColl
       l1extra_.nTkPhotons++;
     }
   }
+
+  /*
   for (l1t::TkEmCollection::const_iterator it = tkPhotonHGC->begin();
        it != tkPhotonHGC->end() && l1extra_.nTkPhotons < maxL1Extra;
        it++) {
@@ -289,6 +293,7 @@ void L1Analysis::L1AnalysisPhaseIIStep1::SetTkEM(const edm::Handle<l1t::TkEmColl
       l1extra_.nTkPhotons++;
     }
   }
+  */
 }
 
 /*

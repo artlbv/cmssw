@@ -189,11 +189,16 @@ L1PhaseIITreeStep1Producer::L1PhaseIITreeStep1Producer(const edm::ParameterSet& 
   egToken_ = consumes<l1t::EGammaBxCollection>(iConfig.getParameter<edm::InputTag>("egTokenBarrel"));
   egTokenHGC_ = consumes<l1t::EGammaBxCollection>(iConfig.getParameter<edm::InputTag>("egTokenHGC"));
 
+  tkEGToken_ = consumes<l1t::TkElectronCollection>(iConfig.getParameter<edm::InputTag>("tkEGToken"));
+  tkEMToken_ = consumes<l1t::TkEmCollection>(iConfig.getParameter<edm::InputTag>("tkEMToken"));
+
+  /*
   tkEGToken_ = consumes<l1t::TkElectronCollection>(iConfig.getParameter<edm::InputTag>("tkEGTokenBarrel"));
   tkEMToken_ = consumes<l1t::TkEmCollection>(iConfig.getParameter<edm::InputTag>("tkEMTokenBarrel"));
 
   tkEGTokenHGC_ = consumes<l1t::TkElectronCollection>(iConfig.getParameter<edm::InputTag>("tkEGTokenHGC"));
   tkEMTokenHGC_ = consumes<l1t::TkEmCollection>(iConfig.getParameter<edm::InputTag>("tkEMTokenHGC"));
+  */
 
   /*  muonKalman_ = consumes<l1t::RegionalMuonCandBxCollection>(iConfig.getParameter<edm::InputTag>("muonKalman"));
   muonOverlap_ = consumes<l1t::RegionalMuonCandBxCollection>(iConfig.getParameter<edm::InputTag>("muonOverlap"));
@@ -402,11 +407,15 @@ void L1PhaseIITreeStep1Producer::analyze(const edm::Event& iEvent, const edm::Ev
 
   edm::Handle<l1t::TkElectronCollection> tkEG;
   iEvent.getByToken(tkEGToken_, tkEG);
+  /*
   edm::Handle<l1t::TkElectronCollection> tkEGHGC;
   iEvent.getByToken(tkEGTokenHGC_, tkEGHGC);
+  */
 
-  if (tkEG.isValid() && tkEGHGC.isValid()) {
-    l1Extra->SetTkEG(tkEG, tkEGHGC, maxL1Extra_);
+  //if (tkEG.isValid() && tkEGHGC.isValid()) {
+  if (tkEG.isValid()) {
+      //l1Extra->SetTkEG(tkEG, tkEGHGC, maxL1Extra_);
+      l1Extra->SetTkEG(tkEG, maxL1Extra_);
   } else {
     edm::LogWarning("MissingProduct") << "L1PhaseII TkEG not found. Branch will not be filled" << std::endl;
   }
@@ -424,12 +433,14 @@ void L1PhaseIITreeStep1Producer::analyze(const edm::Event& iEvent, const edm::Ev
 
   edm::Handle<l1t::TkEmCollection> tkEM;
   iEvent.getByToken(tkEMToken_, tkEM);
-
+/*
   edm::Handle<l1t::TkEmCollection> tkEMHGC;
   iEvent.getByToken(tkEMTokenHGC_, tkEMHGC);
+*/
 
-  if (tkEM.isValid() && tkEMHGC.isValid()) {
-    l1Extra->SetTkEM(tkEM, tkEMHGC, maxL1Extra_);
+  //if (tkEM.isValid() && tkEMHGC.isValid()) {
+  if (tkEM.isValid()) {
+    l1Extra->SetTkEM(tkEM,maxL1Extra_);
   } else {
     edm::LogWarning("MissingProduct") << "L1PhaseII  TkEM not found. Branch will not be filled" << std::endl;
   }
