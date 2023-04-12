@@ -23,9 +23,10 @@ l1PhaseIITree = cms.EDAnalyzer(
    scPFL1PuppiExtended = cms.InputTag("l1tSCPFL1PuppiExtendedCorrectedEmulator", ""), #Emulator and corrected JEC; seededcone jets from extended tracks/puppi
    scBjetNN = cms.InputTag("l1tBJetProducerPuppiCorrectedEmulator", "L1PFBJets"), #B Jet NN ID for seededcone jets from extended tracks/puppi
 
-   l1pfPhase1L1TJetToken  = cms.InputTag("l1tPhase1JetCalibrator9x9" ,   "Phase1L1TJetFromPfCandidates",process_name), #use the 9x9 case
-   l1pfPhase1L1TJetMET  = cms.InputTag("l1tPhase1JetProducer9x9" ,   "UncalibratedPhase1L1TJetFromPfCandidatesMET",process_name), #use the 9x9 case
-   l1pfPhase1L1TJetSums  = cms.InputTag("l1tPhase1JetSumsProducer9x9",  "Sums",process_name), #use the 9x9 case
+   # histo jets - TRIMMED validated in FW
+   l1pfPhase1L1TJetToken  = cms.InputTag("l1tPhase1JetCalibrator9x9trimmed" ,   "Phase1L1TJetFromPfCandidates",process_name), #use the 9x9trimmed case
+   l1pfPhase1L1TJetMET  = cms.InputTag("l1tPhase1JetProducer9x9trimmed" ,   "UncalibratedPhase1L1TJetFromPfCandidatesMET",process_name), #use the 9x9trimmed case
+   l1pfPhase1L1TJetSums  = cms.InputTag("l1tPhase1JetSumsProducer9x9trimmed",  "Sums",process_name), #use the 9x9trimmed case
 
    caloJetToken = cms.InputTag("l1tCaloJet","L1CaloJetCollectionBXV",process_name),
    caloJetHTTToken = cms.InputTag("l1tCaloJetHTT","CaloJetHTT",process_name),
