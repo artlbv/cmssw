@@ -41,12 +41,6 @@ l1tGMTStubs = cms.EDProducer("Phase2L1TGMTStubProducer",
 
 
 
-l1tGMTFilteredMuons = cms.EDProducer('Phase2L1TGMTFilter',
-                                     srcMuons = cms.InputTag("l1tTkMuonsGmt",""),
-                                     applyLowPtFilter = cms.bool(False),
-                                     ptBarrelMin = cms.int32(8),
-                                     ptEndcapMin = cms.int32(8)
-                                     )
 
 
 l1tGMTMuons = cms.EDProducer('Phase2L1TGMTProducer',
@@ -81,6 +75,15 @@ l1tGMTMuons = cms.EDProducer('Phase2L1TGMTProducer',
                     tauto3mu = cms.PSet()
 
 )
+
+
+l1tGMTFilteredMuons = cms.EDProducer('Phase2L1TGMTFilter',
+                    srcMuons = cms.InputTag("l1tTkMuonsGmt",""),
+                                     applyLowPtFilter = cms.bool(True),
+                    ptBarrelMin = cms.int32(8),
+                    ptEndcapMin = cms.int32(8)
+)
+
 
 l1tStandaloneMuons = cms.EDProducer('Phase2L1TGMTSAMuonProducer',
                                  muonToken  = cms.InputTag('simGmtStage2Digis'),
