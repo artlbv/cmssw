@@ -68,11 +68,12 @@ void Phase2L1TGMTFilter::produce(edm::Event& iEvent, const edm::EventSetup& iSet
         // if quality is already set to 0 don't continue the loop.
         for (const auto& r : mu.muonRef()) {
           if (r.isNonnull()) {
-	    noSAMatch=false;
+            noSAMatch = false;
             break;
           }
         }
-	if (noSAMatch) mu.setHwQual(0);	
+        if (noSAMatch)
+          mu.setHwQual(0);
       }
     }
     out.push_back(mu);  // store all muons otherwise
