@@ -43,9 +43,6 @@ private:
               const l1t::PFCandidateCollection& iParts,
               std::unique_ptr<PFTauCollection>& outputTaus);
 
-  void printParts(std::vector<l1t::PFCandidate>& parts);
-
-  void printTau(uint32_t& iPt, uint32_t& iEta, uint32_t& iPhi, uint32_t& iNN);
   double fSeedPt_;
   double fConeSize_;
   double fTauSize_;
@@ -273,10 +270,32 @@ void L1NNTauProducer::makeTau_HW(const l1t::PFCandidate& seed,
   L1TauEmu::etaphi_t phi = etaphi_t(seed.phi() * L1TauEmu::etaphi_base);
   math::PtEtaPhiMLorentzVector tempP4(
       float(pt), float(eta) / L1TauEmu::etaphi_base, float(phi) / L1TauEmu::etaphi_base, float(mass));
+
+  //Make 
   l1t::PFTau l1PFTau(tempP4, pNNVec, NN, 0, lId);
   l1PFTau.setZ0(float(z0) * 0.05);    //L1TauEmu::z0_base);
   l1PFTau.setDxy(float(dxy) * 0.05);  //L1TauEmu::dxy_base);
 
+  //Firmware Tau 
+  l1ct::Tau l1ctTau;
+  l1ctTau.hwPt = l1ct::pt_t(pt); //l1gt is <16,11> and currently <16,14>
+  l1ctTau.hwEta = l1ct::eta_t(seed.eta()/l1ct::Scales::ETAPHI_LSB);
+  l1ctTau.hwPhi = l1ct::phi_t(seed.phi()/l1ct::Scales::ETAPHI_LSB);
+  
+  l1ctTau.hwSeedPt = seed.pt();
+  l1ctTau.hwSeedZ0 = seed.hwZ0();
+  l1ctTau.hwCharge = seed.charge();
+
+  l1ctTau.hwType = l1ct::Tau::type_t(lId);
+  l1ctTau.hwRawId = ap_uint<10>(NN*1024); //NN Output is ap_fixed<16, 8> so need to cast.
+
+  //Convert to GT format and pack to encodedTau of PFTau
+  l1gt::Tau l1gtTau = l1ctTau.toGT();
+  std::array<uint64_t, 2> packed_Tau = l1gtTau.pack();
+
+  l1PFTau.set_TauGT(l1gtTau);
+  l1PFTau.set_encodedTau(packed_Tau);
+  
   iTaus->push_back(l1PFTau);
 }
 

@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <vector>
 #include "DataFormats/L1Trigger/interface/L1Candidate.h"
+#include "DataFormats/L1TParticleFlow/interface/taus.h"
+#include "DataFormats/L1TParticleFlow/interface/gt_datatypes.h"
 
 namespace l1t {
 
@@ -72,12 +74,28 @@ namespace l1t {
     }
     bool passTightPF() const { return fullIso_ < PFTAU_PF_TIGHT_CUT; }
 
+    void set_encodedTau(std::array<uint64_t, 2> encodedTau){
+      encodedTau_ = encodedTau;
+    }
+    std::array<uint64_t, 2> encodedTau() const {return encodedTau_; }
+
+    //l1gt::Tau getHWTauGT() const { return l1ct::Tau::unpack_gt(encodedTau_); }
+
+    //Return the l1gt Tau object for now
+    void set_TauGT(l1gt::Tau TauGT){
+      TauGT_ = TauGT;
+    }
+    
+    l1gt::Tau getTauGT() const { return TauGT_; }
+
   private:
     float NNValues_[80];
     float iso_;
     float fullIso_;
     int id_;
     float dxy_;
+    std::array<uint64_t, 2> encodedTau_;
+    l1gt::Tau TauGT_;
   };
 
   typedef std::vector<l1t::PFTau> PFTauCollection;

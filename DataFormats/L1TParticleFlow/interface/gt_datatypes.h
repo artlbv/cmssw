@@ -35,6 +35,7 @@ namespace l1gt {
 
   // tau fields
   typedef ap_ufixed<10, 8> tauseed_pt_t;
+  typedef ap_uint<10> tau_rawid_t;
 
   namespace Scales {
     const int INTPHI_PI = 1 << (phi_t::width - 1);
@@ -185,12 +186,12 @@ namespace l1gt {
     z0_t seed_z0;
     ap_uint<1> charge;
     ap_uint<2> type;
-    iso_t isolation;
+    tau_rawid_t isolation;
     ap_uint<2> id0;
     ap_uint<2> id1;
 
     static const int BITWIDTH = 128;
-    inline ap_uint<BITWIDTH> pack() const {
+    inline ap_uint<BITWIDTH> pack_ap() const {
       ap_uint<BITWIDTH> ret;
       unsigned int start = 0;
       pack_into_bits(ret, start, valid);
@@ -204,6 +205,15 @@ namespace l1gt {
       pack_into_bits(ret, start, id1);
       return ret;
     }
+
+    inline std::array<uint64_t, 2> pack() const {
+      std::array<uint64_t, 2> packed;
+      ap_uint<BITWIDTH> bits = this->pack_ap();
+      packed[0] = bits(63, 0);
+      packed[1] = bits(127, 64);
+      return packed;
+    }
+    
   };  // struct Tau
 
   struct Electron {

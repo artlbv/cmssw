@@ -48,7 +48,7 @@
   <class name="std::vector<edm::Ref<std::vector<l1t::PFJet>,l1t::PFJet,edm::refhelper::FindUsingAdvance<std::vector<l1t::PFJet>,l1t::PFJet> > >" />
 
   <class name="l1t::PFTau"  ClassVersion="5">
-        <version ClassVersion="5" checksum="3999627045"/>
+        <version ClassVersion="5" checksum="2339758668"/>
         <version ClassVersion="4" checksum="2045755946"/>
         <version ClassVersion="3" checksum="1410157160"/>
   </class>
