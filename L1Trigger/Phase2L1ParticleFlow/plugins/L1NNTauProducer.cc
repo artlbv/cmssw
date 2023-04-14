@@ -46,8 +46,6 @@ private:
   void printParts(std::vector<l1t::PFCandidate>& parts);
 
   void printTau(uint32_t& iPt, uint32_t& iEta, uint32_t& iPhi, uint32_t& iNN);
-  FILE* file1_;
-  FILE* file2_;
   double fSeedPt_;
   double fConeSize_;
   double fTauSize_;
@@ -279,31 +277,7 @@ void L1NNTauProducer::makeTau_HW(const l1t::PFCandidate& seed,
   l1PFTau.setZ0(float(z0) * 0.05);    //L1TauEmu::z0_base);
   l1PFTau.setDxy(float(dxy) * 0.05);  //L1TauEmu::dxy_base);
 
-  uint32_t lPt = pt.to_uint();
-  uint32_t lEta = eta.to_uint();
-  uint32_t lPhi = phi.to_uint();
-  uint32_t lNN = NN.to_uint();
   iTaus->push_back(l1PFTau);
-}
-void L1NNTauProducer::printParts(std::vector<l1t::PFCandidate>& parts) {
-  for (unsigned i0 = 0; i0 < parts.size(); i0++) {
-    fprintf(file1_, " %16lx", parts[i0].encodedPuppi64());
-    if (i0 % 36 == 35)
-      fprintf(file1_, "\n");
-    if (i0 == 6 * 36 - 1)
-      break;
-  }
-  for (unsigned i0 = parts.size(); i0 < 6 * 36 - 1; i0++) {
-    unsigned long int dummy = 0;
-    fprintf(file1_, " %16lx", dummy);
-  }
-}
-void L1NNTauProducer::printTau(uint32_t& iPt, uint32_t& iEta, uint32_t& iPhi, uint32_t& iNN) {
-  fprintf(file2_, " %08x", iPt);
-  fprintf(file2_, " %08x", iEta);
-  fprintf(file2_, " %08x", iPhi);
-  fprintf(file2_, " %08x", iNN);
-  fprintf(file2_, "\n");
 }
 
 void L1NNTauProducer::process_HW(const l1t::PFCandidateCollection& parts,
