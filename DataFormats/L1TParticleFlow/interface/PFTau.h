@@ -74,18 +74,14 @@ namespace l1t {
     }
     bool passTightPF() const { return fullIso_ < PFTAU_PF_TIGHT_CUT; }
 
-    void set_encodedTau(std::array<uint64_t, 2> encodedTau){
-      encodedTau_ = encodedTau;
-    }
-    std::array<uint64_t, 2> encodedTau() const {return encodedTau_; }
+    void set_encodedTau(std::array<uint64_t, 2> encodedTau) { encodedTau_ = encodedTau; }
+    std::array<uint64_t, 2> encodedTau() const { return encodedTau_; }
 
     //l1gt::Tau getHWTauGT() const { return l1ct::Tau::unpack_gt(encodedTau_); }
 
     //Return the l1gt Tau object for now
-    void set_TauGT(l1gt::Tau TauGT){
-      TauGT_ = TauGT;
-    }
-    
+    void set_TauGT(l1gt::Tau TauGT) { TauGT_ = TauGT; }
+
     l1gt::Tau getTauGT() const { return TauGT_; }
 
   private:

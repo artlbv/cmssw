@@ -213,7 +213,7 @@ namespace l1gt {
       packed[1] = bits(127, 64);
       return packed;
     }
-    
+
   };  // struct Tau
 
   struct Electron {
