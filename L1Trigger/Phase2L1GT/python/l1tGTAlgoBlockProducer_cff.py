@@ -21,3 +21,7 @@ def collectAlgorithmPaths(process) -> tuple[cms.Path]:
         paths.add(getattr(process, str_path))
 
     return tuple(paths)
+
+l1tGTAlgoBlockProducerSequence = cms.Sequence(
+    l1tGTAlgoBlockProducer
+)

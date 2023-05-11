@@ -1012,6 +1012,10 @@ class ConfigBuilder(object):
         self.DIGIDefaultCFF="Configuration/StandardSequences/Digi_cff"
         self.DIGI2RAWDefaultCFF="Configuration/StandardSequences/DigiToRaw_cff"
         self.L1EMDefaultCFF='Configuration/StandardSequences/SimL1Emulator_cff'
+        #phase 2 GT emulation
+        self.L1P2GTProducer='L1Trigger/Phase2L1GT/l1tGTProducer_cff'
+        self.L1P2ALGGTProducer = 'L1Trigger/Phase2L1GT/l1tGTAlgoBlockProducer_cff'
+        #
         self.L1MENUDefaultCFF="Configuration/StandardSequences/L1TriggerDefaultMenu_cff"
         self.HLTDefaultCFF="Configuration/StandardSequences/HLTtable_cff"
         self.RAW2DIGIDefaultCFF="Configuration/StandardSequences/RawToDigi_Data_cff"
@@ -1571,9 +1575,74 @@ class ConfigBuilder(object):
         self.scheduleSequence(_repackSeq,'digi2repack_step')
         return
 
-    def prepare_L1(self, stepSpec = None):
+    # The computing people will never let me get away with this, this will
+    # have to be replaced with a better solution before it is acceptable
+    # for general CMSSW use
+    def loadPhase2L1GTMenuFile(self, module: str):
+        import importlib
+        menuModule = importlib.import_module(module) # by doing this, algorithms gets loaded with the correct modifications in the file
+        
+        triggerPaths = []
+        triggerFilters = []
+
+        for objName in dir(menuModule):
+            if 'ObjectCond' in objName: #ignore generic filters.
+                continue
+            obj = getattr(menuModule,objName)
+            objType = type(obj)
+            objDict = {
+                'name': objName,
+                'obj': obj
+            }
+            if objType == cms.EDFilter:
+                triggerFilters.append(objDict)
+            elif objType == cms.Path:
+                triggerPaths.append(objDict)
+
+        return triggerPaths, triggerFilters
+
+    def prepare_L1(self, sequence = None):
         """ Enrich the schedule with the L1 simulation step"""
-        assert(stepSpec == None)
+        # irrelevant with the advent of GT as a seperate step
+        # assert(sequence == None)
+        possibleSequences = ['RUNP2GT']
+        if sequence in possibleSequences:
+            if 'RUNP2GT' in sequence:
+                # Load the initial GT producer
+                self.loadAndRemember(self.L1P2GTProducer)
+                self.scheduleSequence('l1tGTProducerSequence','Phase2L1GTProducer')
+                # This doesn't generalize right now,
+                # but it should suffice for testing and running on a fixed menu
+                
+                # get a list of all the files that contain every path, filter, and name we need 
+                # to have attached to the final process
+                menuModuleList = [
+                    'L1Trigger.Phase2L1GT.l1tGTMenu_hadr_metSeeds_cff',
+                    'L1Trigger.Phase2L1GT.l1tGTMenu_lepSeeds_cff',
+                ]
+                # we'll keep lists with names and objects
+                triggerPaths, triggerFilters = [], []
+                # for each file load these dictionaries 
+                for menuModuleName in menuModuleList:
+                    self.executeAndRemember(f'process.load(\'{menuModuleName}\')')
+                    newTriggerPaths, newTriggerFilters = self.loadPhase2L1GTMenuFile(menuModuleName)
+                    triggerPaths += newTriggerPaths
+                    triggerFilters += newTriggerFilters
+                # the filters need to be associated with the process (first!) then the paths
+                for filterDict in triggerFilters:
+                    setattr(self.process, filterDict['name'], filterDict['obj'])
+                for pathDict in triggerPaths:
+                    setattr(self.process, pathDict['name'], pathDict['obj'])
+
+                # then we schedule the paths for execution
+                triggerScheduleList = [pathDict['obj'] for pathDict in triggerPaths]
+                self.schedule.extend(triggerScheduleList)
+
+                # load the final algo block producer
+                self.loadAndRemember(self.L1P2ALGGTProducer)
+                self.scheduleSequence('l1tGTAlgoBlockProducerSequence','Phase2L1GTAlgoBlockProducer')
+            else:
+                raise RuntimeError(f'Attempted to run unknown sequences for L1 emulation\nSupported Sequences are {possibleSequences}')
         self.loadAndRemember(self.L1EMDefaultCFF)
         self.scheduleSequence('SimL1Emulator','L1simulation_step')
         return

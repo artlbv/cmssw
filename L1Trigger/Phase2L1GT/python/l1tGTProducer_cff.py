@@ -16,3 +16,7 @@ l1tGTProducer = cms.EDProducer(
     CL2HtSum = cms.InputTag("l1tSCPFL1PuppiCorrectedEmulatorMHT")
 )
 
+l1tGTProducerSequence = cms.Sequence(
+    l1tGTProducer
+)
+
