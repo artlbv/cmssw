@@ -1583,23 +1583,14 @@ class ConfigBuilder(object):
         menuModule = importlib.import_module(module) # by doing this, algorithms gets loaded with the correct modifications in the file
         
         triggerPaths = []
-        triggerFilters = []
 
         for objName in dir(menuModule):
-            if 'ObjectCond' in objName: #ignore generic filters.
-                continue
             obj = getattr(menuModule,objName)
             objType = type(obj)
-            objDict = {
-                'name': objName,
-                'obj': obj
-            }
-            if objType == cms.EDFilter:
-                triggerFilters.append(objDict)
-            elif objType == cms.Path:
-                triggerPaths.append(objDict)
+            if objType == cms.Path:
+                triggerPaths.append(objName)
 
-        return triggerPaths, triggerFilters
+        return triggerPaths
 
     def prepare_L1(self, sequence = None):
         """ Enrich the schedule with the L1 simulation step"""
@@ -1620,22 +1611,20 @@ class ConfigBuilder(object):
                     'L1Trigger.Phase2L1GT.l1tGTMenu_hadr_metSeeds_cff',
                     'L1Trigger.Phase2L1GT.l1tGTMenu_lepSeeds_cff',
                 ]
-                # we'll keep lists with names and objects
-                triggerPaths, triggerFilters = [], []
-                # for each file load these dictionaries 
+                # we'll go import each of these modules to get a name of paths from them
+                # the import will fill the 'algorithms' parameters,
+                # and we can get all the path names to extend the schedule with
+                # the paths, modules, sequences and whatever else will be handled
+                # via the load and remember
+                triggerPaths = []
                 for menuModuleName in menuModuleList:
-                    self.executeAndRemember(f'process.load(\'{menuModuleName}\')')
-                    newTriggerPaths, newTriggerFilters = self.loadPhase2L1GTMenuFile(menuModuleName)
+                    self.loadAndRemember(menuModuleName)
+                    newTriggerPaths = self.loadPhase2L1GTMenuFile(menuModuleName)
                     triggerPaths += newTriggerPaths
-                    triggerFilters += newTriggerFilters
-                # the filters need to be associated with the process (first!) then the paths
-                for filterDict in triggerFilters:
-                    setattr(self.process, filterDict['name'], filterDict['obj'])
-                for pathDict in triggerPaths:
-                    setattr(self.process, pathDict['name'], pathDict['obj'])
+                # get the paths by name to schedule
+                triggerScheduleList = [getattr(self.process, name) for name in triggerPaths]
 
                 # then we schedule the paths for execution
-                triggerScheduleList = [pathDict['obj'] for pathDict in triggerPaths]
                 self.schedule.extend(triggerScheduleList)
 
                 # load the final algo block producer
