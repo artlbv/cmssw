@@ -1,7 +1,9 @@
 import FWCore.ParameterSet.Config as cms
+from L1Trigger.Phase2L1GT.l1tGTScales import scale_parameter
 
 l1tGTProducer = cms.EDProducer(
     "L1GTProducer",
+    scales=scale_parameter,
     GTTPromptJets = cms.InputTag("l1tTrackJetsEmulation", "L1TrackJets"),
     GTTDisplacedJets = cms.InputTag("l1tTrackJetsExtendedEmulation", "L1TrackJetsExtended"),
     GTTPrimaryVert = cms.InputTag("l1tVertexFinderEmulator", "l1verticesEmulation"),

@@ -14,7 +14,8 @@
   <class name="l1t::L1CandidateVectorRef"/>
   <class name="edm::Wrapper<l1t::L1CandidateVectorRef>"/>
 
-  <class name="l1t::P2GTCandidate::OptionalInt"/>
+  <class name="l1t::P2GTCandidate::Optional<int>"/>
+  <class name="l1t::P2GTCandidate::Optional<double>"/>
   <class name="l1t::P2GTCandidate"/>
   <class name="l1t::P2GTCandidateCollection"/>
   <class name="edm::Wrapper<l1t::P2GTCandidateCollection>"/>

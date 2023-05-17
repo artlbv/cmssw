@@ -70,16 +70,14 @@ if __name__ == "__main__":
             for obj in algo_blk.trigObjects():
                 if object_name(obj.objectType()) in ["CL2Electron", "CL2Photon"]:
                     print(" {}: pt {:3.1f} eta {:3.2f} phi {:3.2f} iso: {:3.2f} relIso: {:3.2f}".format(
-                        object_name(obj.objectType()), obj.hwPT() * scale_parameter.pT_lsb.value(),
-                        obj.hwEta() * scale_parameter.eta_lsb.value(), obj.hwPhi() * scale_parameter.phi_lsb.value(),
+                        object_name(obj.objectType()), obj.pT(), obj.eta(), obj.phi(),
                         obj.hwIso() * scale_parameter.isolation_lsb.value(),
                         obj.hwIso() * scale_parameter.isolation_lsb.value()/(obj.hwPT() * scale_parameter.pT_lsb.value())))
                 elif "Sum" not in object_name(obj.objectType()):
                     print(" {}: pt {:3.1f} eta {:3.2f} phi {:3.2f}".format(
-                        object_name(obj.objectType()), obj.hwPT() * scale_parameter.pT_lsb.value(),
-                        obj.hwEta() * scale_parameter.eta_lsb.value(), obj.hwPhi() * scale_parameter.phi_lsb.value()))
+                        object_name(obj.objectType()), obj.pT(), obj.eta(), obj.phi()))
                 else:
                     print(" {}: pt {:3.1f} phi {:3.2f}".format(
-                        object_name(obj.objectType()), obj.hwPT() * scale_parameter.pT_lsb.value(), obj.hwPhi() * scale_parameter.phi_lsb.value()))
+                        object_name(obj.objectType()), obj.pT(), obj.phi()))
 
         print('*' * 80)

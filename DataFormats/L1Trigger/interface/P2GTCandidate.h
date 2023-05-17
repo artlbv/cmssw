@@ -10,17 +10,7 @@
 
 namespace l1t {
 
-  // Upstream objects
-  class VertexWord;
-  class TkJetWord;
-  class EtSum;
-  class SAMuon;
-  class TrackerMuon;
-  class PFJet;
-  class TkEm;
-  class TkElectron;
-  class EtSum;
-  class PFTau;
+  class L1GTProducer;
 
   class P2GTCandidate;
   typedef std::vector<P2GTCandidate> P2GTCandidateCollection;
@@ -30,6 +20,10 @@ namespace l1t {
 
   class P2GTCandidate {
   public:
+    P2GTCandidate();
+
+    friend class L1GTProducer;
+
     typedef ap_uint<16> hwPT_t;
     typedef ap_int<13> hwPhi_t;
     typedef ap_int<14> hwEta_t;
@@ -50,19 +44,20 @@ namespace l1t {
     typedef ap_uint<8> hwNumber_of_tracks_in_pv_t;
     typedef ap_uint<10> hwNumber_of_tracks_not_in_pv_t;
 
-    // Similar to std::optional<int> but avoids inheritance for ROOT file embedding
-    struct OptionalInt {
-      OptionalInt() : value_(0), set_(false) {}
-      OptionalInt(int value) : value_(value), set_(true) {}
+    // Similar to std::optional<T> but avoids inheritance for ROOT file embedding
+    template <typename T>
+    struct Optional {
+      Optional() : value_(0), set_(false) {}
+      Optional(T value) : value_(value), set_(true) {}
 
-      operator int() const { return value_; }
+      operator T() const { return value_; }
       operator bool() const { return set_; }
 
       bool operator==(bool rhs) const { return set_ == rhs; }
       bool operator!=(bool rhs) const { return set_ != rhs; }
 
     private:
-      int value_;
+      T value_;
       bool set_;
     };
 
@@ -95,25 +90,6 @@ namespace l1t {
       CL2HtSum,
       CL2EtSum
     };
-
-    P2GTCandidate();
-
-    // GTT
-    P2GTCandidate(const VertexWord&);
-    P2GTCandidate(const TkJetWord&, ObjectType);
-
-    // GMT
-    P2GTCandidate(const SAMuon&, ObjectType);
-    P2GTCandidate(const TrackerMuon&);
-
-    // CL2
-    P2GTCandidate(const PFJet&);
-    P2GTCandidate(const TkEm&);
-    P2GTCandidate(const TkElectron&);
-    P2GTCandidate(const PFTau&);
-
-    P2GTCandidate(const EtSum&);
-    P2GTCandidate(const EtSum&, const EtSum&);
 
     void setHwPT(hwPT_t hwPT) { hwPT_ = hwPT.to_int(); }
     void setHwPhi(hwPhi_t hwPhi) { hwPhi_ = hwPhi.to_int(); }
@@ -275,33 +251,74 @@ namespace l1t {
       return static_cast<int>(hwNumber_of_tracks_not_in_pv_);
     }
 
+    double pT() const {
+      if (!pT_) {
+        throw std::invalid_argument("Object doesn't have pT");
+      }
+      return pT_;
+    };
+
+    double phi() const {
+      if (!phi_) {
+        throw std::invalid_argument("Object doesn't have phi");
+      }
+      return phi_;
+    };
+
+    double eta() const {
+      if (!eta_) {
+        throw std::invalid_argument("Object doesn't have eta");
+      }
+      return eta_;
+    };
+
+    double z0() const {
+      if (!z0_) {
+        throw std::invalid_argument("Object doesn't have z0");
+      }
+      return z0_;
+    };
+
+    double sca_sum() const {
+      if (!sca_sum_) {
+        throw std::invalid_argument("Object doesn't have sca_sum");
+      }
+      return sca_sum_;
+    };
+
     ObjectType objectType() const { return objectType_; }
 
     bool operator==(const P2GTCandidate& rhs) const;
     bool operator!=(const P2GTCandidate& rhs) const;
 
   private:
-    OptionalInt hwPT_;
-    OptionalInt hwPhi_;
-    OptionalInt hwEta_;
-    OptionalInt hwZ0_;
-    OptionalInt hwIso_;
-    OptionalInt hwQual_;
-    OptionalInt hwCharge_;
-    OptionalInt hwD0_;
-    OptionalInt hwBeta_;
-    OptionalInt hwMass_;
-    OptionalInt hwIndex_;
-    OptionalInt hwSeed_pT_;
-    OptionalInt hwSeed_z0_;
-    OptionalInt hwSca_sum_;
-    OptionalInt hwNumber_of_tracks_;
+    Optional<int> hwPT_;
+    Optional<int> hwPhi_;
+    Optional<int> hwEta_;
+    Optional<int> hwZ0_;
+    Optional<int> hwIso_;
+    Optional<int> hwQual_;
+    Optional<int> hwCharge_;
+    Optional<int> hwD0_;
+    Optional<int> hwBeta_;
+    Optional<int> hwMass_;
+    Optional<int> hwIndex_;
+    Optional<int> hwSeed_pT_;
+    Optional<int> hwSeed_z0_;
+    Optional<int> hwSca_sum_;
+    Optional<int> hwNumber_of_tracks_;
 
     // TODO ?
-    OptionalInt hwSum_pT_pv_;
-    OptionalInt hwType_;
-    OptionalInt hwNumber_of_tracks_in_pv_;
-    OptionalInt hwNumber_of_tracks_not_in_pv_;
+    Optional<int> hwSum_pT_pv_;
+    Optional<int> hwType_;
+    Optional<int> hwNumber_of_tracks_in_pv_;
+    Optional<int> hwNumber_of_tracks_not_in_pv_;
+
+    Optional<double> pT_;
+    Optional<double> phi_;
+    Optional<double> eta_;
+    Optional<double> z0_;
+    Optional<double> sca_sum_;
 
     ObjectType objectType_ = Undefined;
   };

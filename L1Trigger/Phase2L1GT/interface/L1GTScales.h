@@ -5,7 +5,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include <cmath>
-#include <cinttypes>
 
 namespace l1t {
   class L1GTScales {
@@ -15,7 +14,7 @@ namespace l1t {
     L1GTScales(double pT_lsb,
                double phi_lsb,
                double eta_lsb,
-               double dZ_lsb,
+               double z0_lsb,
                //double dD_lsb,
                double isolation_lsb,
                double beta_lsb,
@@ -52,6 +51,12 @@ namespace l1t {
     double to_hw_TransMassSqrDiv2(double value) const { return value * value / (2 * pT_lsb_ * pT_lsb_); }
 
     double to_hw_PtSquared(double value) const { return value * value / (pT_lsb_ * pT_lsb_); }
+
+    double to_pT(int value) const { return value * pT_lsb_; };
+    double to_phi(int value) const { return value * phi_lsb_; };
+    double to_eta(int value) const { return value * eta_lsb_; };
+    double to_z0(int value) const { return value * z0_lsb_; };
+    double to_sca_sum(int value) const { return value * sca_sum_lsb_; };
 
     double pT_lsb() const { return pT_lsb_; }
     double phi_lsb() const { return phi_lsb_; }
