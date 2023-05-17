@@ -450,12 +450,14 @@ void L1GTAlgoBlockProducer::produce(edm::Event& event, const edm::EventSetup& ev
 
     P2GTCandidateVectorRef trigObjects;
 
-    for (const auto& handle : handles) {
-      const std::string& module = handle.provenance()->moduleLabel();
-      const std::string& instance = handle.provenance()->productInstanceName();
+    if (initial) {
+      for (const auto& handle : handles) {
+        const std::string& module = handle.provenance()->moduleLabel();
+        const std::string& instance = handle.provenance()->productInstanceName();
 
-      if (algoDef.filtModules_.count({module, instance}) > 0) {
-        trigObjects.insert(trigObjects.end(), handle->begin(), handle->end());
+        if (algoDef.filtModules_.count({module, instance}) > 0) {
+          trigObjects.insert(trigObjects.end(), handle->begin(), handle->end());
+        }
       }
     }
 
