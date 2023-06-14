@@ -137,8 +137,8 @@ void L1TrackerEtMissEmulatorProducer::produce(edm::Event& iEvent, const edm::Eve
 
   // Initialize sector sums, need 0 initialization in case a sector has no
   // tracks
-  l1tmetemu::E2t_t sumPx[l1tmetemu::kNSector * 2] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  l1tmetemu::E2t_t sumPy[l1tmetemu::kNSector * 2] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  l1tmetemu::Et_t sumPx[l1tmetemu::kNSector * 2] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  l1tmetemu::Et_t sumPy[l1tmetemu::kNSector * 2] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   int link_totals[l1tmetemu::kNSector * 2] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   int sector_totals[l1tmetemu::kNSector] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 

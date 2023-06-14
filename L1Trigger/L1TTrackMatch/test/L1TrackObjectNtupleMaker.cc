@@ -2404,8 +2404,8 @@ void L1TrackObjectNtupleMaker::analyze(const edm::Event& iEvent, const edm::Even
       }
 
       if (L1TkMETEmuHandle.isValid()) {
-        trkMETEmu = L1TkMETEmuHandle->begin()->hwPt() * l1tmetemu::kStepMET;
-        trkMETEmuPhi = L1TkMETEmuHandle->begin()->hwPhi() * l1tmetemu::kStepMETPhi;
+        trkMETEmu = L1TkMETEmuHandle->begin()->hwPt() * l1tmetemu::kStepMETwordEt;
+        trkMETEmuPhi = L1TkMETEmuHandle->begin()->hwPhi() * l1tmetemu::kStepMETwordPhi;
       }
       else {
         edm::LogWarning("DataNotFound") << "\nWarning: tkMETEmu handle not found" << std::endl;
