@@ -189,11 +189,16 @@ L1PhaseIITreeStep1Producer::L1PhaseIITreeStep1Producer(const edm::ParameterSet& 
   egToken_ = consumes<l1t::EGammaBxCollection>(iConfig.getParameter<edm::InputTag>("egTokenBarrel"));
   egTokenHGC_ = consumes<l1t::EGammaBxCollection>(iConfig.getParameter<edm::InputTag>("egTokenHGC"));
 
+  tkEGToken_ = consumes<l1t::TkElectronCollection>(iConfig.getParameter<edm::InputTag>("tkEGToken"));
+  tkEMToken_ = consumes<l1t::TkEmCollection>(iConfig.getParameter<edm::InputTag>("tkEMToken"));
+
+  /*
   tkEGToken_ = consumes<l1t::TkElectronCollection>(iConfig.getParameter<edm::InputTag>("tkEGTokenBarrel"));
   tkEMToken_ = consumes<l1t::TkEmCollection>(iConfig.getParameter<edm::InputTag>("tkEMTokenBarrel"));
 
   tkEGTokenHGC_ = consumes<l1t::TkElectronCollection>(iConfig.getParameter<edm::InputTag>("tkEGTokenHGC"));
   tkEMTokenHGC_ = consumes<l1t::TkEmCollection>(iConfig.getParameter<edm::InputTag>("tkEMTokenHGC"));
+  */
 
   /*  muonKalman_ = consumes<l1t::RegionalMuonCandBxCollection>(iConfig.getParameter<edm::InputTag>("muonKalman"));
   muonOverlap_ = consumes<l1t::RegionalMuonCandBxCollection>(iConfig.getParameter<edm::InputTag>("muonOverlap"));
@@ -273,20 +278,6 @@ L1PhaseIITreeStep1Producer::~L1PhaseIITreeStep1Producer() {
 void L1PhaseIITreeStep1Producer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   l1Extra->Reset();
 
-  /*  edm::Handle<l1t::RegionalMuonCandBxCollection> muonsKalman;
-  iEvent.getByToken(muonKalman_, muonsKalman);
-  edm::Handle<l1t::RegionalMuonCandBxCollection> muonsOverlap;
-  iEvent.getByToken(muonOverlap_, muonsOverlap);
-  edm::Handle<l1t::EMTFTrackCollection> muonsEndcap;
-  iEvent.getByToken(muonEndcap_, muonsEndcap);
-  edm::Handle<l1t::TkMuonCollection> TkMuon;
-  iEvent.getByToken(TkMuonToken_, TkMuon);
-  edm::Handle<l1t::MuonBxCollection> muon;
-  edm::Handle<l1t::TkGlbMuonCollection> TkGlbMuon;
-  iEvent.getByToken(muonToken_, muon);
-  iEvent.getByToken(TkGlbMuonToken_, TkGlbMuon);
-*/
-
   edm::Handle<std::vector<l1t::SAMuon>> gmtMuon;
   edm::Handle<std::vector<l1t::TrackerMuon>> gmtTkMuon;
 
@@ -337,20 +328,6 @@ void L1PhaseIITreeStep1Producer::analyze(const edm::Event& iEvent, const edm::Ev
   iEvent.getByToken(scBJetNN_, scBJetNN);
 
   // now also fill vertices
-
-  /*  edm::Handle<float> z0Puppi;
-  iEvent.getByToken(z0PuppiToken_, z0Puppi);
-  float Z0 = *z0Puppi;
-*/
-
-  // edm::Handle<std::vector<l1t::Vertex> > l1vertextdr;
-  // edm::Handle<std::vector<l1t::Vertex> > l1vertices;
-  // iEvent.getByToken(l1vertextdrToken_,l1vertextdr);
-  // iEvent.getByToken(l1verticesToken_,l1vertices);
-
-  //edm::Handle<l1t::VertexWordCollectionx> l1TkPrimaryVertex;
-  //iEvent.getByToken(l1TkPrimaryVertexToken_, l1TkPrimaryVertex);
-
   edm::Handle<std::vector<l1t::VertexWord>> l1TkPrimaryVertex;
   iEvent.getByToken(l1TkPrimaryVertexToken_, l1TkPrimaryVertex);
 
@@ -390,38 +367,17 @@ void L1PhaseIITreeStep1Producer::analyze(const edm::Event& iEvent, const edm::Ev
     edm::LogWarning("MissingProduct") << "L1PhaseII TkMET not found. Branch will not be filled" << std::endl;
   }
 
-  /*for (auto& tkmhttoken : tkMhtToken_) {
-    edm::Handle<l1t::TkHTMissCollection> tkMhts;
-    iEvent.getByToken(tkmhttoken, tkMhts);*/
-
   if (tkMhts.isValid()) {
     l1Extra->SetTkMHT(tkMhts);
   } else {
     edm::LogWarning("MissingProduct") << "L1PhaseII TkMHT not found. Branch will not be filled" << std::endl;
   }
 
-  /*for (auto& tkmhtdisplacedtoken : tkMhtDisplacedToken_) {
-    edm::Handle<l1t::TkHTMissCollection> tkMhtsDisplaced;
-    iEvent.getByToken(tkmhtdisplacedtoken, tkMhtsDisplaced);*/
-
   if (tkMhtsDisplaced.isValid()) {
     l1Extra->SetTkMHTDisplaced(tkMhtsDisplaced);
   } else {
     edm::LogWarning("MissingProduct") << "L1PhaseII TkMHT Displaced not found. Branch will not be filled" << std::endl;
   }
-
-  //  float vertexTDRZ0=-999;
-  //  if(l1vertextdr->size()>0) vertexTDRZ0=l1vertextdr->at(0).z0();
-  /*
-       if(l1vertices.isValid() && l1TkPrimaryVertex.isValid() &&  l1vertices->size()>0 && l1TkPrimaryVertex->size()>0){
-             l1Extra->SetVertices(Z0,vertexTDRZ0,l1vertices,l1TkPrimaryVertex);
-       }
-       else {
-                edm::LogWarning("MissingProduct") << "One of the L1TVertex collections is not valid " << std::endl;
-                std::cout<<"Getting the vertices!"<<std::endl;
-                std::cout<<Z0<<"   "<<l1vertextdr->size() <<"  "<< l1vertices->size() <<"   "<<  l1TkPrimaryVertex->size()<<std::endl;
-        }
-*/
 
   if (l1TkPrimaryVertex.isValid() && !l1TkPrimaryVertex->empty()) {
     l1Extra->SetVertices(0, l1TkPrimaryVertex);  // We should change this function
@@ -451,11 +407,15 @@ void L1PhaseIITreeStep1Producer::analyze(const edm::Event& iEvent, const edm::Ev
 
   edm::Handle<l1t::TkElectronCollection> tkEG;
   iEvent.getByToken(tkEGToken_, tkEG);
+  /*
   edm::Handle<l1t::TkElectronCollection> tkEGHGC;
   iEvent.getByToken(tkEGTokenHGC_, tkEGHGC);
+  */
 
-  if (tkEG.isValid() && tkEGHGC.isValid()) {
-    l1Extra->SetTkEG(tkEG, tkEGHGC, maxL1Extra_);
+  //if (tkEG.isValid() && tkEGHGC.isValid()) {
+  if (tkEG.isValid()) {
+      //l1Extra->SetTkEG(tkEG, tkEGHGC, maxL1Extra_);
+      l1Extra->SetTkEG(tkEG, maxL1Extra_);
   } else {
     edm::LogWarning("MissingProduct") << "L1PhaseII TkEG not found. Branch will not be filled" << std::endl;
   }
@@ -473,12 +433,14 @@ void L1PhaseIITreeStep1Producer::analyze(const edm::Event& iEvent, const edm::Ev
 
   edm::Handle<l1t::TkEmCollection> tkEM;
   iEvent.getByToken(tkEMToken_, tkEM);
-
+/*
   edm::Handle<l1t::TkEmCollection> tkEMHGC;
   iEvent.getByToken(tkEMTokenHGC_, tkEMHGC);
+*/
 
-  if (tkEM.isValid() && tkEMHGC.isValid()) {
-    l1Extra->SetTkEM(tkEM, tkEMHGC, maxL1Extra_);
+  //if (tkEM.isValid() && tkEMHGC.isValid()) {
+  if (tkEM.isValid()) {
+    l1Extra->SetTkEM(tkEM,maxL1Extra_);
   } else {
     edm::LogWarning("MissingProduct") << "L1PhaseII  TkEM not found. Branch will not be filled" << std::endl;
   }
@@ -528,40 +490,6 @@ void L1PhaseIITreeStep1Producer::analyze(const edm::Event& iEvent, const edm::Ev
                                       << std::endl;
   }
 
-  /*
-  if (muonsKalman.isValid()) {
-    l1Extra->SetMuonKF(muonsKalman, maxL1Extra_, 1);
-  } else {
-    edm::LogWarning("MissingProduct") << "L1Upgrade KBMTF Muons not found. Branch will not be filled" << std::endl;
-  }
-  if (muonsOverlap.isValid()) {
-    l1Extra->SetMuonKF(muonsOverlap, maxL1Extra_, 2);
-  } else {
-    edm::LogWarning("MissingProduct") << "L1Upgrade KBMTF Muons not found. Branch will not be filled" << std::endl;
-  }
-  if (muonsEndcap.isValid()) {
-    l1Extra->SetMuonEMTF(muonsEndcap, maxL1Extra_, 3);
-  } else {
-    edm::LogWarning("MissingProduct") << "L1Upgrade EMTF track Muons not found. Branch will not be filled" << std::endl;
-  }
-  if (TkMuon.isValid()) {
-    l1Extra->SetTkMuon(TkMuon, maxL1Extra_);
-    //                l1Extra->SetDiMuonTk(TkMuon,maxL1Extra_);
-  } else {
-    edm::LogWarning("MissingProduct") << "L1PhaseII TkMuons not found. Branch will not be filled" << std::endl;
-  }
-  if (muon.isValid()) {
-    l1Extra->SetMuon(muon, maxL1Extra_);
-  } else {
-    edm::LogWarning("MissingProduct") << "L1Upgrade Muons not found. Branch will not be filled" << std::endl;
-  }
-  if (TkGlbMuon.isValid()) {
-    l1Extra->SetTkGlbMuon(TkGlbMuon, maxL1Extra_);
-  } else {
-    edm::LogWarning("MissingProduct") << "L1PhaseII TkGlbMuons not found. Branch will not be filled" << std::endl;
-  }
-*/
-
   if (gmtMuon.isValid()) {
     l1Extra->SetGmtMuon(gmtMuon, maxL1Extra_);
   } else {
@@ -584,12 +512,6 @@ void L1PhaseIITreeStep1Producer::analyze(const edm::Event& iEvent, const edm::Ev
     l1Extra->SetNNTaus(l1NNTau, maxL1Extra_);
   } else {
     edm::LogWarning("MissingProduct") << "L1NNTau missing" << std::endl;
-  }
-
-  if (l1NNTau2vtx.isValid()) {
-    l1Extra->SetNNTau2vtxs(l1NNTau2vtx, maxL1Extra_);
-  } else {
-    edm::LogWarning("MissingProduct") << "L1NNTau2vtxs missing" << std::endl;
   }
 
   tree_->Fill();
