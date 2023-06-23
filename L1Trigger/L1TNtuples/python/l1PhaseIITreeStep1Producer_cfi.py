@@ -33,7 +33,7 @@ l1PhaseIITree = cms.EDAnalyzer("L1PhaseIITreeStep1Producer",
 
     l1PFMet = cms.InputTag("l1tMETPFProducer","",process_name), #emulator
 
-    l1TkPrimaryVertex= cms.InputTag("l1tVertexFinderEmulator","l1verticesEmulation",process_name), #we need to rename this, but these are now emulated vertices!
+    l1TkPrimaryVertex= cms.InputTag("l1tVertexFinderEmulator","l1tVerticesEmulation",process_name), #we need to rename this, but these are now emulated vertices!
 
     L1NNTauToken = cms.InputTag("l1tNNTauProducerPuppi","L1PFTausNN",process_name), # default collection, emulated
     L1NNTau2vtxToken = cms.InputTag("l1tNNTauProducerPuppi2Vtx","L1PFTausNN",process_name), # 2 vtx version
