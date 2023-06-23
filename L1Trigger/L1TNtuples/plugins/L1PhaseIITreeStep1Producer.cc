@@ -103,7 +103,7 @@ Implementation:
 // class declaration
 //
 
-class L1PhaseIITreeStep1Producer : public edm::one::EDAnalyzer<> {
+class L1PhaseIITreeStep1Producer : public edm::one::EDAnalyzer<edm::one::SharedResources>{
 public:
   explicit L1PhaseIITreeStep1Producer(const edm::ParameterSet&);
   ~L1PhaseIITreeStep1Producer() override;
