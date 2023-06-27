@@ -1592,13 +1592,13 @@ class ConfigBuilder(object):
 
         return triggerPaths
 
-    def prepare_L1(self, sequence = None):
+    def prepare_L1(self, stepSpec = None):
         """ Enrich the schedule with the L1 simulation step"""
         # irrelevant with the advent of GT as a seperate step
         # assert(sequence == None)
         possibleSequences = ['RUNP2GT']
-        if sequence in possibleSequences:
-            if 'RUNP2GT' in sequence:
+        if stepSpec in possibleSequences:
+            if 'RUNP2GT' in stepSpec:
                 # Load the initial GT producer
                 self.loadAndRemember(self.L1P2GTProducer)
                 self.scheduleSequence('l1tGTProducerSequence','Phase2L1GTProducer')
