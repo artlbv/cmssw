@@ -179,6 +179,43 @@ namespace l1gt {
     }
   };  // struct Sum
 
+  // struct Tau {
+  //   valid_t valid;
+  //   ThreeVector v3;
+  //   tauseed_pt_t seed_pt;
+  //   z0_t seed_z0;
+  //   ap_uint<1> charge;
+  //   ap_uint<2> type;
+  //   tau_rawid_t isolation;
+  //   ap_uint<2> id0;
+  //   ap_uint<2> id1;
+
+  //   static const int BITWIDTH = 128;
+  //   inline ap_uint<BITWIDTH> pack_ap() const {
+  //     ap_uint<BITWIDTH> ret;
+  //     unsigned int start = 0;
+  //     pack_into_bits(ret, start, valid);
+  //     pack_into_bits(ret, start, v3.pack());
+  //     pack_into_bits(ret, start, seed_pt);
+  //     pack_into_bits(ret, start, seed_z0);
+  //     pack_into_bits(ret, start, charge);
+  //     pack_into_bits(ret, start, type);
+  //     pack_into_bits(ret, start, isolation);
+  //     pack_into_bits(ret, start, id0);
+  //     pack_into_bits(ret, start, id1);
+  //     return ret;
+  //   }
+
+  //   inline std::array<uint64_t, 2> pack() const {
+  //     std::array<uint64_t, 2> packed;
+  //     ap_uint<BITWIDTH> bits = this->pack_ap();
+  //     packed[0] = bits(63, 0);
+  //     packed[1] = bits(127, 64);
+  //     return packed;
+  //   }
+
+  // };  // struct Tau
+
   struct Tau {
     valid_t valid;
     ThreeVector v3;
@@ -189,6 +226,7 @@ namespace l1gt {
     tau_rawid_t isolation;
     ap_uint<2> id0;
     ap_uint<2> id1;
+
 
     static const int BITWIDTH = 128;
     inline ap_uint<BITWIDTH> pack_ap() const {
@@ -206,6 +244,7 @@ namespace l1gt {
       return ret;
     }
 
+
     inline std::array<uint64_t, 2> pack() const {
       std::array<uint64_t, 2> packed;
       ap_uint<BITWIDTH> bits = this->pack_ap();
@@ -213,6 +252,40 @@ namespace l1gt {
       packed[1] = bits(127, 64);
       return packed;
     }
+
+
+    inline static Tau unpack_ap(const ap_uint<BITWIDTH> &src) {
+      Tau ret;
+      ret.initFromBits(src);
+      return ret;
+    }
+
+
+    inline static Tau unpack(const std::array<uint64_t, 2> &src) {
+      ap_uint<BITWIDTH> bits;
+      bits(63, 0) = src[0];
+      bits(127, 64) = src[1];
+
+
+      return unpack_ap(bits);
+    }
+
+
+    inline void initFromBits(const ap_uint<BITWIDTH> &src) {
+      unsigned int start = 0;
+      unpack_from_bits(src, start, valid);
+      unpack_from_bits(src, start, v3.pt);
+      unpack_from_bits(src, start, v3.phi);
+      unpack_from_bits(src, start, v3.eta);
+      unpack_from_bits(src, start, seed_pt);
+      unpack_from_bits(src, start, seed_z0);
+      unpack_from_bits(src, start, charge);
+      unpack_from_bits(src, start, type);
+      unpack_from_bits(src, start, isolation);
+      unpack_from_bits(src, start, id0);
+      unpack_from_bits(src, start, id1);
+    }
+
 
   };  // struct Tau
 

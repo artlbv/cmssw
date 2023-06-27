@@ -367,7 +367,8 @@ namespace l1t {
     std::unique_ptr<P2GTCandidateCollection> outputCollection = std::make_unique<P2GTCandidateCollection>();
     const PFTauCollection &collection = event.get(cl2TauToken_);
     for (size_t i = 0; i < collection.size() && i < 12; i++) {
-      l1gt::Tau gtTau = collection[i].getTauGT();
+      // l1gt::Tau gtTau = collection[i].getTauGT();
+      l1gt::Tau gtTau = collection[i].getHWTauGT();
       P2GTCandidate gtObj;
       gtObj.hwPT_ = gtTau.v3.pt.V.to_int();
       gtObj.hwPhi_ = gtTau.v3.phi.V.to_int();

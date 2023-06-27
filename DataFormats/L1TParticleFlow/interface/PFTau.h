@@ -77,12 +77,12 @@ namespace l1t {
     void set_encodedTau(std::array<uint64_t, 2> encodedTau) { encodedTau_ = encodedTau; }
     std::array<uint64_t, 2> encodedTau() const { return encodedTau_; }
 
-    //l1gt::Tau getHWTauGT() const { return l1ct::Tau::unpack_gt(encodedTau_); }
+    l1gt::Tau getHWTauGT() const { return l1gt::Tau::unpack(encodedTau_); }
 
     //Return the l1gt Tau object for now
-    void set_TauGT(l1gt::Tau TauGT) { TauGT_ = TauGT; }
+    // void set_TauGT(l1gt::Tau TauGT) { TauGT_ = TauGT; }
 
-    l1gt::Tau getTauGT() const { return TauGT_; }
+    // l1gt::Tau getTauGT() const { return TauGT_; }
 
   private:
     float NNValues_[80];
@@ -91,7 +91,7 @@ namespace l1t {
     int id_;
     float dxy_;
     std::array<uint64_t, 2> encodedTau_;
-    l1gt::Tau TauGT_;
+    // l1gt::Tau TauGT_;
   };
 
   typedef std::vector<l1t::PFTau> PFTauCollection;

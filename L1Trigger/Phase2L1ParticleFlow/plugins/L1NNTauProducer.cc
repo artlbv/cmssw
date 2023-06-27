@@ -285,7 +285,7 @@ void L1NNTauProducer::makeTau_HW(const l1t::PFCandidate& seed,
   l1gt::Tau l1gtTau = l1ctTau.toGT();
   std::array<uint64_t, 2> packed_Tau = l1gtTau.pack();
 
-  l1PFTau.set_TauGT(l1gtTau);
+  // l1PFTau.set_TauGT(l1gtTau);
   l1PFTau.set_encodedTau(packed_Tau);
 
   iTaus->push_back(l1PFTau);
