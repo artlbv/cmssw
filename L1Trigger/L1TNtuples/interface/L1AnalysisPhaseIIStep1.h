@@ -103,10 +103,10 @@ namespace L1Analysis {
 
     // Add L1TrackTriggerObjects
     void SetTkEG(const edm::Handle<l1t::TkElectronCollection> tkEG,
-                 const edm::Handle<l1t::TkElectronCollection> tkEGHGC,
+                 //const edm::Handle<l1t::TkElectronCollection> tkEGHGC,
                  unsigned maxL1Extra);
     void SetTkEM(const edm::Handle<l1t::TkEmCollection> tkEM,
-                 const edm::Handle<l1t::TkEmCollection> tkEMHGC,
+                 //const edm::Handle<l1t::TkEmCollection> tkEMHGC,
                  unsigned maxL1Extra);
 
     /*
