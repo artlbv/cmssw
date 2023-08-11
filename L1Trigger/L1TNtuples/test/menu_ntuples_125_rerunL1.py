@@ -1,8 +1,8 @@
 # Auto generated configuration file
-# using: 
-# Revision: 1.19 
-# Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: step1 --conditions 125X_mcRun4_realistic_v2 -n 2 --era Phase2C17I13M9 --eventcontent FEVTDEBUGHLT -s RAW2DIGI,L1 --datatier GEN-SIM-DIGI-RAW-MINIAOD --fileout file:test.root --customise SLHCUpgradeSimulations/Configuration/aging.customise_aging_1000,Configuration/DataProcessing/Utils.addMonitoring,L1Trigger/Configuration/customisePhase2.addHcalTriggerPrimitives,L1Trigger/Configuration/customisePhase2FEVTDEBUGHLT.customisePhase2FEVTDEBUGHLT --geometry Extended2026D88 --nThreads 8 --filein /store/mc/Phase2Fall22DRMiniAOD/TT_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW-MINIAOD/PU200_125X_mcRun4_realistic_v2_ext1-v1/30000/000c5e5f-78f7-44ee-95fe-7b2f2c2e2312.root --mc --customise_commands=process.source.inputCommands = cms.untracked.vstring("keep *", "drop l1tPFJets_*_*_*") --no_exec --python_filename rerunL1_only_cfg.py  
+# using:
+# Revision: 1.19
+# Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v
+# with command line options: step1 --conditions 125X_mcRun4_realistic_v2 -n 2 --era Phase2C17I13M9 --eventcontent FEVTDEBUGHLT -s RAW2DIGI,L1 --datatier GEN-SIM-DIGI-RAW-MINIAOD --fileout file:test.root --customise SLHCUpgradeSimulations/Configuration/aging.customise_aging_1000,Configuration/DataProcessing/Utils.addMonitoring,L1Trigger/Configuration/customisePhase2.addHcalTriggerPrimitives,L1Trigger/Configuration/customisePhase2FEVTDEBUGHLT.customisePhase2FEVTDEBUGHLT --geometry Extended2026D88 --nThreads 8 --filein /store/mc/Phase2Fall22DRMiniAOD/TT_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW-MINIAOD/PU200_125X_mcRun4_realistic_v2_ext1-v1/30000/000c5e5f-78f7-44ee-95fe-7b2f2c2e2312.root --mc --customise_commands=process.source.inputCommands = cms.untracked.vstring("keep *", "drop l1tPFJets_*_*_*") --no_exec --python_filename rerunL1_only_cfg.py
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.Eras.Era_Phase2C17I13M9_cff import Phase2C17I13M9
@@ -29,7 +29,15 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('/store/mc/Phase2Fall22DRMiniAOD/TT_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW-MINIAOD/PU200_125X_mcRun4_realistic_v2_ext1-v1/30000/000c5e5f-78f7-44ee-95fe-7b2f2c2e2312.root'),
+    fileNames = cms.untracked.vstring(
+        ## 125X samples
+        #'/store/mc/Phase2Fall22DRMiniAOD/TT_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW-MINIAOD/PU200_125X_mcRun4_realistic_v2_ext1-v1/30000/000c5e5f-78f7-44ee-95fe-7b2f2c2e2312.root'
+        ### 13X samples
+        #'/store/relval/CMSSW_13_1_0/RelValTTbar_14TeV/GEN-SIM-RECO/PU_131X_mcRun4_realistic_v5_2026D95PU200-v1/2590000/00e84477-cac7-4817-9c46-f3fca87c448a.root'
+        #'file:/eos/cms/store/group/offcomp_upgrade-sw/srimanob/Phase2Spring23/13_1_0/RAW-MiniAOD-standard.root'
+        "file:/eos/cms/store/relval/CMSSW_13_1_0/RelValZMM_14/GEN-SIM-RECO/PU_131X_mcRun4_realistic_v5_2026D95PU200-v1/2590000/f58d533b-d332-4336-9ae6-7702052fabac.root"
+    ),
+
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -114,31 +122,31 @@ from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
 #Setup FWK for multithreaded
-process.options.numberOfThreads = 8
+process.options.numberOfThreads = 1
 process.options.numberOfStreams = 0
 
 # customisation of the process.
 
 # Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.aging
-from SLHCUpgradeSimulations.Configuration.aging import customise_aging_1000 
+from SLHCUpgradeSimulations.Configuration.aging import customise_aging_1000
 
 #call to customisation function customise_aging_1000 imported from SLHCUpgradeSimulations.Configuration.aging
 process = customise_aging_1000(process)
 
 # Automatic addition of the customisation function from Configuration.DataProcessing.Utils
-from Configuration.DataProcessing.Utils import addMonitoring 
+from Configuration.DataProcessing.Utils import addMonitoring
 
 #call to customisation function addMonitoring imported from Configuration.DataProcessing.Utils
 process = addMonitoring(process)
 
 # Automatic addition of the customisation function from L1Trigger.Configuration.customisePhase2
-from L1Trigger.Configuration.customisePhase2 import addHcalTriggerPrimitives 
+from L1Trigger.Configuration.customisePhase2 import addHcalTriggerPrimitives
 
 #call to customisation function addHcalTriggerPrimitives imported from L1Trigger.Configuration.customisePhase2
 process = addHcalTriggerPrimitives(process)
 
 # Automatic addition of the customisation function from L1Trigger.Configuration.customisePhase2FEVTDEBUGHLT
-from L1Trigger.Configuration.customisePhase2FEVTDEBUGHLT import customisePhase2FEVTDEBUGHLT 
+from L1Trigger.Configuration.customisePhase2FEVTDEBUGHLT import customisePhase2FEVTDEBUGHLT
 
 #call to customisation function customisePhase2FEVTDEBUGHLT imported from L1Trigger.Configuration.customisePhase2FEVTDEBUGHLT
 process = customisePhase2FEVTDEBUGHLT(process)

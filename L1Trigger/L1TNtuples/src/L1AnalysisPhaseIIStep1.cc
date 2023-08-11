@@ -24,7 +24,7 @@ void L1Analysis::L1AnalysisPhaseIIStep1::SetCaloTau(const edm::Handle<l1t::TauBx
     for (l1t::TauBxCollection::const_iterator it = calotau->begin(ibx);
          it != calotau->end(ibx) && l1extra_.nCaloTaus < maxL1Extra;
          it++) {
-      if (it->pt() > 0) {
+      if (it->pt() > 5) {
         l1extra_.caloTauPt.push_back(it->pt());
         l1extra_.caloTauEt.push_back(it->et());
         l1extra_.caloTauEta.push_back(it->eta());
@@ -82,7 +82,7 @@ void L1Analysis::L1AnalysisPhaseIIStep1::SetCaloJet(const edm::Handle<l1t::JetBx
     for (l1t::JetBxCollection::const_iterator it = jet->begin(ibx);
          it != jet->end(ibx) && l1extra_.nCaloJets < maxL1Extra;
          it++) {
-      if (it->pt() > 0) {
+      if (it->pt() > 5) {
         l1extra_.caloJetEt.push_back(it->et());
         l1extra_.caloJetPt.push_back(it->pt());
         l1extra_.caloJetEta.push_back(it->eta());
@@ -578,6 +578,7 @@ void L1Analysis::L1AnalysisPhaseIIStep1::SetNNTaus(const edm::Handle<vector<l1t:
   }
 }
 
+/*
 void L1Analysis::L1AnalysisPhaseIIStep1::SetNNTau2vtxs(const edm::Handle<vector<l1t::PFTau>> l1nnTau2vtxs,
                                                        unsigned maxL1Extra) {
   for (unsigned int i = 0; i < l1nnTau2vtxs->size() && l1extra_.nNNTau2vtxs < maxL1Extra; i++) {
@@ -603,6 +604,7 @@ void L1Analysis::L1AnalysisPhaseIIStep1::SetNNTau2vtxs(const edm::Handle<vector<
     l1extra_.nNNTau2vtxs++;
   }
 }
+*/
 
 // TkJet
 void L1Analysis::L1AnalysisPhaseIIStep1::SetTkJet(const edm::Handle<l1t::TkJetWordCollection> trackerJet,

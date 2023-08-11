@@ -139,7 +139,10 @@ void L1GenTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup&
   edm::Handle<reco::GenJetCollection> genJets;
   iEvent.getByToken(genJetToken_, genJets);
 
-  const auto& jetFlavourInfosProd = iEvent.get(genJetFlavourInfosToken_);
+  //const auto& jetFlavourInfosProd = iEvent.get(genJetFlavourInfosToken_);
+  //const class reco::JetFlavourInfoMatchingCollection' has no member named 'isValid'
+  //edm::Handle<JetFlavourInfoMatchingCollection> jetFlavourInfosProd;
+  //iEvent.get(genJetFlavourInfosToken_, jetFlavourInfosProd);
 
   if (genJets.isValid()) {
     reco::GenJetCollection::const_iterator jetItr = genJets->begin();
@@ -151,17 +154,21 @@ void L1GenTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup&
       l1GenData_->jetM.push_back(jetItr->mass());
       l1GenData_->nJet++;
 
-      int partonFlavour = -1;
-      int hadronFlavour = -1;
-      for (const reco::JetFlavourInfoMatching& jetFlavourInfoMatching : jetFlavourInfosProd) {
-        if (deltaR(jetItr->p4(), jetFlavourInfoMatching.first->p4()) < 0.1) {
-          partonFlavour = jetFlavourInfoMatching.second.getPartonFlavour();
-          hadronFlavour = jetFlavourInfoMatching.second.getHadronFlavour();
-          break;
-        }
+      /*
+      if (jetFlavourInfosProd.isValid()) {
+	  int partonFlavour = -1;
+	  int hadronFlavour = -1;
+	  for (const reco::JetFlavourInfoMatching& jetFlavourInfoMatching : jetFlavourInfosProd) {
+	      if (deltaR(jetItr->p4(), jetFlavourInfoMatching.first->p4()) < 0.1) {
+		  partonFlavour = jetFlavourInfoMatching.second.getPartonFlavour();
+		  hadronFlavour = jetFlavourInfoMatching.second.getHadronFlavour();
+		  break;
+	      }
+	  }
+	  l1GenData_->jetPartonFlavour.push_back(partonFlavour);
+	  l1GenData_->jetHadronFlavour.push_back(hadronFlavour);
       }
-      l1GenData_->jetPartonFlavour.push_back(partonFlavour);
-      l1GenData_->jetHadronFlavour.push_back(hadronFlavour);
+      */
     }
 
   } else {
