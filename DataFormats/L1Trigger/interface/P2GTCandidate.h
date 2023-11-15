@@ -278,6 +278,139 @@ namespace l1t {
              objectType_ == CL2Jets;
     }
 
+  int hwPT_toInt() const {
+      if (!hwPT_) {
+        throw std::invalid_argument("Object doesn't have pT");
+      }
+      return static_cast<int>(hwPT_);
+    }
+  
+    int hwPhi_toInt() const {
+      if (!hwPhi_) {
+        throw std::invalid_argument("Object doesn't have phi");
+      }
+      return static_cast<int>(hwPhi_);
+    }
+  
+    int hwEta_toInt() const {
+      if (!hwEta_) {
+        throw std::invalid_argument("Object doesn't have eta");
+      }
+      return static_cast<int>(hwEta_);
+    }
+  
+    int hwZ0_toInt() const {
+      if (!hwZ0_) {
+        throw std::invalid_argument("Object doesn't have z0");
+      }
+      return static_cast<int>(hwZ0_);
+    }
+  
+    int hwIso_toInt() const {
+      if (!hwIso_) {
+        throw std::invalid_argument("Object doesn't have iso");
+      }
+      return static_cast<int>(hwIso_);
+    }
+  
+    int hwQual_toInt() const {
+      if (!hwQual_) {
+        throw std::invalid_argument("Object doesn't have qual");
+      }
+      return static_cast<int>(hwQual_);
+    }
+  
+    int hwCharge_toInt() const {
+      if (!hwCharge_) {
+        throw std::invalid_argument("Object doesn't have charge");
+      }
+      return static_cast<int>(hwCharge_);
+    }
+  
+    int hwD0_toInt() const {
+      if (!hwD0_) {
+        throw std::invalid_argument("Object doesn't have d0");
+      }
+      return static_cast<int>(hwD0_);
+    }
+  
+    int hwBeta_toInt() const {
+      if (!hwBeta_) {
+        throw std::invalid_argument("Object doesn't have beta");
+      }
+      return static_cast<int>(hwBeta_);
+    }
+  
+    int hwMass_toInt() const {
+      if (!hwMass_) {
+        throw std::invalid_argument("Object doesn't have mass");
+      }
+      return static_cast<int>(hwMass_);
+    }
+  
+    int hwIndex_toInt() const {
+      if (!hwIndex_) {
+        throw std::invalid_argument("Object doesn't have index");
+      }
+      return static_cast<int>(hwIndex_);
+    }
+  
+    int hwSeed_pT_toInt() const {
+      if (!hwSeed_pT_) {
+        throw std::invalid_argument("Object doesn't have seed_pT");
+      }
+      return static_cast<int>(hwSeed_pT_);
+    }
+  
+    int hwSeed_z0_toInt() const {
+      if (!hwSeed_z0_) {
+        throw std::invalid_argument("Object doesn't have seed_z0");
+      }
+      return static_cast<int>(hwSeed_z0_);
+    }
+  
+    int hwSca_sum_toInt() const {
+      if (!hwSca_sum_) {
+        throw std::invalid_argument("Object doesn't have sca_sum");
+      }
+      return static_cast<int>(hwSca_sum_);
+    }
+  
+    int hwNumber_of_tracks_toInt() const {
+      if (!hwNumber_of_tracks_) {
+        throw std::invalid_argument("Object doesn't have number_of_tracks");
+      }
+      return static_cast<int>(hwNumber_of_tracks_);
+    }
+  
+    int hwSum_pT_pv_toInt() const {
+      if (!hwSum_pT_pv_) {
+        throw std::invalid_argument("Object doesn't have sum_pT_pv");
+      }
+      return static_cast<int>(hwSum_pT_pv_);
+    }
+  
+    int hwType_toInt() const {
+      if (!hwType_) {
+        throw std::invalid_argument("Object doesn't have type");
+      }
+      return static_cast<int>(hwType_);
+    }
+  
+    int hwNumber_of_tracks_in_pv_toInt() const {
+      if (!hwNumber_of_tracks_in_pv_) {
+        throw std::invalid_argument("Object doesn't have number_of_tracks_in_pv");
+      }
+      return static_cast<int>(hwNumber_of_tracks_in_pv_);
+    }
+  
+    int hwNumber_of_tracks_not_in_pv_toInt() const {
+      if (!hwNumber_of_tracks_not_in_pv_) {
+        throw std::invalid_argument("Object doesn't have hwNumber_of_tracks_not_in_pv");
+      }
+      return static_cast<int>(hwNumber_of_tracks_not_in_pv_);
+    }
+
   private:
     Optional<int> hwPT_;
     Optional<int> hwPhi_;
