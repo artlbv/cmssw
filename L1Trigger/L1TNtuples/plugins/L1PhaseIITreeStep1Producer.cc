@@ -161,8 +161,6 @@ private:
   edm::EDGetTokenT<std::vector<l1t::EtSum>> scPFL1PuppiMHT_;
   edm::EDGetTokenT<std::vector<l1t::PFJet>> scPFL1PuppiExtended_;
   edm::EDGetTokenT<edm::ValueMap<float>> scBJetNN_;
-  edm::EDGetTokenT<std::vector<l1t::PFJet>> scPFL1PuppiExtended_;
-  edm::EDGetTokenT<edm::ValueMap<float>> scBJetNN_;
 
   //edm::EDGetTokenT<float> z0PuppiToken_;
   //edm::EDGetTokenT<l1t::VertexCollection> l1vertextdrToken_;
