@@ -233,13 +233,7 @@ def customiseForOffline(process):
 
     return process
 
-def customizeHLTfor43885(process):
-    for producer in producers_by_type(process, "EgammaHLTClusterShapeProducer"):
-        if hasattr(producer, 'isIeta'):
-            delattr(producer, 'isIeta')
-    return process
-
-def customizeHLTfor44054(process):
+def customizeHLTfor44397(process):
     """
     Customisation for running HLT with the updated L1 UTM and AXOL1TL condition parsing from the PR 44054
     """
