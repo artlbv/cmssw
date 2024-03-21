@@ -2789,15 +2789,11 @@ bool l1t::TriggerMenuParser::parseAXOL1TL(L1TUtmCondition condAXOL1TL, unsigned 
     const std::vector<L1TUtmCut>& cuts = object.getCuts();
     for (size_t kk = 0; kk < cuts.size(); kk++) {
       const L1TUtmCut& cut = cuts.at(kk);
-
-      switch (cut.getCutType()) {
-        case esCutType::AnomalyScore:
-          lowerThresholdInd = cut.getMinimum().value;
-          upperThresholdInd = cut.getMaximum().value;
-          break;
-        default:
-          break;
-      }  //end switch
+      if (cut.getCutType() == esCutType::AnomalyScore) {
+        lowerThresholdInd = cut.getMinimum().value;
+        upperThresholdInd = cut.getMaximum().value;
+        break;
+      }
     }    //end cut loop
   }
   else {
