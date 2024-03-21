@@ -327,7 +327,8 @@ void l1t::TriggerMenuParser::parseCondFormats(const L1TUtmTriggerMenu* utmMenu) 
           parseEnergySumZdc(condition, chipNr, false);
 
           //parse AXOL1TL
-        } else if (condition.getType() == esConditionType::Axol1tlTrigger) {
+        } else if (condition.getType() == esConditionType::Axol1tlTrigger || 
+                   condition.getType() == esConditionType::AnomalyDetectionTrigger) {
           parseAXOL1TL(condition, chipNr);
 
           //parse Muons
@@ -2760,7 +2761,9 @@ bool l1t::TriggerMenuParser::parseAXOL1TL(L1TUtmCondition condAXOL1TL, unsigned 
   //save model and threshold
   std::string model = "";
 
+  // for UTM v12+
   if (object.getType() == tmeventsetup::Axol1tl) {
+
     const std::vector<L1TUtmCut>& cuts = object.getCuts();
     for (size_t kk = 0; kk < cuts.size(); kk++) {
       const L1TUtmCut& cut = cuts.at(kk);
@@ -2776,6 +2779,31 @@ bool l1t::TriggerMenuParser::parseAXOL1TL(L1TUtmCondition condAXOL1TL, unsigned 
       }  //end else if
     }    //end cut loop
   }      //end if getType
+  // LEGACY
+  // for UTM pre v12
+  else if (condAXOL1TL.getType() == esConditionType::AnomalyDetectionTrigger)  {
+
+    // hard-code model version for legacy Menu
+    model = "v3";
+
+    const std::vector<L1TUtmCut>& cuts = object.getCuts();
+    for (size_t kk = 0; kk < cuts.size(); kk++) {
+      const L1TUtmCut& cut = cuts.at(kk);
+
+      switch (cut.getCutType()) {
+        case esCutType::AnomalyScore:
+          lowerThresholdInd = cut.getMinimum().value;
+          upperThresholdInd = cut.getMaximum().value;
+          break;
+        default:
+          break;
+      }  //end switch
+    }    //end cut loop
+  }
+  else {
+    edm::LogError("TriggerMenuParser") << "    Error: not a proper AXOL1TL condition" << std::endl;
+    return false;
+  }
 
   //fill object params
   objParameter[0].minAXOL1TLThreshold = lowerThresholdInd;
