@@ -90,11 +90,12 @@ const bool l1t::AXOL1TLCondition::evaluateCondition(const int bxEval) const {
   int useBx = bxEval + m_gtAXOL1TLTemplate->condRelativeBx();
 
   //HLS4ML stuff
-  std::string AXOL1TLmodelversion = m_AXOL1TLmodelversion;  //loading from menu
+  // std::string AXOL1TLmodelversion = m_AXOL1TLmodelversion;  //loading from menu
+  std::string AXOL1TLmodelversion = "GTADModel_" + m_gtAXOL1TLTemplate->modelVersion();  //loading from menu/template
 
   //if model version is empty, throw exception. Should not ever happen
   if (AXOL1TLmodelversion == "" || AXOL1TLmodelversion == "GTADModel_") {
-    throw cms::Exception("ModelError") << " Error: AXOL1TL model version not set!";
+    throw cms::Exception("ModelError") << " Error: AXOL1TL model version not properly set: " << AXOL1TLmodelversion;
   }
 
   //otherwise load model (if possible) and run inference
@@ -242,6 +243,8 @@ const bool l1t::AXOL1TLCondition::evaluateCondition(const int bxEval) const {
   loss = ADModelResult.second;
   score = ((loss).to_float()) * 16.0;  //scaling to match threshold
 
+  std::cout << "Score: " << score << std::endl;
+
   //number of objects/thrsholds to check
   int iCondition = 0;  // number of conditions: there is only one
   int nObjInCond = m_gtAXOL1TLTemplate->nrObjects();
@@ -262,11 +265,6 @@ const bool l1t::AXOL1TLCondition::evaluateCondition(const int bxEval) const {
 
   //return result
   return condResult;
-}
-
-//in order to set model version from menu->triggermenuparser->globalproducer->globalboard->here
-void l1t::AXOL1TLCondition::setModelVersion(const std::string modelversionname) {
-  m_AXOL1TLmodelversion = "GTADModel_" + modelversionname;
 }
 
 void l1t::AXOL1TLCondition::print(std::ostream& myCout) const {
