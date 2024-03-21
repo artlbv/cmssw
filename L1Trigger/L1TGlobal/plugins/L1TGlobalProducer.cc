@@ -401,7 +401,6 @@ void L1TGlobalProducer::produce(edm::Event& iEvent, const edm::EventSetup& evSet
       m_l1GtMenu->print(std::cout, printV);
 
     m_l1GtMenuCacheID = l1GtMenuCacheID;
-
   }
 
   // get / update the board maps from the EventSetup
