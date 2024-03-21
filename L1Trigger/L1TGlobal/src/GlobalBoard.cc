@@ -656,8 +656,6 @@ void l1t::GlobalBoard::runGTL(const edm::Event&,
 
           axol1tlCondition->setVerbosity(m_verbosity);
 
-          axol1tlCondition->setModelVersion(m_axol1tlModelVersion);
-
           axol1tlCondition->evaluateConditionStoreResult(iBxInEvent);
 
           cMapResults[itCond->first] = axol1tlCondition;
