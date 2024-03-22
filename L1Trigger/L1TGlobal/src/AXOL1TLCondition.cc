@@ -243,8 +243,6 @@ const bool l1t::AXOL1TLCondition::evaluateCondition(const int bxEval) const {
   loss = ADModelResult.second;
   score = ((loss).to_float()) * 16.0;  //scaling to match threshold
 
-  std::cout << "Score: " << score << std::endl;
-
   //number of objects/thrsholds to check
   int iCondition = 0;  // number of conditions: there is only one
   int nObjInCond = m_gtAXOL1TLTemplate->nrObjects();
