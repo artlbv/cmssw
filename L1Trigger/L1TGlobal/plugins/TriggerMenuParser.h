@@ -425,6 +425,9 @@ namespace l1t {
     std::vector<std::vector<CaloTemplate> > m_corCaloTemplate;
     std::vector<std::vector<EnergySumTemplate> > m_corEnergySumTemplate;
 
+    /// AXOL1TL Model Version
+    std::string m_axol1tlModelVersion = "";
+
     /// map containing the physics algorithms (by name)
     AlgorithmMap m_algorithmMap;
 
