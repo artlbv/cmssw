@@ -90,7 +90,6 @@ const bool l1t::AXOL1TLCondition::evaluateCondition(const int bxEval) const {
   int useBx = bxEval + m_gtAXOL1TLTemplate->condRelativeBx();
 
   //HLS4ML stuff
-  // std::string AXOL1TLmodelversion = m_AXOL1TLmodelversion;  //loading from menu
   std::string AXOL1TLmodelversion = "GTADModel_" + m_gtAXOL1TLTemplate->modelVersion();  //loading from menu/template
 
   //if model version is empty, throw exception. Should not ever happen
@@ -107,8 +106,8 @@ const bool l1t::AXOL1TLCondition::evaluateCondition(const int bxEval) const {
   } catch (std::runtime_error& e) {
     // for stopping with exception if model version cannot be loaded
     throw cms::Exception("ModelError")
-        << " ERROR: failed to load AXOL1TL model version " << AXOL1TLmodelversion
-        << " that was specified in menu. Model version not found in cms-hls4ml externals. " << std::endl;
+        << " ERROR: failed to load AXOL1TL model version \"" << AXOL1TLmodelversion
+        << "\" that was specified in menu. Model version not found in cms-hls4ml externals.";
   }
 
   // //pointers to objects

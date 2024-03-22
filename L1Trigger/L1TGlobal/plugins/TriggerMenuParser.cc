@@ -167,11 +167,6 @@ void l1t::TriggerMenuParser::setVecCorrelationWithOverlapRemovalTemplate(
   m_vecCorrelationWithOverlapRemovalTemplate = vecCorrelationWithOverlapRemovalTempl;
 }
 
-//set the AXO model version so it can be fetched from the GlobalProducer
-void l1t::TriggerMenuParser::setAXOL1TLModelVersion(const std::string& axol1tlmodelversion) {
-  m_axol1tlModelVersion = axol1tlmodelversion;
-}
-
 // set the vectors containing the conditions for correlation templates
 //
 void l1t::TriggerMenuParser::setCorMuonTemplate(const std::vector<std::vector<MuonTemplate> >& corMuonTempl) {
@@ -2824,9 +2819,6 @@ bool l1t::TriggerMenuParser::parseAXOL1TL(L1TUtmCondition condAXOL1TL, unsigned 
   }
 
   (m_vecAXOL1TLTemplate[chipNr]).push_back(axol1tlCond);
-
-  //fill class model version variable
-  l1t::TriggerMenuParser::setAXOL1TLModelVersion(model);
 
   return true;
 }
