@@ -244,7 +244,7 @@ def checkHLTfor43774(process):
 
     return process
 
-def customizeHLTforAxoUTM12(process):
+def customizeHLTfor44510(process):
     """
     Customisation for running HLT with the updated L1 UTM and AXOL1TL condition parsing from the PR 44054
     """
@@ -271,6 +271,6 @@ def customizeHLTforCMSSW(process, menuType="GRun"):
     process = checkHLTfor43774(process)
 
     # customizes AXOL1TL condition in the L1 menu
-    process = customizeHLTforAxoUTM12(process)
+    process = customizeHLTfor44510(process)
 
     return process
