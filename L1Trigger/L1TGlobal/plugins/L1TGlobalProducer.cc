@@ -220,8 +220,6 @@ L1TGlobalProducer::L1TGlobalProducer(const edm::ParameterSet& parSet)
   m_l1GtParCacheID = 0ULL;
   m_l1GtMenuCacheID = 0ULL;
 
-  // m_AXOL1TLModelVersion = "";
-
   m_numberPhysTriggers = 0;
   m_numberDaqPartitions = 0;
 
@@ -622,9 +620,6 @@ void L1TGlobalProducer::produce(edm::Event& iEvent, const edm::EventSetup& evSet
                                   receiveEtSumsZdc);
 
   m_uGtBrd->receiveMuonObjectData(iEvent, m_muInputToken, receiveMu, m_nrL1Mu);
-
-  //set axo model version in global board from version in menu
-  // m_uGtBrd->setAXOL1TLModelVersion(m_AXOL1TLModelVersion);
 
   if (m_useMuonShowers)
     m_uGtBrd->receiveMuonShowerObjectData(iEvent, m_muShowerInputToken, receiveMuShower, m_nrL1MuShower);
