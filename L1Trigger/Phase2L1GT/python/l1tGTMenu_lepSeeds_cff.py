@@ -234,7 +234,7 @@ DoublePuppiTau5252 = l1tGTDoubleObjectCond.clone(
         minEta = cms.double(-2.172),
         maxEta = cms.double(2.172),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5),
-        regionsMinPt=cms.vdouble(28,20),
+        regionsMinPt=cms.vdouble(39,35),
         minQualityScore = cms.uint32(225),
     ),
     collection2 = cms.PSet(
@@ -242,7 +242,7 @@ DoublePuppiTau5252 = l1tGTDoubleObjectCond.clone(
         minEta = cms.double(-2.172),
         maxEta = cms.double(2.172),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5),
-        regionsMinPt=cms.vdouble(28,20),
+        regionsMinPt=cms.vdouble(39,35),
         minQualityScore = cms.uint32(225),
     ),
     minDR = cms.double(0.5),
