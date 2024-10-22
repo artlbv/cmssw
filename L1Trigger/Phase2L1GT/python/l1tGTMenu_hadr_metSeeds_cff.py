@@ -79,7 +79,7 @@ algorithms.append(cms.PSet(expression = cms.string("pPuppiHT450")))
 
 PuppiMHT140 = l1tGTSingleObjectCond.clone(
     tag = cms.InputTag("l1tGTProducer", "CL2HtSum"),
-    minScalarSumPt = getObjectThrs(140, "L1puppiJetSC4sums","MHT"),
+    minPt = getObjectThrs(140, "L1puppiJetSC4sums","MHT"),
 )
 pPuppiMHT140 = cms.Path(PuppiMHT140)
 algorithms.append(cms.PSet(expression = cms.string("pPuppiMHT140")))
