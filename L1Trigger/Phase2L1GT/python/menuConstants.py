@@ -24,7 +24,10 @@ def getObjectThrs(thr, obj, id):
     if "overlap" in regions:
         # fix order for the case of overlap region as the alphabetic sorting messes up the order
         regions = ["barrel","overlap","endcap"]
-    return cms.vdouble(tuple(off2onl(thr, obj, id, region) for region in regions))
+    if len(regions) > 1:
+        return cms.vdouble(tuple(off2onl(thr, obj, id, region) for region in regions))
+    else:
+        return cms.double([off2onl(thr, obj, id, region) for region in regions][0])
 
 objectIDs = {
     "L1nnPuppiTau": {
