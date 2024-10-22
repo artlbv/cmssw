@@ -15,18 +15,20 @@ from L1Trigger.Phase2L1GT.l1tGTQuadObjectCond_cfi import l1tGTQuadObjectCond
 
 from L1Trigger.Phase2L1GT.l1tGTAlgoBlockProducer_cff import algorithms
 
+from L1Trigger.Phase2L1GT.menuConstants import *
+
 DoubleTkMuonOSEr1p5Dr1p4 = l1tGTDoubleObjectCond.clone(
     collection1 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
         minEta = cms.double(-1.5),
         maxEta = cms.double(1.5),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
         minEta = cms.double(-1.5),
         maxEta = cms.double(1.5),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     minDR = cms.double(0),
     maxDR =cms.double(1.4),
@@ -43,7 +45,7 @@ DoubleTkMuon44OSDr1p2 = l1tGTDoubleObjectCond.clone(
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,0.83,1.24),
         regionsMinPt=cms.vdouble(4,4,4),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
@@ -51,7 +53,7 @@ DoubleTkMuon44OSDr1p2 = l1tGTDoubleObjectCond.clone(
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,0.83,1.24),
         regionsMinPt=cms.vdouble(4,4,4),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     minDR = cms.double(0),
     maxDR =cms.double(1.2),
@@ -68,7 +70,7 @@ DoubleTkMuon4p5OSEr2Mass7to18 = l1tGTDoubleObjectCond.clone(
         maxEta = cms.double(2.0),
         regionsAbsEtaLowerBounds=cms.vdouble(0,0.83,1.24),
         regionsMinPt=cms.vdouble(4,4,4),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
@@ -76,7 +78,7 @@ DoubleTkMuon4p5OSEr2Mass7to18 = l1tGTDoubleObjectCond.clone(
         maxEta = cms.double(2.0),
         regionsAbsEtaLowerBounds=cms.vdouble(0,0.83,1.24),
         regionsMinPt=cms.vdouble(4,4,4),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     minDR = cms.double(0),
     minInvMass = cms.double(7),
@@ -93,21 +95,21 @@ TripleTkMuon530OSMassMax9 = l1tGTTripleObjectCond.clone(
         minPt = cms.double(5),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
         minPt = cms.double(3),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     collection3 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
         minPt = cms.double(0),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     correl12 = cms.PSet(
         minDR = cms.double(0),
@@ -132,21 +134,21 @@ TripleTkMuon53p52p5OSMass5to17 = l1tGTTripleObjectCond.clone(
         minPt = cms.double(5),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
         minPt = cms.double(4),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     collection3 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
         minPt = cms.double(2),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     correl12 = cms.PSet(
         minDR = cms.double(0),
