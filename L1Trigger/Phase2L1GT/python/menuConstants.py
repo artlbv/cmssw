@@ -11,10 +11,19 @@ with open(scalings_fname, 'r') as file:
 def off2onl(thr, obj, id, region, scalings = scalings):
     offset = scalings[obj][id][region]["offset"]
     slope = scalings[obj][id][region]["slope"]
-    return (thr - offset)/slope
+    new_thr = round((thr - offset)/slope, 1)
+
+    if "Jet" in obj:
+        # safety cut
+        return max(25, new_thr)
+    else:
+        return max(0, new_thr)
 
 def getObjectThrs(thr, obj, id):
     regions = scalings[obj][id].keys()
+    if "overlap" in regions:
+        # fix order for the case of overlap region as the alphabetic sorting messes up the order
+        regions = ["barrel","overlap","endcap"]
     return cms.vdouble(tuple(off2onl(thr, obj, id, region) for region in regions))
 
 objectIDs = {
