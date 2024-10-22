@@ -28,8 +28,8 @@ SingleTkMuon22 = l1tGTSingleObjectCond.clone(
     minEta = cms.double(-2.4),
     maxEta = cms.double(2.4),
     regionsAbsEtaLowerBounds=cms.vdouble(0,0.83,1.24),
-    regionsMinPt=cms.vdouble( getObjectThrs(22, "L1gmtTkMuon","VLoose") ),
-    qualityFlags=cms.vuint32( getObjectIDs("L1gmtTkMuon","VLoose") ),
+    regionsMinPt = getObjectThrs(22, "L1gmtTkMuon","VLoose"),
+    qualityFlags = getObjectIDs("L1gmtTkMuon","VLoose"),
 )
 pSingleTkMuon22 = cms.Path(SingleTkMuon22)
 algorithms.append(cms.PSet(expression = cms.string("pSingleTkMuon22")))
@@ -40,8 +40,8 @@ DoubleTkMuon157 = l1tGTDoubleObjectCond.clone(
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,0.83,1.24),
-        regionsMinPt=cms.vdouble( getObjectThrs(15, "L1gmtTkMuon","VLoose") ),
-        qualityFlags=cms.vuint32( getObjectIDs("L1gmtTkMuon","VLoose") ),
+        regionsMinPt = getObjectThrs(15, "L1gmtTkMuon","VLoose"),
+        qualityFlags = getObjectIDs("L1gmtTkMuon","VLoose"),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
@@ -49,7 +49,7 @@ DoubleTkMuon157 = l1tGTDoubleObjectCond.clone(
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,0.83,1.24),
         regionsMinPt=cms.vdouble(7,7,7), # no scaling used below 8 GeV
-        qualityFlags=cms.vuint32( getObjectIDs("L1gmtTkMuon","Loose") ),
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     maxDz = cms.double(1),
     minDR = cms.double(0),
@@ -63,21 +63,21 @@ TripleTkMuon533 = l1tGTTripleObjectCond.clone(
         minPt = cms.double(5), # no scaling used below 8 GeV
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
-        qualityFlags=cms.vuint32( getObjectIDs("L1gmtTkMuon","Loose") ),
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
         minPt = cms.double(3),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
-        qualityFlags=cms.vuint32( getObjectIDs("L1gmtTkMuon","Loose") ),
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     collection3 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
         minPt = cms.double(3),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
-        qualityFlags=cms.vuint32( getObjectIDs("L1gmtTkMuon","Loose") ),
+        qualityFlags = getObjectIDs("L1gmtTkMuon","Loose"),
     ),
     correl12 = cms.PSet(
         minDR = cms.double(0),
@@ -101,8 +101,8 @@ SingleEGEle51 = l1tGTSingleObjectCond.clone(
     minEta = cms.double(-2.4),
     maxEta = cms.double(2.4),
     regionsAbsEtaLowerBounds=cms.vdouble(0,1.479),
-    regionsMinPt=cms.vdouble( getObjectThrs(51, "L1tkPhoton","Iso") ),
-    regionsQualityFlags=cms.vuint32( getObjectIDs("L1tkPhoton","Iso") ),
+    regionsMinPt = getObjectThrs(51, "L1tkPhoton","Iso"),
+    regionsQualityFlags = getObjectIDs("L1tkPhoton","Iso"),
 )
 pSingleEGEle51 = cms.Path(SingleEGEle51) 
 algorithms.append(cms.PSet(expression = cms.string("pSingleEGEle51")))
@@ -113,17 +113,16 @@ DoubleEGEle3724 = l1tGTDoubleObjectCond.clone(
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.479),
-    regionsMinPt=cms.vdouble( getObjectThrs(37, "L1tkPhoton","Iso") ),
-    regionsQualityFlags=cms.vuint32( getObjectIDs("L1tkPhoton","Iso") ),
+        regionsMinPt = getObjectThrs(37, "L1tkPhoton","Iso"),
+        regionsQualityFlags = getObjectIDs("L1tkPhoton","Iso"),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "CL2Photons"),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.479),
-    regionsMinPt=cms.vdouble( getObjectThrs(24, "L1tkPhoton","Iso") ) , 
-    regionsQualityFlags=cms.vuint32( getObjectIDs("L1tkPhoton","Iso") ),
-
+        regionsMinPt = getObjectThrs(24, "L1tkPhoton","Iso"), 
+        regionsQualityFlags = getObjectIDs("L1tkPhoton","Iso"),
     ),
     minDR = cms.double(0.1),
 )
@@ -136,17 +135,17 @@ IsoTkEleEGEle2212 = l1tGTDoubleObjectCond.clone(
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.479),
-        regionsMinPt=cms.vdouble( getObjectThrs(22, "L1tkElectron","Iso") ),
-        # regionsQualityFlags=cms.vuint32( getObjectIDs("L1tkElectron","NoIsoLowPt") ),
-        regionsMaxRelIsolationPt = cms.vdouble( getObjectISOs("L1tkElectron","Iso") ),
+        regionsMinPt = getObjectThrs(22, "L1tkElectron","Iso"),
+        # regionsQualityFlags = getObjectIDs("L1tkElectron","NoIsoLowPt"),
+        regionsMaxRelIsolationPt = getObjectISOs("L1tkElectron","Iso"),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "CL2Photons"),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.479),
-        regionsMinPt=cms.vdouble( getObjectThrs(12, "L1tkPhoton","Iso") ), 
-        regionsQualityFlags=cms.vuint32( getObjectIDs("L1tkPhoton","Iso") ),
+        regionsMinPt = getObjectThrs(12, "L1tkPhoton","Iso"),
+        regionsQualityFlags = getObjectIDs("L1tkPhoton","Iso"),
     ),
     minDR = cms.double(0.1),
 )
@@ -158,9 +157,9 @@ SingleTkEle36 = l1tGTSingleObjectCond.clone(
     minEta = cms.double(-2.4),
     maxEta = cms.double(2.4),
     regionsAbsEtaLowerBounds=cms.vdouble(0,1.479),
-    regionsMinPt=cms.vdouble( getObjectThrs(36, "L1tkElectron","NoIso") ),
-    regionsQualityFlags=cms.vuint32( getObjectIDs("L1tkElectron","NoIso") ),
-    # regionsMaxRelIsolationPt = cms.vdouble( getObjectISOs("L1tkElectron","NoIso") ),
+    regionsMinPt = getObjectThrs(36, "L1tkElectron","NoIso"),
+    regionsQualityFlags = getObjectIDs("L1tkElectron","NoIso"),
+    # regionsMaxRelIsolationPt = getObjectISOs("L1tkElectron","NoIso"),
 
 )
 pSingleTkEle36 = cms.Path(SingleTkEle36) 
@@ -171,9 +170,9 @@ SingleIsoTkEle28 = l1tGTSingleObjectCond.clone(
     minEta = cms.double(-2.4),
     maxEta = cms.double(2.4),
     regionsAbsEtaLowerBounds=cms.vdouble(0,1.479),
-    regionsMinPt=cms.vdouble( getObjectThrs(28, "L1tkElectron","Iso") ),
-    # regionsQualityFlags=cms.vuint32( getObjectIDs("L1tkElectron","Iso") ),
-    regionsMaxRelIsolationPt = cms.vdouble( getObjectISOs("L1tkElectron","Iso") ),
+    regionsMinPt = getObjectThrs(28, "L1tkElectron","Iso"),
+    # regionsQualityFlags = getObjectIDs("L1tkElectron","Iso"),
+    regionsMaxRelIsolationPt = getObjectISOs("L1tkElectron","Iso"),
 )
 pSingleIsoTkEle28 = cms.Path(SingleIsoTkEle28) 
 algorithms.append(cms.PSet(expression = cms.string("pSingleIsoTkEle28")))
@@ -183,9 +182,9 @@ SingleIsoTkPho36 = l1tGTSingleObjectCond.clone(
     minEta = cms.double(-2.4),
     maxEta = cms.double(2.4),
     regionsAbsEtaLowerBounds=cms.vdouble(0,1.479),
-    regionsMinPt=cms.vdouble( getObjectThrs(36, "L1tkPhoton","Iso") ),
-    regionsQualityFlags=cms.vuint32( getObjectIDs("L1tkPhoton","Iso") ),
-    regionsMaxRelIsolationPt = cms.vdouble( getObjectISOs("L1tkPhoton","Iso") ),
+    regionsMinPt = getObjectThrs(36, "L1tkPhoton","Iso"),
+    regionsQualityFlags = getObjectIDs("L1tkPhoton","Iso"),
+    regionsMaxRelIsolationPt = getObjectISOs("L1tkPhoton","Iso"),
 )
 pSingleIsoTkPho36 = cms.Path(SingleIsoTkPho36) 
 
@@ -197,16 +196,16 @@ DoubleTkEle2512 = l1tGTDoubleObjectCond.clone(
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.479),
-        regionsMinPt=cms.vdouble( getObjectThrs(25, "L1tkElectron","NoIso") ),
-        regionsQualityFlags=cms.vuint32( getObjectIDs("L1tkElectron","NoIsoLowPt") ),
+        regionsMinPt = getObjectThrs(25, "L1tkElectron","NoIso"),
+        regionsQualityFlags = getObjectIDs("L1tkElectron","NoIsoLowPt"),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.479),
-        regionsMinPt=cms.vdouble( getObjectThrs(12, "L1tkElectron","NoIso") ),
-        regionsQualityFlags=cms.vuint32( getObjectIDs("L1tkElectron","NoIsoLowPt") ),
+        regionsMinPt = getObjectThrs(12, "L1tkElectron","NoIso"),
+        regionsQualityFlags = getObjectIDs("L1tkElectron","NoIsoLowPt"),
     ),
     maxDz = cms.double(1),
 )
@@ -219,8 +218,8 @@ DoubleIsoTkPho2212 = l1tGTDoubleObjectCond.clone(
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.479),
-        regionsMinPt=cms.vdouble( getObjectThrs(22, "L1tkPhoton","Iso") ),
-        regionsQualityFlags=cms.vuint32( getObjectIDs("L1tkPhoton","Iso") ),
+        regionsMinPt = getObjectThrs(22, "L1tkPhoton","Iso"),
+        regionsQualityFlags = getObjectIDs("L1tkPhoton","Iso"),
         regionsMaxRelIsolationPt = cms.vdouble(
             getObjectISOs("L1tkPhoton","Iso")
         )
@@ -230,9 +229,9 @@ DoubleIsoTkPho2212 = l1tGTDoubleObjectCond.clone(
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.479),
-        regionsMinPt=cms.vdouble( getObjectThrs(12, "L1tkPhoton","Iso") ),
-        regionsQualityFlags=cms.vuint32( getObjectIDs("L1tkPhoton","Iso") ),
-        regionsMaxRelIsolationPt = cms.vdouble( getObjectISOs("L1tkPhoton","Iso") )
+        regionsMinPt = getObjectThrs(12, "L1tkPhoton","Iso"),
+        regionsQualityFlags = getObjectIDs("L1tkPhoton","Iso"),
+        regionsMaxRelIsolationPt = getObjectISOs("L1tkPhoton","Iso")
     ),
 )
 pDoubleIsoTkPho22_12 = cms.Path(DoubleIsoTkPho2212)
@@ -244,20 +243,16 @@ DoublePuppiTau5252 = l1tGTDoubleObjectCond.clone(
         minEta = cms.double(-2.172),
         maxEta = cms.double(2.172),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5),
-        regionsMinPt=cms.vdouble( getObjectThrs(52, "L1nnPuppiTau","default") ),
-        minQualityScore = cms.uint32(
-            getObjectIDs("L1nnPuppiTau","default")
-        )
+        regionsMinPt = getObjectThrs(52, "L1nnPuppiTau","default"),
+        minQualityScore = getObjectIDs("L1nnPuppiTau","default")
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "CL2Taus"),
         minEta = cms.double(-2.172),
         maxEta = cms.double(2.172),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5),
-        regionsMinPt=cms.vdouble( getObjectThrs(52, "L1nnPuppiTau","default") ),
-        minQualityScore = cms.uint32(
-            getObjectIDs("L1nnPuppiTau","default")
-        )
+        regionsMinPt = getObjectThrs(52, "L1nnPuppiTau","default"),
+        minQualityScore = getObjectIDs("L1nnPuppiTau","default")
     ),
     minDR = cms.double(0.5),
 )

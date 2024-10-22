@@ -1,3 +1,5 @@
+import FWCore.ParameterSet.Config as cms
+
 from os import environ
 import json
 
@@ -12,7 +14,8 @@ def off2onl(thr, obj, id, region, scalings = scalings):
     return (thr - offset)/slope
 
 def getObjectThrs(thr, obj, id):
-    return tuple(off2onl(thr, obj, id, region) for region in scalings[obj][id].keys())
+    regions = scalings[obj][id].keys()
+    return cms.vdouble(tuple(off2onl(thr, obj, id, region) for region in regions))
 
 objectIDs = {
     "L1nnPuppiTau": {
@@ -75,14 +78,14 @@ objectIDs = {
 def getObjectIDs(obj, id, objDict = objectIDs):
     values = objDict[obj][id]["qual"]
     if isinstance(values, dict):
-        return tuple(values.values())
+        return cms.vuint32(tuple(values.values()))
     else:
-        return values
+        return cms.uint32(values)
     
 
 def getObjectISOs(obj, id, objDict = objectIDs):
     values = objDict[obj][id]["iso"]
     if isinstance(values, dict):
-        return tuple(values.values())
+        return cms.vdouble(tuple(values.values()))
     else:
-        return values
+        return cms.double(values)
