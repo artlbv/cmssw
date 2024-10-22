@@ -136,7 +136,6 @@ IsoTkEleEGEle2212 = l1tGTDoubleObjectCond.clone(
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.479),
         regionsMinPt = getObjectThrs(22, "L1tkElectron","Iso"),
-        # regionsQualityFlags = getObjectIDs("L1tkElectron","NoIsoLowPt"),
         regionsMaxRelIsolationPt = getObjectISOs("L1tkElectron","Iso"),
     ),
     collection2 = cms.PSet(
