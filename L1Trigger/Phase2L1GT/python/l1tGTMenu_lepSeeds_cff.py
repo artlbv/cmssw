@@ -28,7 +28,8 @@ SingleTkMuon22 = l1tGTSingleObjectCond.clone(
     minEta = cms.double(-2.4),
     maxEta = cms.double(2.4),
     regionsAbsEtaLowerBounds=cms.vdouble(0,0.83,1.24),
-    regionsMinPt=cms.vdouble(20,20,20)
+    regionsMinPt=cms.vdouble( getObjectThrs(22, "L1gmtTkMuon","VLoose") ),
+    qualityFlags=cms.vuint32( getObjectIDs("L1gmtTkMuon","VLoose") ),
 )
 pSingleTkMuon22 = cms.Path(SingleTkMuon22)
 algorithms.append(cms.PSet(expression = cms.string("pSingleTkMuon22")))
@@ -39,16 +40,16 @@ DoubleTkMuon157 = l1tGTDoubleObjectCond.clone(
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,0.83,1.24),
-        regionsMinPt=cms.vdouble(13,13,13)
-
+        regionsMinPt=cms.vdouble( getObjectThrs(15, "L1gmtTkMuon","VLoose") ),
+        qualityFlags=cms.vuint32( getObjectIDs("L1gmtTkMuon","VLoose") ),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,0.83,1.24),
-        regionsMinPt=cms.vdouble(7,7,7),
-        qualityFlags = cms.uint32(0b0001)
+        regionsMinPt=cms.vdouble(7,7,7), # no scaling used below 8 GeV
+        qualityFlags=cms.vuint32( getObjectIDs("L1gmtTkMuon","Loose") ),
     ),
     maxDz = cms.double(1),
     minDR = cms.double(0),
@@ -59,24 +60,24 @@ algorithms.append(cms.PSet(expression = cms.string("pDoubleTkMuon15_7")))
 TripleTkMuon533 = l1tGTTripleObjectCond.clone(
     collection1 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
-        minPt = cms.double(5),
+        minPt = cms.double(5), # no scaling used below 8 GeV
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags=cms.vuint32( getObjectIDs("L1gmtTkMuon","Loose") ),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
         minPt = cms.double(3),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags=cms.vuint32( getObjectIDs("L1gmtTkMuon","Loose") ),
     ),
     collection3 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
         minPt = cms.double(3),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
-        qualityFlags = cms.uint32(0b0001)
+        qualityFlags=cms.vuint32( getObjectIDs("L1gmtTkMuon","Loose") ),
     ),
     correl12 = cms.PSet(
         minDR = cms.double(0),

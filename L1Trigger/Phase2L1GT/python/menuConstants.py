@@ -55,6 +55,20 @@ objectIDs = {
                 "endcap": 0b0000,
             },
         }
+    },
+    "L1gmtTkMuon":{
+        "VLoose": {
+            "qual": 0b0001,
+        },
+        "Loose": {
+            "qual": 0b0010,
+        },
+        "Medium": {
+            "qual": 0b0100,
+        },
+        "Tight": {
+            "qual": 0b1000,
+        },
     }
 }
 
