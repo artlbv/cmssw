@@ -125,7 +125,7 @@ TripleTkMuon530OSMassMax9 = l1tGTTripleObjectCond.clone(
         minDR = cms.double(0),
     )
 )
-TripleTkMuon_5_3_0_DoubleTkMuon_5_3_OS_MassTo9 = cms.Path(TripleTkMuon530OSMassMax9)
+pTripleTkMuon_5_3_0_DoubleTkMuon_5_3_OS_MassTo9 = cms.Path(TripleTkMuon530OSMassMax9)
 algorithms.append(cms.PSet(expression = cms.string("pTripleTkMuon_5_3_0_DoubleTkMuon_5_3_OS_MassTo9")))
 
 TripleTkMuon53p52p5OSMass5to17 = l1tGTTripleObjectCond.clone(
@@ -165,5 +165,5 @@ TripleTkMuon53p52p5OSMass5to17 = l1tGTTripleObjectCond.clone(
         minDR = cms.double(0),
     )
 )
-TripleTkMuon_5_3p5_2p5_OS_Mass5to17 = cms.Path(TripleTkMuon53p52p5OSMass5to17)
+pTripleTkMuon_5_3p5_2p5_OS_Mass5to17 = cms.Path(TripleTkMuon53p52p5OSMass5to17)
 algorithms.append(cms.PSet(expression = cms.string("pTripleTkMuon_5_3p5_2p5_OS_Mass5to17")))
