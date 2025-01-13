@@ -43,11 +43,11 @@ scoutingPFJetReclusterTask = cms.Task(
     scoutingPFJetReclusterTable,
 
     ### add SV and HLT like PNET
-    # scoutingVertices, # unpack scouting to reco::PFCandidate
-    # hltDeepInclusiveVertexFinderPF,
-    # hltDeepInclusiveSecondaryVerticesPF,
-    # hltDeepTrackVertexArbitratorPF,
-    # hltDeepInclusiveMergedVerticesPF,
+    scoutingVertices, # unpack scouting to reco::PFCandidate
+    hltDeepInclusiveVertexFinderPF,
+    hltDeepInclusiveSecondaryVerticesPF,
+    hltDeepTrackVertexArbitratorPF,
+    hltDeepInclusiveMergedVerticesPF,
     hltPrimaryVertexAssociation,
     hltParticleNetJetTagInfos,
     hltParticleNetONNXJetTags,

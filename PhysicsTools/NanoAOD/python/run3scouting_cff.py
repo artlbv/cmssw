@@ -500,72 +500,76 @@ scoutingPFJetReclusterMatchGenExtensionTable = cms.EDProducer("SimplePFJetFlatTa
 #     scoutingparticle = cms.InputTag("hltScoutingPrimaryVertexPacker", "primaryVtx"),
 # )
 
-# hltDeepInclusiveVertexFinderPF = cms.EDProducer( "InclusiveCandidateVertexFinder",
-#     # beamSpot = cms.InputTag( "hltOnlineBeamSpot" ),
-#     # primaryVertices = cms.InputTag("hltScoutingPrimaryVertexPacker", "primaryVtx"),
-#     # primaryVertices = cms.InputTag("scoutingVertices"),
-#     tracks = cms.InputTag("scoutingPFCandidate"),
-#     minHits = cms.uint32( 8 ),
-#     maximumLongitudinalImpactParameter = cms.double( 0.3 ),
-#     maximumTimeSignificance = cms.double( 3.0 ),
-#     minPt = cms.double( 0.8 ),
-#     maxNTracks = cms.uint32( 30 ),
-#     clusterizer = cms.PSet( 
-#       distanceRatio = cms.double( 20.0 ),
-#       clusterMaxDistance = cms.double( 0.05 ),
-#       seedMax3DIPSignificance = cms.double( 9999.0 ),
-#       clusterMaxSignificance = cms.double( 4.5 ),
-#       seedMin3DIPSignificance = cms.double( 1.2 ),
-#       clusterMinAngleCosine = cms.double( 0.5 ),
-#       seedMin3DIPValue = cms.double( 0.005 ),
-#       seedMax3DIPValue = cms.double( 9999.0 )
-#     ),
-#     vertexMinAngleCosine = cms.double( 0.95 ),
-#     vertexMinDLen2DSig = cms.double( 2.5 ),
-#     vertexMinDLenSig = cms.double( 0.5 ),
-#     fitterSigmacut = cms.double( 3.0 ),
-#     fitterTini = cms.double( 256.0 ),
-#     fitterRatio = cms.double( 0.25 ),
-#     useDirectVertexFitter = cms.bool( True ),
-#     useVertexReco = cms.bool( True ),
-#     vertexReco = cms.PSet( 
-#       primcut = cms.double( 1.0 ),
-#       seccut = cms.double( 3.0 ),
-#       finder = cms.string( "avr" ),
-#       smoothing = cms.bool( True )
-#     )
-# )
+scoutingVertices = cms.EDProducer("Run3ScoutingVertexToRecoVertexProducer",
+    scoutingvertex = cms.InputTag("hltScoutingPrimaryVertexPacker", "primaryVtx"),
+)
 
-# hltDeepInclusiveSecondaryVerticesPF = cms.EDProducer( "CandidateVertexMerger",
-#     secondaryVertices = cms.InputTag( "hltDeepInclusiveVertexFinderPF" ),
-#     maxFraction = cms.double( 0.7 ),
-#     minSignificance = cms.double( 2.0 )
-# )
-# hltDeepTrackVertexArbitratorPF = cms.EDProducer( "CandidateVertexArbitrator",
-#     # beamSpot = cms.InputTag( "hltOnlineBeamSpot" ),
-#     # primaryVertices = cms.InputTag( "hltVerticesPFFilter" ),
-#     # tracks = cms.InputTag( "hltParticleFlow" ),
-#     # primaryVertices = cms.InputTag("scoutingVertices"),
-#     primaryVertices = cms.InputTag("hltDeepInclusiveVertexFinderPF"),
-#     tracks = cms.InputTag("scoutingPFCandidate"),
-#     secondaryVertices = cms.InputTag( "hltDeepInclusiveSecondaryVerticesPF" ),
-#     dLenFraction = cms.double( 0.333 ),
-#     dRCut = cms.double( 0.4 ),
-#     distCut = cms.double( 0.04 ),
-#     sigCut = cms.double( 5.0 ),
-#     fitterSigmacut = cms.double( 3.0 ),
-#     fitterTini = cms.double( 256.0 ),
-#     fitterRatio = cms.double( 0.25 ),
-#     trackMinLayers = cms.int32( 4 ),
-#     trackMinPt = cms.double( 0.4 ),
-#     trackMinPixels = cms.int32( 1 ),
-#     maxTimeSignificance = cms.double( 3.5 )
-# )
-# hltDeepInclusiveMergedVerticesPF = cms.EDProducer( "CandidateVertexMerger",
-#     secondaryVertices = cms.InputTag( "hltDeepTrackVertexArbitratorPF" ),
-#     maxFraction = cms.double( 0.2 ),
-#     minSignificance = cms.double( 10.0 )
-# )
+hltDeepInclusiveVertexFinderPF = cms.EDProducer( "InclusiveCandidateVertexFinder",
+    # beamSpot = cms.InputTag( "hltOnlineBeamSpot" ),
+    primaryVertices = cms.InputTag("scoutingVertices"),
+    tracks = cms.InputTag("scoutingPFCandidate"),
+    minHits = cms.uint32( 8 ),
+    maximumLongitudinalImpactParameter = cms.double( 0.3 ),
+    maximumTimeSignificance = cms.double( 3.0 ),
+    minPt = cms.double( 0.8 ),
+    maxNTracks = cms.uint32( 30 ),
+    clusterizer = cms.PSet( 
+      distanceRatio = cms.double( 20.0 ),
+      clusterMaxDistance = cms.double( 0.05 ),
+      seedMax3DIPSignificance = cms.double( 9999.0 ),
+      clusterMaxSignificance = cms.double( 4.5 ),
+      seedMin3DIPSignificance = cms.double( 1.2 ),
+      clusterMinAngleCosine = cms.double( 0.5 ),
+      seedMin3DIPValue = cms.double( 0.005 ),
+      seedMax3DIPValue = cms.double( 9999.0 )
+    ),
+    vertexMinAngleCosine = cms.double( 0.95 ),
+    vertexMinDLen2DSig = cms.double( 2.5 ),
+    vertexMinDLenSig = cms.double( 0.5 ),
+    fitterSigmacut = cms.double( 3.0 ),
+    fitterTini = cms.double( 256.0 ),
+    fitterRatio = cms.double( 0.25 ),
+    useDirectVertexFitter = cms.bool( True ),
+    useVertexReco = cms.bool( True ),
+    vertexReco = cms.PSet( 
+      primcut = cms.double( 1.0 ),
+      seccut = cms.double( 3.0 ),
+      finder = cms.string( "avr" ),
+      smoothing = cms.bool( True )
+    )
+)
+
+hltDeepInclusiveSecondaryVerticesPF = cms.EDProducer( "CandidateVertexMerger",
+    secondaryVertices = cms.InputTag( "hltDeepInclusiveVertexFinderPF" ),
+    maxFraction = cms.double( 0.7 ),
+    minSignificance = cms.double( 2.0 )
+)
+hltDeepTrackVertexArbitratorPF = cms.EDProducer( "CandidateVertexArbitrator",
+    # beamSpot = cms.InputTag( "hltOnlineBeamSpot" ),
+    ## In HLT GRun:
+    ## primaryVertices = cms.InputTag( "hltVerticesPFFilter" ),
+    ## tracks = cms.InputTag( "hltParticleFlow" ),
+    primaryVertices = cms.InputTag("scoutingVertices"),
+    tracks = cms.InputTag("scoutingPFCandidate"),
+    secondaryVertices = cms.InputTag( "hltDeepInclusiveSecondaryVerticesPF" ),
+    dLenFraction = cms.double( 0.333 ),
+    dRCut = cms.double( 0.4 ),
+    distCut = cms.double( 0.04 ),
+    sigCut = cms.double( 5.0 ),
+    fitterSigmacut = cms.double( 3.0 ),
+    fitterTini = cms.double( 256.0 ),
+    fitterRatio = cms.double( 0.25 ),
+    trackMinLayers = cms.int32( 4 ),
+    trackMinPt = cms.double( 0.4 ),
+    trackMinPixels = cms.int32( 1 ),
+    maxTimeSignificance = cms.double( 3.5 )
+)
+hltDeepInclusiveMergedVerticesPF = cms.EDProducer( "CandidateVertexMerger",
+    secondaryVertices = cms.InputTag( "hltDeepTrackVertexArbitratorPF" ),
+    maxFraction = cms.double( 0.2 ),
+    minSignificance = cms.double( 10.0 )
+)
+
 hltPrimaryVertexAssociation = cms.EDProducer( "PFCandidatePrimaryVertexSorter",
     sorting = cms.PSet(  ),
     assignment = cms.PSet( 
@@ -591,11 +595,12 @@ hltPrimaryVertexAssociation = cms.EDProducer( "PFCandidatePrimaryVertexSorter",
     ),
     qualityForPrimary = cms.int32( 2 ),
     usePVMET = cms.bool( True ),
-    particles = cms.InputTag("scoutingPFCandidate"), #cms.InputTag( "hltParticleFlow" ),
-    #vertices = cms.InputTag("scoutingVertices"),
+    # in HLT
     # vertices = cms.InputTag("hltDeepInclusiveVertexFinderPF"),
-    vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
-    jets = cms.InputTag("scoutingPFJetRecluster"), #cms.InputTag( "hltPFJetForBtag" ),
+    # vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    particles = cms.InputTag("scoutingPFCandidate"), 
+    vertices = cms.InputTag("scoutingVertices"),
+    jets = cms.InputTag("scoutingPFJetRecluster"), 
     produceAssociationToOriginalVertices = cms.bool( True ),
     produceSortedVertices = cms.bool( False ),
     producePileUpCollection = cms.bool( False ),
@@ -605,19 +610,19 @@ hltParticleNetJetTagInfos = scoutingPFJetReclusterParticleNetJetTagInfos.clone(
     use_scouting_features = cms.bool(False),
     use_hlt_features = cms.bool(True),
 
-    vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
-    secondary_vertices = cms.InputTag("slimmedSecondaryVertices"),
+    # vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    # secondary_vertices = cms.InputTag("slimmedSecondaryVertices"),
+    # vertex_associator = cms.InputTag( 'hltPrimaryVertexAssociation','original' ),
+
+    vertices = cms.InputTag("scoutingVertices"), 
+    secondary_vertices = cms.InputTag( "hltDeepInclusiveMergedVerticesPF" ),
     vertex_associator = cms.InputTag( 'hltPrimaryVertexAssociation','original' ),
 
-    # vertices = cms.InputTag("hltScoutingPrimaryVertexPacker", "primaryVtx"),
-    # secondary_vertices = cms.InputTag( "hltDeepInclusiveMergedVerticesPF" ),
-    # vertex_associator = cms.InputTag( 'hltPrimaryVertexAssociation','original' ),
-
-    # vertices = cms.InputTag("hltDeepInclusiveMergedVerticesPF"),
-    # secondary_vertices = cms.InputTag( "hltDeepInclusiveMergedVerticesPF" ),
-    # vertex_associator = cms.InputTag( 'hltPrimaryVertexAssociation','original' ),
+    covarianceVersion = cms.int32( 1 ),
+    covariancePackingSchemas = cms.vint32( 8, 264, 520, 776, 0 )
 )
-hltParticleNetONNXJetTags = cms.EDProducer( "BoostedJetONNXJetTagsProducer",
+#hltParticleNetONNXJetTags = cms.EDProducer( "BoostedJetONNXJetTagsProducer",
+hltParticleNetONNXJetTags = scoutingPFJetReclusterParticleNetJetTags.clone(
     # jets = cms.InputTag("scoutingFatPFJetRecluster"),
     # produceValueMap = cms.untracked.bool(True),
     # src = cms.InputTag("scoutingFatPFJetReclusterParticleNetJetTagInfos"),
@@ -626,14 +631,13 @@ hltParticleNetONNXJetTags = cms.EDProducer( "BoostedJetONNXJetTagsProducer",
     # flav_names = cms.vstring(["probQCDall", "probHbb","probHcc", "probHqq"]),
     # debugMode = cms.untracked.bool(False),
 
-    jets = cms.InputTag("scoutingPFJetRecluster"),
-    produceValueMap = cms.untracked.bool( True ),
+    # jets = cms.InputTag("scoutingPFJetRecluster"),
+    # produceValueMap = cms.untracked.bool( True ),
     src = cms.InputTag( "hltParticleNetJetTagInfos" ),
     preprocess_json = cms.string( "RecoBTag/Combined/data/HLT/ParticleNetAK4/V01/preprocess.json" ),
-    # preprocessParams = cms.PSet(  ),
     model_path = cms.FileInPath( "RecoBTag/Combined/data/HLT/ParticleNetAK4/V01/particle-net.onnx" ),
     flav_names = cms.vstring( 'probtauhp', 'probtauhm', 'probb', 'probc', 'probuds', 'probg','ptcorr' ),
-    debugMode = cms.untracked.bool( False )
+    # debugMode = cms.untracked.bool( False )
 )
 
 scoutingPFJetReclusterTable.externalVariables = scoutingPFJetReclusterTable.externalVariables.clone(
