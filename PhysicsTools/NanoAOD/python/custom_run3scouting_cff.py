@@ -31,12 +31,27 @@ run3_scouting_nanoAOD_post2023.toReplaceWith(scoutingMuonTableTask, cms.Task(sco
 # Scouting Derived Objects #
 ############################
 
+TransientTrackBuilderESProducer = cms.ESProducer( "TransientTrackBuilderESProducer",
+  ComponentName = cms.string( "TransientTrackBuilder" )
+)
+
 scoutingPFCandidateTask = cms.Task(scoutingPFCandidate, scoutingPFCandidateTable)
 scoutingPFJetReclusterTask = cms.Task(
     scoutingPFCandidate, # translate to reco::PFCandidate, used as input
     scoutingPFJetRecluster, # jet clustering
     scoutingPFJetReclusterParticleNetJetTagInfos, scoutingPFJetReclusterParticleNetJetTags, # jet tagging
-    scoutingPFJetReclusterTable
+    scoutingPFJetReclusterTable,
+
+    ### add SV and HLT like PNET
+    # scoutingVertices, # unpack scouting to reco::PFCandidate
+    # hltDeepInclusiveVertexFinderPF,
+    # hltDeepInclusiveSecondaryVerticesPF,
+    # hltDeepTrackVertexArbitratorPF,
+    # hltDeepInclusiveMergedVerticesPF,
+    hltPrimaryVertexAssociation,
+    hltParticleNetJetTagInfos,
+    hltParticleNetONNXJetTags,
+
 )
 scoutingPFJetReclusterMatchGenExtensionTask = cms.Task(
     scoutingPFJetReclusterMatchGen, # gen jet matching

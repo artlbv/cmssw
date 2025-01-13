@@ -492,6 +492,163 @@ scoutingPFJetReclusterMatchGenExtensionTable = cms.EDProducer("SimplePFJetFlatTa
     ),
 )
 
+
+### DO SV finding
+# from PhysicsTools.NanoAOD.simpleCandidateFlatTableProducer_cfi import simpleCandidateFlatTableProducer
+
+# scoutingVertices = cms.EDProducer("Run3ScoutingParticleToRecoPFCandidateProducer",
+#     scoutingparticle = cms.InputTag("hltScoutingPrimaryVertexPacker", "primaryVtx"),
+# )
+
+# hltDeepInclusiveVertexFinderPF = cms.EDProducer( "InclusiveCandidateVertexFinder",
+#     # beamSpot = cms.InputTag( "hltOnlineBeamSpot" ),
+#     # primaryVertices = cms.InputTag("hltScoutingPrimaryVertexPacker", "primaryVtx"),
+#     # primaryVertices = cms.InputTag("scoutingVertices"),
+#     tracks = cms.InputTag("scoutingPFCandidate"),
+#     minHits = cms.uint32( 8 ),
+#     maximumLongitudinalImpactParameter = cms.double( 0.3 ),
+#     maximumTimeSignificance = cms.double( 3.0 ),
+#     minPt = cms.double( 0.8 ),
+#     maxNTracks = cms.uint32( 30 ),
+#     clusterizer = cms.PSet( 
+#       distanceRatio = cms.double( 20.0 ),
+#       clusterMaxDistance = cms.double( 0.05 ),
+#       seedMax3DIPSignificance = cms.double( 9999.0 ),
+#       clusterMaxSignificance = cms.double( 4.5 ),
+#       seedMin3DIPSignificance = cms.double( 1.2 ),
+#       clusterMinAngleCosine = cms.double( 0.5 ),
+#       seedMin3DIPValue = cms.double( 0.005 ),
+#       seedMax3DIPValue = cms.double( 9999.0 )
+#     ),
+#     vertexMinAngleCosine = cms.double( 0.95 ),
+#     vertexMinDLen2DSig = cms.double( 2.5 ),
+#     vertexMinDLenSig = cms.double( 0.5 ),
+#     fitterSigmacut = cms.double( 3.0 ),
+#     fitterTini = cms.double( 256.0 ),
+#     fitterRatio = cms.double( 0.25 ),
+#     useDirectVertexFitter = cms.bool( True ),
+#     useVertexReco = cms.bool( True ),
+#     vertexReco = cms.PSet( 
+#       primcut = cms.double( 1.0 ),
+#       seccut = cms.double( 3.0 ),
+#       finder = cms.string( "avr" ),
+#       smoothing = cms.bool( True )
+#     )
+# )
+
+# hltDeepInclusiveSecondaryVerticesPF = cms.EDProducer( "CandidateVertexMerger",
+#     secondaryVertices = cms.InputTag( "hltDeepInclusiveVertexFinderPF" ),
+#     maxFraction = cms.double( 0.7 ),
+#     minSignificance = cms.double( 2.0 )
+# )
+# hltDeepTrackVertexArbitratorPF = cms.EDProducer( "CandidateVertexArbitrator",
+#     # beamSpot = cms.InputTag( "hltOnlineBeamSpot" ),
+#     # primaryVertices = cms.InputTag( "hltVerticesPFFilter" ),
+#     # tracks = cms.InputTag( "hltParticleFlow" ),
+#     # primaryVertices = cms.InputTag("scoutingVertices"),
+#     primaryVertices = cms.InputTag("hltDeepInclusiveVertexFinderPF"),
+#     tracks = cms.InputTag("scoutingPFCandidate"),
+#     secondaryVertices = cms.InputTag( "hltDeepInclusiveSecondaryVerticesPF" ),
+#     dLenFraction = cms.double( 0.333 ),
+#     dRCut = cms.double( 0.4 ),
+#     distCut = cms.double( 0.04 ),
+#     sigCut = cms.double( 5.0 ),
+#     fitterSigmacut = cms.double( 3.0 ),
+#     fitterTini = cms.double( 256.0 ),
+#     fitterRatio = cms.double( 0.25 ),
+#     trackMinLayers = cms.int32( 4 ),
+#     trackMinPt = cms.double( 0.4 ),
+#     trackMinPixels = cms.int32( 1 ),
+#     maxTimeSignificance = cms.double( 3.5 )
+# )
+# hltDeepInclusiveMergedVerticesPF = cms.EDProducer( "CandidateVertexMerger",
+#     secondaryVertices = cms.InputTag( "hltDeepTrackVertexArbitratorPF" ),
+#     maxFraction = cms.double( 0.2 ),
+#     minSignificance = cms.double( 10.0 )
+# )
+hltPrimaryVertexAssociation = cms.EDProducer( "PFCandidatePrimaryVertexSorter",
+    sorting = cms.PSet(  ),
+    assignment = cms.PSet( 
+      maxDxyForJetAxisAssigment = cms.double( 0.1 ),
+      maxDzForJetAxisAssigment = cms.double( 0.1 ),
+      useTiming = cms.bool( False ),
+      preferHighRanked = cms.bool( False ),
+      EtaMinUseDz = cms.double( -1.0 ),
+      maxDistanceToJetAxis = cms.double( 0.07 ),
+      PtMaxCharged = cms.double( -1.0 ),
+      minJetPt = cms.double( 25.0 ),
+      maxDzSigForPrimaryAssignment = cms.double( 5.0 ),
+      OnlyUseFirstDz = cms.bool( False ),
+      maxDzErrorForPrimaryAssignment = cms.double( 0.05 ),
+      maxDzForPrimaryAssignment = cms.double( 0.1 ),
+      maxJetDeltaR = cms.double( 0.5 ),
+      maxDxySigForNotReconstructedPrimary = cms.double( 2.0 ),
+      DzCutForChargedFromPUVtxs = cms.double( 0.2 ),
+      maxDtSigForPrimaryAssignment = cms.double( 3.0 ),
+      maxDxyForNotReconstructedPrimary = cms.double( 0.01 ),
+      useVertexFit = cms.bool( True ),
+      NumOfPUVtxsForCharged = cms.uint32( 0 )
+    ),
+    qualityForPrimary = cms.int32( 2 ),
+    usePVMET = cms.bool( True ),
+    particles = cms.InputTag("scoutingPFCandidate"), #cms.InputTag( "hltParticleFlow" ),
+    #vertices = cms.InputTag("scoutingVertices"),
+    # vertices = cms.InputTag("hltDeepInclusiveVertexFinderPF"),
+    vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    jets = cms.InputTag("scoutingPFJetRecluster"), #cms.InputTag( "hltPFJetForBtag" ),
+    produceAssociationToOriginalVertices = cms.bool( True ),
+    produceSortedVertices = cms.bool( False ),
+    producePileUpCollection = cms.bool( False ),
+    produceNoPileUpCollection = cms.bool( False )
+)
+hltParticleNetJetTagInfos = scoutingPFJetReclusterParticleNetJetTagInfos.clone(
+    use_scouting_features = cms.bool(False),
+    use_hlt_features = cms.bool(True),
+
+    vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    secondary_vertices = cms.InputTag("slimmedSecondaryVertices"),
+    vertex_associator = cms.InputTag( 'hltPrimaryVertexAssociation','original' ),
+
+    # vertices = cms.InputTag("hltScoutingPrimaryVertexPacker", "primaryVtx"),
+    # secondary_vertices = cms.InputTag( "hltDeepInclusiveMergedVerticesPF" ),
+    # vertex_associator = cms.InputTag( 'hltPrimaryVertexAssociation','original' ),
+
+    # vertices = cms.InputTag("hltDeepInclusiveMergedVerticesPF"),
+    # secondary_vertices = cms.InputTag( "hltDeepInclusiveMergedVerticesPF" ),
+    # vertex_associator = cms.InputTag( 'hltPrimaryVertexAssociation','original' ),
+)
+hltParticleNetONNXJetTags = cms.EDProducer( "BoostedJetONNXJetTagsProducer",
+    # jets = cms.InputTag("scoutingFatPFJetRecluster"),
+    # produceValueMap = cms.untracked.bool(True),
+    # src = cms.InputTag("scoutingFatPFJetReclusterParticleNetJetTagInfos"),
+    # preprocess_json = cms.string("RecoBTag/Combined/data/Run3Scouting/ParticleNetAK8/General/V00/preprocess.json"),
+    # model_path = cms.FileInPath("RecoBTag/Combined/data/Run3Scouting/ParticleNetAK8/General/V00/particle-net.onnx"),
+    # flav_names = cms.vstring(["probQCDall", "probHbb","probHcc", "probHqq"]),
+    # debugMode = cms.untracked.bool(False),
+
+    jets = cms.InputTag("scoutingPFJetRecluster"),
+    produceValueMap = cms.untracked.bool( True ),
+    src = cms.InputTag( "hltParticleNetJetTagInfos" ),
+    preprocess_json = cms.string( "RecoBTag/Combined/data/HLT/ParticleNetAK4/V01/preprocess.json" ),
+    # preprocessParams = cms.PSet(  ),
+    model_path = cms.FileInPath( "RecoBTag/Combined/data/HLT/ParticleNetAK4/V01/particle-net.onnx" ),
+    flav_names = cms.vstring( 'probtauhp', 'probtauhm', 'probb', 'probc', 'probuds', 'probg','ptcorr' ),
+    debugMode = cms.untracked.bool( False )
+)
+
+scoutingPFJetReclusterTable.externalVariables = scoutingPFJetReclusterTable.externalVariables.clone(
+    # jet tagging probabilities
+    newParticleNet_prob_b = ExtVar(cms.InputTag("hltParticleNetONNXJetTags:probb"), float, doc="ParticleNet probability of b", precision=10),
+    newParticleNet_prob_c = ExtVar(cms.InputTag("hltParticleNetONNXJetTags:probc"), float, doc="ParticleNet probability of c", precision=10),
+    newParticleNet_prob_uds = ExtVar(cms.InputTag("hltParticleNetONNXJetTags:probuds"), float, doc="particlenet probability of uds", precision=10),
+    newParticleNet_prob_g = ExtVar(cms.InputTag("hltParticleNetONNXJetTags:probg"), float, doc="ParticleNet probability of g", precision=10),
+    ## tau
+    newParticleNet_prob_tauhp = ExtVar(cms.InputTag("hltParticleNetONNXJetTags:probtauhp"), float, doc="ParticleNet probability of tauhp", precision=10),
+    newParticleNet_prob_tauhm = ExtVar(cms.InputTag("hltParticleNetONNXJetTags:probtauhm"), float, doc="ParticleNet probability of tauhm", precision=10),
+    ## pt corr
+    newParticleNet_ptcorr = ExtVar(cms.InputTag("hltParticleNetONNXJetTags:ptcorr"), float, doc="ParticleNet ptcorr", precision=10),
+)
+
 #########################
 # AK8 PFJet Reclustered #
 #########################
