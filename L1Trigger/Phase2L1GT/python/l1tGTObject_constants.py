@@ -3,8 +3,19 @@ Module for handling L1 trigger menu constants and conversions.
 """
 
 import FWCore.ParameterSet.Config as cms
-from L1Trigger.Phase2L1GT.l1tObjectScalings import scalings
-from L1Trigger.Phase2L1GT.l1tObjectIDs import objectIDs
+from L1Trigger.Phase2L1GT.l1tGTObject_scalings import scalings
+from L1Trigger.Phase2L1GT.l1tGTObject_ids import objectIDs
+
+obj_regions_abseta_lowbounds = {
+    "CL2Photons": { "barrel": 0, "endcap": 1.479 },
+    "CL2Electrons": { "barrel": 0, "endcap": 1.479 },
+
+    "CL2Taus": { "barrel": 0, "endcap": 1.5 },
+    "CL2Jets": { "barrel": 0, "endcap": 1.5, "forward": 2.4 },
+
+    "GMTTkMuons": { "barrel": 0, "overlap": 0.83, "endcap": 1.24 },
+    "GMTMuons": { "barrel": 0, "overlap": 0.83, "endcap": 1.24 },
+}
 
 def off2onl_thresholds(thr, obj, id, region, scalings=scalings):
     """
@@ -44,7 +55,18 @@ def get_object_thrs(thr, obj, id, regions=None, scalings=scalings):
         cms.vdouble or cms.double: The thresholds for the regions.
     """
     if regions is None:
-        regions = sorted(scalings[obj][id].keys())
+        # dict_regions = sorted(scalings[obj][id].keys())
+        # obj_regions = list(obj_regions_abseta_lowbounds[obj].keys())
+
+        # if sorted(dict_regions) == sorted(obj_regions):
+        #     regions = sorted(obj_regions)
+        # else:
+        #     print(f"Regions for {obj} not found in scalings file. Using all regions.")
+        #     print(f"Regions in scalings file: {dict_regions}")
+        #     print(f"Regions for {obj}: {obj_regions}")
+        #     exit(1)
+        regions = scalings[obj][id].keys()
+
         if "overlap" in regions:
             # Fix order for the case of overlap region as the alphabetic sorting messes up the order
             regions = ["barrel", "overlap", "endcap"]
