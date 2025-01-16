@@ -15,7 +15,7 @@ from L1Trigger.Phase2L1GT.l1tGTQuadObjectCond_cfi import l1tGTQuadObjectCond
 
 from L1Trigger.Phase2L1GT.l1tGTAlgoBlockProducer_cff import algorithms
 
-from L1Trigger.Phase2L1GT.menuConstants import *
+from L1Trigger.Phase2L1GT.l1tGTMenu_constants import *
 
 ####### JET, MET, HT ###########
 
