@@ -16,32 +16,22 @@ from L1Trigger.Phase2L1GT.l1tGTQuadObjectCond_cfi import l1tGTQuadObjectCond
 from L1Trigger.Phase2L1GT.l1tGTAlgoBlockProducer_cff import algorithms
 
 from L1Trigger.Phase2L1GT.l1tGTObject_constants import *
+from L1Trigger.Phase2L1GT.l1GTMenuObjects_cff import *
 
 ####### JET, MET, HT ###########
 
 SinglePuppiJet230 = l1tGTSingleObjectCond.clone(
-    tag =  cms.InputTag("l1tGTProducer", "CL2JetsSC4"),
-    minEta = cms.double(-2.4),
-    maxEta = cms.double(2.4),
-    regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2JetsSC4"),
+    l1tGTsc4Jet.clone(),
     regionsMinPt = get_object_thrs(230, "CL2JetsSC4", "default"),
 )
 pSinglePuppiJet230 = cms.Path(SinglePuppiJet230)
 algorithms.append(cms.PSet(expression = cms.string("pSinglePuppiJet230")))
 
 DoublePuppiJet112112 = l1tGTDoubleObjectCond.clone(
-    collection1 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2JetsSC4"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2JetsSC4"),
+    collection1 = l1tGTsc4Jet.clone(
         regionsMinPt = get_object_thrs(112, "CL2JetsSC4", "default"),
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2JetsSC4"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2JetsSC4"),
+    collection2 = l1tGTsc4Jet.clone(
         regionsMinPt = get_object_thrs(112, "CL2JetsSC4", "default"),
     ),
     maxDEta = cms.double(1.6),
@@ -50,18 +40,10 @@ pDoublePuppiJet112_112 = cms.Path(DoublePuppiJet112112)
 algorithms.append(cms.PSet(expression = cms.string("pDoublePuppiJet112_112")))
 
 DoublePuppiJet16035Mass620 = l1tGTDoubleObjectCond.clone(
-    collection1 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2JetsSC4"),
-        minEta = cms.double(-5),
-        maxEta = cms.double(5),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2JetsSC4"),
+    collection1 = l1tGTsc4Jet_er5.clone(
         regionsMinPt = get_object_thrs(160, "CL2JetsSC4", "default"),
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2JetsSC4"),
-        minEta = cms.double(-5),
-        maxEta = cms.double(5),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2JetsSC4"),
+    collection2 = l1tGTsc4Jet_er5.clone(
         regionsMinPt = get_object_thrs(35, "CL2JetsSC4", "default"),
     ),
     minInvMass = cms.double(620),
@@ -92,32 +74,16 @@ pPuppiMET200 = cms.Path(PuppiMET200)
 algorithms.append(cms.PSet(expression = cms.string("pPuppiMET200")))
 
 QuadJet70554040 = l1tGTQuadObjectCond.clone(
-    collection1 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2JetsSC4"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2JetsSC4"),
+    collection1 = l1tGTsc4Jet.clone(
         regionsMinPt = get_object_thrs(70, "CL2JetsSC4", "default"),
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2JetsSC4"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2JetsSC4"),
+    collection2 = l1tGTsc4Jet.clone(
         regionsMinPt = get_object_thrs(55, "CL2JetsSC4", "default"),
     ),
-    collection3 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2JetsSC4"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2JetsSC4"),
+    collection3 = l1tGTsc4Jet.clone(
         regionsMinPt = get_object_thrs(40, "CL2JetsSC4", "default"),
     ),
-    collection4 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2JetsSC4"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2JetsSC4"),
+    collection4 = l1tGTsc4Jet.clone(
         regionsMinPt = get_object_thrs(40, "CL2JetsSC4", "default"),
     ),
 

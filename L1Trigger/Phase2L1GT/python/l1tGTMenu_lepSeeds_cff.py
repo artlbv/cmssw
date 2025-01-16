@@ -21,7 +21,7 @@ from L1Trigger.Phase2L1GT.l1GTMenuObjects_cff import *
 ####### MUON SEEDS ###########
 
 SingleTkMuon22 = l1tGTSingleObjectCond.clone(
-    **l1tGTtkMuonVLoose.parameters_(),
+    l1tGTtkMuonVLoose.clone(),
     regionsMinPt = get_object_thrs(22, "GMTTkMuons","VLoose"),
 )
 pSingleTkMuon22 = cms.Path(SingleTkMuon22)
@@ -208,21 +208,11 @@ pDoubleIsoTkPho22_12 = cms.Path(DoubleIsoTkPho2212)
 algorithms.append(cms.PSet(expression = cms.string("pDoubleIsoTkPho22_12")))
 
 DoublePuppiTau5252 = l1tGTDoubleObjectCond.clone(
-    collection1 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Taus"),
-        minEta = cms.double(-2.172),
-        maxEta = cms.double(2.172),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2JetsSC4"),
+    collection1 = l1tGTnnTau.clone(
         regionsMinPt = get_object_thrs(52, "CL2Taus","default"),
-        minQualityScore = get_object_ids("CL2Taus","default")
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Taus"),
-        minEta = cms.double(-2.172),
-        maxEta = cms.double(2.172),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2JetsSC4"),
+    collection2 = l1tGTnnTau.clone(
         regionsMinPt = get_object_thrs(52, "CL2Taus","default"),
-        minQualityScore = get_object_ids("CL2Taus","default")
     ),
     minDR = cms.double(0.5),
 )

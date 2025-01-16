@@ -166,7 +166,7 @@ FakeDiMuSeed = l1tGTDoubleObjectCond.clone(
 For single object conditions using pre-defined objects requires to first clone the condition and then extend it with the objects PSet as shown below:
 ```python
 SingleTkMuon22 = l1tGTSingleObjectCond.clone(
-    **l1tGTtkMuonVLoose.parameters_(),
+    l1tGTtkMuonVLoose.clone(),
 )    
 ```
 
