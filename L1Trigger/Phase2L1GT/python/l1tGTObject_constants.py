@@ -20,6 +20,9 @@ obj_regions_abseta_lowbounds = {
     "CL2EtSum": {"inclusive": 0},
 }
 
+def get_object_etalowbounds(obj):
+    return cms.vdouble(tuple(obj_regions_abseta_lowbounds[obj].values()))
+
 def off2onl_thresholds(thr, obj, id, region, scalings=scalings):
     """
     Convert offline thresholds to online thresholds.
@@ -45,38 +48,15 @@ def off2onl_thresholds(thr, obj, id, region, scalings=scalings):
         return max(0, new_thr)
 
 def get_object_thrs(thr, obj, id = "default", scalings=scalings):
-    """
-    Get object thresholds for specified regions.
-
-    Args:
-        thr (float): The threshold.
-        obj (str): The object type.
-        id (str): The object ID.
-
-    Returns:
-        cms.vdouble or cms.double: The thresholds for the regions.
-    """
-    regions = list(obj_regions_abseta_lowbounds[obj].keys()) # reference
+    regions = obj_regions_abseta_lowbounds[obj].keys()
     thresholds = [off2onl_thresholds(thr, obj, id, region) for region in regions]
     if len(thresholds) > 1:
         return cms.vdouble(tuple(thresholds))
     else:
         return cms.double(thresholds[0])
 
-def get_object_ids(obj, id = "default", regions = None, obj_dict=objectIDs):
-    """
-    Get object IDs.
-
-    Args:
-        obj (str): The object type.
-        id (str): The object ID.
-        obj_dict (dict): The object dictionary.
-
-    Returns:
-        cms.vuint32 or cms.uint32: The object IDs.
-    """
+def get_object_ids(obj, id = "default", obj_dict=objectIDs):
     values = obj_dict[obj][id]["qual"]
-    
     if isinstance(values, dict):
         regions = obj_regions_abseta_lowbounds[obj].keys()
         return cms.vuint32(tuple(values[region] for region in regions))
@@ -84,17 +64,6 @@ def get_object_ids(obj, id = "default", regions = None, obj_dict=objectIDs):
         return cms.uint32(values)
 
 def get_object_isos(obj, id = "default", obj_dict=objectIDs):
-    """
-    Get object isolation values.
-
-    Args:
-        obj (str): The object type.
-        id (str): The object ID.
-        obj_dict (dict): The object dictionary.
-
-    Returns:
-        cms.vuint32 or cms.uint32: The object isolation threshold values.
-    """
     values = obj_dict[obj][id]["iso"]
     if isinstance(values, dict):
         regions = obj_regions_abseta_lowbounds[obj].keys()
