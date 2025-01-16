@@ -139,27 +139,36 @@ As there are only few baseline objects which are are used in many seeds, it migh
 E.g. in the b-physics seeds identical `Loose` `tkMuons` are used with only the pt thresholds varying.
 Thus a baseline tkMuon can be defined as:
 ```python
- l1tGTtkMuonLoose = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
-        minPt = cms.double(0),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        qualityFlags = get_object_ids("GMTTkMuons","Loose"),
-    ),
+ l1tGTtkMuon = cms.PSet(
+    tag = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
+    minEta = cms.double(-2.4),
+    maxEta = cms.double(2.4),
+    regionsAbsEtaLowerBounds = get_object_etalowbounds("GMTTkMuons"),
+)
+l1tGTtkMuonVLoose = l1tGTtkMuon.clone(
+    qualityFlags = get_object_ids("GMTTkMuons","VLoose"),
+)
 ```
 And then this can be used in seed definitions by only changing / adding what is needed, e.g.:
 ```python
 FakeDiMuSeed = l1tGTDoubleObjectCond.clone(
-    collection1 = l1tGTtkMuonLoose.clone(
+    collection1 = l1tGTtkMuon.clone(
         minPt = cms.double(5), # overwrites minPt = 0 from template
     ),
-    collection2 = l1tGTtkMuonLoose.clone(
+    collection2 = l1tGTtkMuonVLoose.clone(
         minEta = cms.double(-1.5), # overwrites minEta = -2.4 
         maxEta = cms.double(1.5), # overwrites maxEta = 2.4 
     ),
 )
 ```
 **NB!** Also new cuts can be added, however caution is needed to not mix per-region cuts such as `regionsMinPt` and the inclusive version `minPt`.
+
+For single object conditions using pre-defined objects requires to first clone the condition and then extend it with the objects PSet as shown below:
+```python
+SingleTkMuon22 = l1tGTSingleObjectCond.clone(
+    **l1tGTtkMuonVLoose.parameters_(),
+)    
+```
 
 ### Single cuts
 
