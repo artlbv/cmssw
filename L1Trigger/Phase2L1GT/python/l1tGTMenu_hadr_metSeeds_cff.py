@@ -24,7 +24,7 @@ SinglePuppiJet230 = l1tGTSingleObjectCond.clone(
     minEta = cms.double(-2.4),
     maxEta = cms.double(2.4),
     regionsAbsEtaLowerBounds=cms.vdouble(0,1.5),
-    regionsMinPt = getObjectThrs(230, "CL2JetsSC4","default"),
+    regionsMinPt = get_object_thrs(230, "CL2JetsSC4", "default", ["barrel", "endcap"]),
 )
 pSinglePuppiJet230 = cms.Path(SinglePuppiJet230)
 algorithms.append(cms.PSet(expression = cms.string("pSinglePuppiJet230")))
@@ -35,14 +35,14 @@ DoublePuppiJet112112 = l1tGTDoubleObjectCond.clone(
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5,2.4),
-        regionsMinPt = getObjectThrs(112, "CL2JetsSC4","default"),
+        regionsMinPt = get_object_thrs(112, "CL2JetsSC4", "default", ["barrel", "endcap", "forward"]),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "CL2JetsSC4"),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5,2.4),
-        regionsMinPt = getObjectThrs(112, "CL2JetsSC4","default"),
+        regionsMinPt = get_object_thrs(112, "CL2JetsSC4", "default", ["barrel", "endcap", "forward"]),
     ),
     maxDEta = cms.double(1.6),
 )
@@ -55,14 +55,14 @@ DoublePuppiJet16035Mass620 = l1tGTDoubleObjectCond.clone(
         minEta = cms.double(-5),
         maxEta = cms.double(5),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5),
-        regionsMinPt = getObjectThrs(160, "CL2JetsSC4","default"),
+        regionsMinPt = get_object_thrs(160, "CL2JetsSC4", "default", ["barrel", "endcap"]),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "CL2JetsSC4"),
         minEta = cms.double(-5),
         maxEta = cms.double(5),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5),
-        regionsMinPt = getObjectThrs(35, "CL2JetsSC4","default"),
+        regionsMinPt = get_object_thrs(35, "CL2JetsSC4", "default", ["barrel", "endcap"]),
     ),
     minInvMass = cms.double(620),
 )
@@ -72,21 +72,21 @@ algorithms.append(cms.PSet(expression = cms.string("pDoublePuppiJet160_35_mass62
 
 PuppiHT450 = l1tGTSingleObjectCond.clone(
     tag = cms.InputTag("l1tGTProducer", "CL2HtSum"),
-    minScalarSumPt = getObjectThrs(450, "CL2HtSum","HT"),
+    minScalarSumPt = get_object_thrs(450, "CL2HtSum", "HT"),
 )
 pPuppiHT450 = cms.Path(PuppiHT450)
 algorithms.append(cms.PSet(expression = cms.string("pPuppiHT450")))
 
 PuppiMHT140 = l1tGTSingleObjectCond.clone(
     tag = cms.InputTag("l1tGTProducer", "CL2HtSum"),
-    minPt = getObjectThrs(140, "CL2HtSum","MHT"),
+    minPt = get_object_thrs(140, "CL2HtSum", "MHT"),
 )
 pPuppiMHT140 = cms.Path(PuppiMHT140)
 algorithms.append(cms.PSet(expression = cms.string("pPuppiMHT140")))
 
 PuppiMET200 = l1tGTSingleObjectCond.clone(
     tag = cms.InputTag("l1tGTProducer", "CL2EtSum"),
-    minPt = getObjectThrs(200, "CL2EtSum","default"),
+    minPt = get_object_thrs(200, "CL2EtSum", "default"),
 )
 pPuppiMET200 = cms.Path(PuppiMET200)
 algorithms.append(cms.PSet(expression = cms.string("pPuppiMET200")))
@@ -97,28 +97,28 @@ QuadJet70554040 = l1tGTQuadObjectCond.clone(
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5,2.4),
-        regionsMinPt = getObjectThrs(70, "CL2JetsSC4","default"),
+        regionsMinPt = get_object_thrs(70, "CL2JetsSC4", "default", ["barrel", "endcap", "forward"]),
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "CL2JetsSC4"),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5,2.4),
-        regionsMinPt = getObjectThrs(55, "CL2JetsSC4","default"),
+        regionsMinPt = get_object_thrs(55, "CL2JetsSC4", "default", ["barrel", "endcap", "forward"]),
     ),
     collection3 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "CL2JetsSC4"),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5,2.4),
-        regionsMinPt=cms.vdouble(25.0,25.0)
+        regionsMinPt = get_object_thrs(40, "CL2JetsSC4", "default", ["barrel", "endcap", "forward"]),
     ),
     collection4 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "CL2JetsSC4"),
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5,2.4),
-        regionsMinPt=cms.vdouble(25.0,25.0)
+        regionsMinPt = get_object_thrs(40, "CL2JetsSC4", "default", ["barrel", "endcap", "forward"]),
     ),
 
 )
@@ -126,7 +126,7 @@ pQuadJet70_55_40_40 = cms.Path(QuadJet70554040)
 
 PuppiHT400 = l1tGTSingleObjectCond.clone(
     tag = cms.InputTag("l1tGTProducer", "CL2HtSum"),
-    minScalarSumPt = getObjectThrs(400, "CL2HtSum","HT"),
+    minScalarSumPt = get_object_thrs(400, "CL2HtSum", "HT"),
 )
 pPuppiHT400 = cms.Path(PuppiHT400)
 
