@@ -16,19 +16,14 @@ from L1Trigger.Phase2L1GT.l1tGTQuadObjectCond_cfi import l1tGTQuadObjectCond
 from L1Trigger.Phase2L1GT.l1tGTAlgoBlockProducer_cff import algorithms
 
 from L1Trigger.Phase2L1GT.l1tGTObject_constants import *
-from L1Trigger.Phase2L1GT.l1GTMenuObjects_cff import *
+from L1Trigger.Phase2L1GT.l1tGTMenuObjects_cff import *
 
 TkMuonTkIsoEle720 = l1tGTDoubleObjectCond.clone(
     collection1 = l1tGTtkMuonLoose.clone(
         regionsMinPt=cms.vdouble(7,7,7), # no scaling used below 8 GeV
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    collection2 = l1tGTtkIsoElectron.clone(
         regionsMinPt = get_object_thrs(20, "CL2Electrons","Iso"),
-        regionsMaxRelIsolationPt = get_object_isos("CL2Electrons","Iso"),
     ),
     maxDz = cms.double(1),
 )
@@ -39,13 +34,8 @@ TkMuonTkEle723 = l1tGTDoubleObjectCond.clone(
     collection1 = l1tGTtkMuonLoose.clone(
         regionsMinPt=cms.vdouble(7,7,7), # no scaling used below 8 GeV
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    collection2 = l1tGTtkElectron.clone(
         regionsMinPt = get_object_thrs(23, "CL2Electrons","NoIso"),
-        regionsQualityFlags = get_object_ids("CL2Electrons","NoIso"),
     ),
     maxDz = cms.double(1),
 )
@@ -53,13 +43,8 @@ pTkMuonTkEle7_23 = cms.Path(TkMuonTkEle723)
 algorithms.append(cms.PSet(expression = cms.string("pTkMuonTkEle7_23")))
 
 TkEleTkMuon1020 = l1tGTDoubleObjectCond.clone(
-    collection1 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    collection1 = l1tGTtkElectron.clone(
         regionsMinPt = get_object_thrs(36, "CL2Electrons","NoIso"),
-        regionsQualityFlags = get_object_ids("CL2Electrons","NoIso"),
     ),
     collection2 = l1tGTtkMuonVLoose.clone(
         regionsMinPt = get_object_thrs(20, "GMTTkMuons","VLoose"),
@@ -73,21 +58,11 @@ TkMuonDoubleTkEle61717 = l1tGTTripleObjectCond.clone(
     collection1 = l1tGTtkMuonLoose.clone(
         regionsMinPt=cms.vdouble(6,6,6),
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    collection2 = l1tGTtkElectronLowPt.clone(
         regionsMinPt = get_object_thrs(17, "CL2Electrons","NoIso"),
-        regionsQualityFlags = get_object_ids("CL2Electrons","NoIsoLowPt"),
     ),
-    collection3 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    collection3 = l1tGTtkElectronLowPt.clone(
         regionsMinPt = get_object_thrs(17, "CL2Electrons","NoIso"),
-        regionsQualityFlags = get_object_ids("CL2Electrons","NoIsoLowPt"),
     ),
     correl12 = cms.PSet(
         maxDz = cms.double(1)
@@ -106,14 +81,8 @@ DoubleTkMuonTkEle559 = l1tGTTripleObjectCond.clone(
     collection2 = l1tGTtkMuonLoose.clone(
         regionsMinPt=cms.vdouble(5,5,5),
     ),
-    collection3 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    collection3 = l1tGTtkElectronLowPt.clone(
         regionsMinPt = get_object_thrs(9, "CL2Electrons","NoIso"),
-        regionsQualityFlags = get_object_ids("CL2Electrons","NoIsoLowPt"),
-
     ),
     correl12 = cms.PSet(
         minDR = cms.double(0),
@@ -134,36 +103,23 @@ PuppiTauTkMuon4218 = l1tGTDoubleObjectCond.clone(  ###NB We need puppivertex her
         maxPrimVertDz = cms.double(1), # in cm
         primVertex = cms.uint32(0) # primary vertex index (choose 0) 
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Taus"),
-        minEta = cms.double(-2.172),
-        maxEta = cms.double(2.172),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Taus"),
+    collection2 = l1tGTnnTau.clone(
         regionsMinPt = get_object_thrs(42, "CL2Taus","default"),
-        minQualityScore = get_object_ids("CL2Taus","default")
     ),
 )
 pPuppiTauTkMuon42_18 = cms.Path(PuppiTauTkMuon4218)
 algorithms.append(cms.PSet(expression = cms.string("pPuppiTauTkMuon42_18")))
 
 PuppiTauTkIsoEle4522 = l1tGTDoubleObjectCond.clone(  ###NB We need puppivertex here
-    collection1 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
+    collection1 = l1tGTtkIsoElectron.clone(
         minEta = cms.double(-2.1),
         maxEta = cms.double(2.1),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
         regionsMinPt = get_object_thrs(22, "CL2Electrons","Iso"),
-        regionsMaxRelIsolationPt = get_object_isos("CL2Electrons","Iso"),
         maxPrimVertDz = cms.double(1), # in cm
         primVertex = cms.uint32(0) # primary vertex index (choose 0) 
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Taus"),
-        minEta = cms.double(-2.172),
-        maxEta = cms.double(2.172),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Taus"),
+    collection2 = l1tGTnnTau.clone(
         regionsMinPt = get_object_thrs(45, "CL2Taus","default"),
-        minQualityScore = get_object_ids("CL2Taus","default")
     ),
 )
 pPuppiTauTkIsoEle45_22 = cms.Path(PuppiTauTkIsoEle4522)

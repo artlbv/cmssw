@@ -16,7 +16,7 @@ from L1Trigger.Phase2L1GT.l1tGTQuadObjectCond_cfi import l1tGTQuadObjectCond
 from L1Trigger.Phase2L1GT.l1tGTAlgoBlockProducer_cff import algorithms
 
 from L1Trigger.Phase2L1GT.l1tGTObject_constants import *
-from L1Trigger.Phase2L1GT.l1GTMenuObjects_cff import *
+from L1Trigger.Phase2L1GT.l1tGTMenuObjects_cff import *
 
 DoubleTkMuonOSEr1p5Dr1p4 = l1tGTDoubleObjectCond.clone(
     collection1 = l1tGTtkMuonLoose.clone(

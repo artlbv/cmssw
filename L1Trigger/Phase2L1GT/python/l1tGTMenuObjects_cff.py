@@ -52,9 +52,52 @@ l1tGTnnTau = cms.PSet(
 )
 
 ############################################################
+# Sums
+############################################################
+
+l1tGTHtSum = cms.PSet(
+    tag = cms.InputTag("l1tGTProducer", "CL2HtSum")
+)
+
+l1tGTEtSum = cms.PSet(
+    tag = cms.InputTag("l1tGTProducer", "CL2EtSum")
+)
+
+############################################################
 # Electrons
 ############################################################
+
+l1tGTtkElectronBase = cms.PSet(
+    tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
+    minEta = cms.double(-2.4),
+    maxEta = cms.double(2.4),
+    regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+)
+
+l1tGTtkElectron = l1tGTtkElectronBase.clone(
+    regionsQualityFlags = get_object_ids("CL2Electrons","NoIso"),
+)
+
+l1tGTtkElectronLowPt = l1tGTtkElectronBase.clone(
+    regionsQualityFlags = get_object_ids("CL2Electrons","NoIsoLowPt"),
+)
+
+l1tGTtkIsoElectron = l1tGTtkElectronBase.clone(
+    regionsMaxRelIsolationPt = get_object_isos("CL2Electrons","Iso"),
+)
 
 ############################################################
 # Photons
 ############################################################
+
+l1tGTtkPhoton = cms.PSet(
+    tag = cms.InputTag("l1tGTProducer", "CL2Photons"),
+    minEta = cms.double(-2.4),
+    maxEta = cms.double(2.4),
+    regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Photons"),
+    regionsQualityFlags = get_object_ids("CL2Photons","Iso"),
+)
+
+l1tGTtkIsoPhoton = l1tGTtkPhoton.clone(
+    regionsMaxRelIsolationPt = get_object_isos("CL2Photons","Iso"),
+)

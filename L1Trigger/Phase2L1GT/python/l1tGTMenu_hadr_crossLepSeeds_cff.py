@@ -16,7 +16,7 @@ from L1Trigger.Phase2L1GT.l1tGTQuadObjectCond_cfi import l1tGTQuadObjectCond
 from L1Trigger.Phase2L1GT.l1tGTAlgoBlockProducer_cff import algorithms
 
 from L1Trigger.Phase2L1GT.l1tGTObject_constants import *
-from L1Trigger.Phase2L1GT.l1GTMenuObjects_cff import *
+from L1Trigger.Phase2L1GT.l1tGTMenuObjects_cff import *
 
 TkMuonPuppiHT6320 = l1tGTDoubleObjectCond.clone( #needs z0 with the puppivertex
     collection1 = l1tGTtkMuonLoose.clone(
@@ -24,8 +24,7 @@ TkMuonPuppiHT6320 = l1tGTDoubleObjectCond.clone( #needs z0 with the puppivertex
         maxPrimVertDz = cms.double(1), # in cm
         primVertex = cms.uint32(0), # primary vertex index (choose 0) 
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2HtSum"),
+    collection2 = l1tGTHtSum.clone(
         minScalarSumPt = get_object_thrs(320, "CL2HtSum","HT"),
     ),
 )
@@ -69,8 +68,7 @@ TkMuPuppiJetPuppiMet = l1tGTTripleObjectCond.clone( #needs z0 between muon and p
     collection2 = l1tGTsc4Jet.clone(
         regionsMinPt = get_object_thrs(110, "CL2JetsSC4", "default"),
     ),
-    collection3 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2EtSum"),
+    collection3 = l1tGTEtSum.clone(
         minPt = get_object_thrs(120, "CL2EtSum","default"),
     ),
 )
@@ -92,8 +90,7 @@ DoubleTkMuPuppiJetPuppiMet = l1tGTQuadObjectCond.clone( #needs z0 between puppiv
     collection3 = l1tGTsc4Jet.clone(
         regionsMinPt = get_object_thrs(60, "CL2JetsSC4", "default"),
     ),
-    collection4 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2EtSum"),        
+    collection4 = l1tGTEtSum.clone(        
         minPt = get_object_thrs(130, "CL2EtSum","default"),
     ),
     correl12 = cms.PSet(
@@ -115,8 +112,7 @@ DoubleTkMuPuppiHT = l1tGTTripleObjectCond.clone( #needs z0 between puppivertex a
         primVertex = cms.uint32(0), # primary vertex index (choose 0)
         maxPrimVertDz = cms.double(1),
     ),
-    collection3 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2HtSum"),
+    collection3 = l1tGTHtSum.clone(
         minScalarSumPt = get_object_thrs(300, "CL2HtSum","HT"),
     ),
     correl12 = cms.PSet(
@@ -129,28 +125,17 @@ algorithms.append(cms.PSet(expression=cms.string("pDoubleTkMuPuppiHT_3_3_300")))
 
 
 DoubleTkElePuppiHT = l1tGTTripleObjectCond.clone( #needs z0 between puppivertex and muon
-    collection1 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    collection1 = l1tGTtkElectronLowPt.clone(
         regionsMinPt = get_object_thrs(8, "CL2Electrons","NoIso"),
-        regionsQualityFlags = get_object_ids("CL2Electrons","NoIsoLowPt"),
         maxPrimVertDz = cms.double(1), # in cm
         primVertex = cms.uint32(0), # primary vertex index (choose 0)
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    collection2 = l1tGTtkElectronLowPt.clone(
         regionsMinPt = get_object_thrs(8, "CL2Electrons","NoIso"),
-        regionsQualityFlags = get_object_ids("CL2Electrons","NoIsoLowPt"),
         maxPrimVertDz = cms.double(1), # in cm
         primVertex = cms.uint32(0), # primary vertex index (choose 0)
     ),
-    collection3 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2HtSum"),
+    collection3 = l1tGTHtSum.clone(
         minScalarSumPt = get_object_thrs(390, "CL2HtSum","HT"),
     ),
 )
@@ -160,18 +145,14 @@ algorithms.append(cms.PSet(expression=cms.string("pDoubleTkElePuppiHT_8_8_390"))
 
 
 TkEleIsoPuppiHT = l1tGTDoubleObjectCond.clone( #missing z0 between electron and puppivertex
-    collection1 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-        minEta = cms.double(-2.1),
-        maxEta = cms.double(2.1),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    collection1 = l1tGTtkIsoElectron.clone(
+        minEta = cms.double(-2.1), # TBC WHY?
+        maxEta = cms.double(2.1), # TBC WHY?
         regionsMinPt = get_object_thrs(26, "CL2Electrons","Iso"),
-        regionsMaxRelIsolationPt = get_object_isos("CL2Electrons","Iso"),
         maxPrimVertDz = cms.double(1), # in cm
         primVertex = cms.uint32(0), # primary vertex index (choose 0)
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2HtSum"),
+    collection2 = l1tGTHtSum.clone(
         minScalarSumPt = get_object_thrs(190, "CL2HtSum","HT"),
     ),
 )
@@ -180,13 +161,10 @@ algorithms.append(cms.PSet(expression = cms.string("pTkEleIsoPuppiHT_26_190")))
 
 
 TkElePuppiJetMinDR = l1tGTDoubleObjectCond.clone( #missing z0 between electron and puppivertex
-    collection1 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-        minEta = cms.double(-2.1),
-        maxEta = cms.double(2.1),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    collection1 = l1tGTtkElectron.clone(
+        minEta = cms.double(-2.1), # TBC WHY?
+        maxEta = cms.double(2.1), # TBC WHY?
         regionsMinPt = get_object_thrs(28, "CL2Electrons","NoIso"),
-        regionsQualityFlags = get_object_ids("CL2Electrons","NoIso"),
         maxPrimVertDz = cms.double(1), # in cm
         primVertex = cms.uint32(0), # primary vertex index (choose 0)
     ),
@@ -196,22 +174,17 @@ TkElePuppiJetMinDR = l1tGTDoubleObjectCond.clone( #missing z0 between electron a
     minDR = cms.double(0.3)
 )
 pTkElePuppiJet_28_40_MinDR = cms.Path(TkElePuppiJetMinDR)
-
 algorithms.append(cms.PSet(expression=cms.string("pTkElePuppiJet_28_40_MinDR")))
-
-
 
 NNPuppiTauPuppiMet = l1tGTDoubleObjectCond.clone(
     collection1 = l1tGTnnTau.clone(
         regionsMinPt = get_object_thrs(55, "CL2Taus","default"),
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2EtSum"),
+    collection2 = l1tGTEtSum.clone(
         minPt = get_object_thrs(190, "CL2EtSum","default"),
     ),
     
 )
 pNNPuppiTauPuppiMet_55_190 = cms.Path(NNPuppiTauPuppiMet)
-
 algorithms.append(cms.PSet(expression=cms.string("pNNPuppiTauPuppiMet_55_190")))
 

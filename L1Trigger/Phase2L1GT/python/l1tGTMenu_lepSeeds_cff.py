@@ -16,7 +16,7 @@ from L1Trigger.Phase2L1GT.l1tGTQuadObjectCond_cfi import l1tGTQuadObjectCond
 from L1Trigger.Phase2L1GT.l1tGTAlgoBlockProducer_cff import algorithms
 
 from L1Trigger.Phase2L1GT.l1tGTObject_constants import *
-from L1Trigger.Phase2L1GT.l1GTMenuObjects_cff import *
+from L1Trigger.Phase2L1GT.l1tGTMenuObjects_cff import *
 
 ####### MUON SEEDS ###########
 
@@ -68,32 +68,18 @@ algorithms.append(cms.PSet(expression = cms.string("pTripleTkMuon5_3_3")))
 ####### EG and PHO seeds ###########
 
 SingleEGEle51 = l1tGTSingleObjectCond.clone(
-    tag = cms.InputTag("l1tGTProducer", "CL2Photons"),
-    minEta = cms.double(-2.4),
-    maxEta = cms.double(2.4),
-    regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Photons"),
+    l1tGTtkPhoton.clone(),
     regionsMinPt = get_object_thrs(51, "CL2Photons","Iso"),
-    regionsQualityFlags = get_object_ids("CL2Photons","Iso"),
 )
 pSingleEGEle51 = cms.Path(SingleEGEle51) 
 algorithms.append(cms.PSet(expression = cms.string("pSingleEGEle51")))
 
 DoubleEGEle3724 = l1tGTDoubleObjectCond.clone(
-    collection1 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Photons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Photons"),
+    collection1 = l1tGTtkIsoPhoton.clone(
         regionsMinPt = get_object_thrs(37, "CL2Photons","Iso"),
-        regionsQualityFlags = get_object_ids("CL2Photons","Iso"),
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Photons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Photons"),
+    collection2 = l1tGTtkIsoPhoton.clone(
         regionsMinPt = get_object_thrs(24, "CL2Photons","Iso"), 
-        regionsQualityFlags = get_object_ids("CL2Photons","Iso"),
     ),
     minDR = cms.double(0.1),
 )
@@ -101,21 +87,11 @@ pDoubleEGEle37_24 = cms.Path(DoubleEGEle3724)
 algorithms.append(cms.PSet(expression = cms.string("pDoubleEGEle37_24")))
 
 IsoTkEleEGEle2212 = l1tGTDoubleObjectCond.clone(
-    collection1 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    collection1 = l1tGTtkIsoElectron.clone(
         regionsMinPt = get_object_thrs(22, "CL2Electrons","Iso"),
-        regionsMaxRelIsolationPt = get_object_isos("CL2Electrons","Iso"),
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Photons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Photons"),
+    collection2 = l1tGTtkIsoPhoton.clone(
         regionsMinPt = get_object_thrs(12, "CL2Photons","Iso"),
-        regionsQualityFlags = get_object_ids("CL2Photons","Iso"),
     ),
     minDR = cms.double(0.1),
 )
@@ -123,59 +99,33 @@ pIsoTkEleEGEle22_12 = cms.Path(IsoTkEleEGEle2212)
 algorithms.append(cms.PSet(expression = cms.string("pIsoTkEleEGEle22_12")))
 
 SingleTkEle36 = l1tGTSingleObjectCond.clone(
-    tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-    minEta = cms.double(-2.4),
-    maxEta = cms.double(2.4),
-    regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    l1tGTtkElectron.clone(),
     regionsMinPt = get_object_thrs(36, "CL2Electrons","NoIso"),
-    regionsQualityFlags = get_object_ids("CL2Electrons","NoIso"),
-    # regionsMaxRelIsolationPt = get_object_isos("CL2Electrons","NoIso"),
-
 )
 pSingleTkEle36 = cms.Path(SingleTkEle36) 
 algorithms.append(cms.PSet(expression = cms.string("pSingleTkEle36")))
 
 SingleIsoTkEle28 = l1tGTSingleObjectCond.clone(
-    tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-    minEta = cms.double(-2.4),
-    maxEta = cms.double(2.4),
-    regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    l1tGTtkIsoElectron.clone(),
     regionsMinPt = get_object_thrs(28, "CL2Electrons","Iso"),
-    # regionsQualityFlags = get_object_ids("CL2Electrons","Iso"),
-    regionsMaxRelIsolationPt = get_object_isos("CL2Electrons","Iso"),
 )
 pSingleIsoTkEle28 = cms.Path(SingleIsoTkEle28) 
 algorithms.append(cms.PSet(expression = cms.string("pSingleIsoTkEle28")))
 
 SingleIsoTkPho36 = l1tGTSingleObjectCond.clone(
-    tag = cms.InputTag("l1tGTProducer", "CL2Photons"),
-    minEta = cms.double(-2.4),
-    maxEta = cms.double(2.4),
-    regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Photons"),
+    l1tGTtkIsoPhoton.clone(),
     regionsMinPt = get_object_thrs(36, "CL2Photons","Iso"),
-    regionsQualityFlags = get_object_ids("CL2Photons","Iso"),
-    regionsMaxRelIsolationPt = get_object_isos("CL2Photons","Iso"),
 )
 pSingleIsoTkPho36 = cms.Path(SingleIsoTkPho36) 
 
 algorithms.append(cms.PSet(expression=cms.string("pSingleIsoTkPho36")))
 
 DoubleTkEle2512 = l1tGTDoubleObjectCond.clone(
-    collection1 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    collection1 = l1tGTtkElectronLowPt.clone(
         regionsMinPt = get_object_thrs(25, "CL2Electrons","NoIso"),
-        regionsQualityFlags = get_object_ids("CL2Electrons","NoIsoLowPt"),
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Electrons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Electrons"),
+    collection2 = l1tGTtkElectronLowPt.clone(
         regionsMinPt = get_object_thrs(12, "CL2Electrons","NoIso"),
-        regionsQualityFlags = get_object_ids("CL2Electrons","NoIsoLowPt"),
     ),
     maxDz = cms.double(1),
 )
@@ -183,25 +133,11 @@ pDoubleTkEle25_12 = cms.Path(DoubleTkEle2512)
 algorithms.append(cms.PSet(expression = cms.string("pDoubleTkEle25_12")))
 
 DoubleIsoTkPho2212 = l1tGTDoubleObjectCond.clone(
-    collection1 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Photons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Photons"),
+    collection1 = l1tGTtkIsoPhoton.clone(
         regionsMinPt = get_object_thrs(22, "CL2Photons","Iso"),
-        regionsQualityFlags = get_object_ids("CL2Photons","Iso"),
-        regionsMaxRelIsolationPt = cms.vdouble(
-            get_object_isos("CL2Photons","Iso")
-        )
     ),
-    collection2 = cms.PSet(
-        tag = cms.InputTag("l1tGTProducer", "CL2Photons"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
-        regionsAbsEtaLowerBounds = get_object_etalowbounds("CL2Photons"),
+    collection2 = l1tGTtkIsoPhoton.clone(
         regionsMinPt = get_object_thrs(12, "CL2Photons","Iso"),
-        regionsQualityFlags = get_object_ids("CL2Photons","Iso"),
-        regionsMaxRelIsolationPt = get_object_isos("CL2Photons","Iso")
     ),
 )
 pDoubleIsoTkPho22_12 = cms.Path(DoubleIsoTkPho2212)
