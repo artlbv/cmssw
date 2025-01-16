@@ -95,7 +95,7 @@ TkMuPuppiJetPuppiMet = l1tGTTripleObjectCond.clone( #needs z0 between muon and p
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5,2.4),
-        regionsMinPt = get_object_thrs(110, "CL2JetsSC4","default", ["barrel", "endcap", "forward"]),
+        regionsMinPt = get_object_thrs(110, "CL2JetsSC4", "default"),
     ),
     collection3 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "CL2EtSum"),
@@ -132,7 +132,7 @@ DoubleTkMuPuppiJetPuppiMet = l1tGTQuadObjectCond.clone( #needs z0 between puppiv
         minEta = cms.double(-2.4),
         maxEta = cms.double(2.4),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5,2.4),
-        regionsMinPt = get_object_thrs(60, "CL2JetsSC4","default", ["barrel", "endcap", "forward"]),
+        regionsMinPt = get_object_thrs(60, "CL2JetsSC4", "default"),
     ),
     collection4 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "CL2EtSum"),        
