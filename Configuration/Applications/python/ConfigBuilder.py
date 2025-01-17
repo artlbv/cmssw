@@ -1586,7 +1586,7 @@ class ConfigBuilder(object):
         self.scheduleSequence('l1tGTProducerSequence', 'Phase2L1GTProducer')
         self.scheduleSequence('l1tGTAlgoBlockProducerSequence', 'Phase2L1GTAlgoBlockProducer')
         if stepSpec == None:
-            defaultMenuFile = "step1_2023"
+            defaultMenuFile = "step1_2024"
             self.loadPhase2GTMenu(menuFile = defaultMenuFile)
         else:
             self.loadPhase2GTMenu(menuFile = stepSpec)
