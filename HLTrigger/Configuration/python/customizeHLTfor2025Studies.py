@@ -85,6 +85,10 @@ def customizeHLTfor2024L1TMenu(process):
         'L1_DoubleEG16_11_er1p2_dR_Max0p6': 'L1_DoubleEG11_er1p2_dR_Max0p6',
         'L1_DoubleEG17_11_er1p2_dR_Max0p6': 'L1_DoubleEG11_er1p2_dR_Max0p6',
 
+        'L1_DoubleEG15_er1p5_dEta_Max1p5': 'L1_AlwaysTrue',
+        'L1_DoubleEG16_er1p5_dEta_Max1p5': 'L1_AlwaysTrue',
+        'L1_DoubleEG17_er1p5_dEta_Max1p5': 'L1_AlwaysTrue',
+
         'L1_DoubleJet_110_35_DoubleJet35_Mass_Min1000': 'L1_AlwaysTrue',
         'L1_DoubleJet_110_35_DoubleJet35_Mass_Min1100': 'L1_AlwaysTrue',
         'L1_DoubleJet_110_35_DoubleJet35_Mass_Min1200': 'L1_AlwaysTrue',
