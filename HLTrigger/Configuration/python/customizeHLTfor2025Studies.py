@@ -36,10 +36,10 @@ def customizeHLTforCMSHLT3469(process):
 
 def customizeHLTfor2025JECs(process):
     jecTagsDict = {
-        'AK4CaloHLT': '', # not available yet
-        'AK8CaloHLT': '', # not available yet
-        'AK4PFHLT': '', # not available yet
-        'AK8PFHLT': '', # not available yet
+        'AK4CaloHLT': 'JetCorrectorParametersCollection_Run3Winter25Digi_AK4CaloHLT_v1',
+        'AK8CaloHLT': 'JetCorrectorParametersCollection_Run3Winter25Digi_AK8CaloHLT_v1',
+        'AK4PFHLT': 'JetCorrectorParametersCollection_Run3Winter25Digi_AK4PFHLT_v1',
+        'AK8PFHLT': 'JetCorrectorParametersCollection_Run3Winter25Digi_AK8PFHLT_v1',
     }
 
     try:
@@ -59,8 +59,8 @@ def customizeHLTfor2025JECs(process):
 def customizeHLTfor2025Studies(process):
     process = customizeHLTfor2025HCALPFCuts(process)
     process = customizeHLTfor2025PFHadronCalibrations(process)
-#    process = customizeHLTforCMSHLT3469(process)
-#    process = customizeHLTfor2025JECs(process)
+    process = customizeHLTforCMSHLT3469(process)
+    process = customizeHLTfor2025JECs(process)
     return process
 
 def customizeHLTfor2024L1TMenu(process):
