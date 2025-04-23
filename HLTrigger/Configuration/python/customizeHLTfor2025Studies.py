@@ -34,7 +34,7 @@ def customizeHLTforCMSHLT3469(process):
         prod.EcalRecHitThresh = True
     return process
 
-def customizeHLTfor2025JECs(process):
+def customizeHLTfor2025JECsV1(process):
     jecTagsDict = {
         'AK4CaloHLT': 'JetCorrectorParametersCollection_Run3Winter25Digi_AK4CaloHLT_v1',
         'AK8CaloHLT': 'JetCorrectorParametersCollection_Run3Winter25Digi_AK8CaloHLT_v1',
@@ -52,8 +52,37 @@ def customizeHLTfor2025JECs(process):
                 ),
             ]
     except:
+        raise RuntimeError("customizeHLTfor2025JECsV1 -- GlobalTag ESSource could not be customized !")
+
+    return process
+
+def customizeHLTfor2025JECs(process):
+    jecTagsDict = {
+        'AK4CaloHLT': 'JetCorrectorParametersCollection_Run3Winter25Digi_AK4CaloHLT_v2',
+        'AK8CaloHLT': 'JetCorrectorParametersCollection_Run3Winter25Digi_AK8CaloHLT_v2',
+        'AK4PFHLT': 'JetCorrectorParametersCollection_Run3Winter25Digi_AK4PFHLT_v2',
+        'AK8PFHLT': 'JetCorrectorParametersCollection_Run3Winter25Digi_AK8PFHLT_v2',
+    }
+
+    try:
+        for (labelName, tagName) in jecTagsDict.items():
+            process.GlobalTag.toGet += [
+                cms.PSet(
+                    record = cms.string("JetCorrectionsRecord"),
+                    label = cms.untracked.string(labelName),
+                    tag = cms.string(tagName),
+                ),
+            ]
+    except:
         raise RuntimeError("customizeHLTfor2025JECs -- GlobalTag ESSource could not be customized !")
 
+    return process
+
+def customizeHLTfor2025Studies_JECsV1(process):
+    process = customizeHLTfor2025HCALPFCuts(process)
+    process = customizeHLTfor2025PFHadronCalibrations(process)
+    process = customizeHLTforCMSHLT3469(process)
+    process = customizeHLTfor2025JECsV1(process)
     return process
 
 def customizeHLTfor2025Studies(process):
