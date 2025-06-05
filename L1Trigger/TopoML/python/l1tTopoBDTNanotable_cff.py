@@ -5,8 +5,9 @@ from PhysicsTools.NanoAOD.common_cff import *
 from PhysicsTools.NanoAOD.globalVariablesTableProducer_cfi import globalVariablesTableProducer
 
 l1tTopoBDTNanotable = globalVariablesTableProducer.clone(
-    name = cms.string("L1TTopoBDT"),
+    name = cms.string("L1Ttopo"),
     variables = cms.PSet(
-        score = ExtVar( cms.InputTag("l1tTopoBDTProducer","score"),"float", doc="BDT score" ),
+        bdtScore = ExtVar( cms.InputTag("l1tTopoBDTProducer","score"),"float", doc="BDT score" ),
+        # bdt2Score = ExtVar( cms.InputTag("l1tTopoBDTProducerOther","score"),"float", doc="BDT score" ),
     ),
 ) 

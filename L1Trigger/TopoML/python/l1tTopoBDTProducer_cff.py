@@ -12,5 +12,5 @@ l1tTopoBDTProducer = cms.EDProducer('L1TTopoBDTProducer',
     nEg = cms.uint32(0),
     nTau = cms.uint32(6),
     model_path = cms.FileInPath("L1Trigger/TopoML/data/conifer_model_HH2b2t_2recotauh.json"),
-    name = cms.string("L1TTopoBDT"),
+    # name = cms.string("L1TTopoBDT"),
 )

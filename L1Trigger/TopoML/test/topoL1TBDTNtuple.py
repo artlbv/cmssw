@@ -46,7 +46,7 @@ process.load('L1Trigger.TopoML.l1tTopoBDTProducer_cff')
 
 process.path = cms.Path(
     process.l1tTopoBDTProducer
-    # + process.l1tTopoBDTProducerOther 
+    + process.l1tTopoBDTProducerOther 
 )
 
 # # create an EDM output file to store the score

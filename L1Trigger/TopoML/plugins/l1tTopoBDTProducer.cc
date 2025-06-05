@@ -7,7 +7,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 // File writing includes
-#include "DataFormats/NanoAOD/interface/FlatTable.h"
+// #include "DataFormats/NanoAOD/interface/FlatTable.h"
 //#include "TTree.h"
 //#include "FWCore/ServiceRegistry/interface/Service.h"
 //#include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -53,7 +53,7 @@ private:
 
   // emulator model path
   std::string model_path;
-  std::string name;
+  // std::string name;
 
 };
 
@@ -78,13 +78,13 @@ L1TTopoBDTProducer::L1TTopoBDTProducer(const edm::ParameterSet& cfg){
 
   // collection name
   // set the collection name to the name of the producer
-  name = cfg.getParameter<std::string>("name");
+  // name = cfg.getParameter<std::string>("name");
 
   // store the path to the .json file
   model_path = cfg.getParameter<edm::FileInPath>("model_path").fullPath();
 
   // produce
-  produces<nanoaod::FlatTable>(name);
+  // produces<nanoaod::FlatTable>(name);
   produces<float>("score"); 
 }
 
@@ -209,15 +209,15 @@ void L1TTopoBDTProducer::produce(edm::StreamID id, edm::Event& iEvent, const edm
   iEvent.put(std::make_unique<float>(output.at(0)), "score");
   // iEvent.put(std::make_unique<float>(output.at(0)));
 
-  // write the result to the output
-  // note cast from the ap_fixed emulated type to float for convenience
-  std::vector<float> y_vec;
-  y_vec.push_back(output.at(0));
+  // // write the result to the output
+  // // note cast from the ap_fixed emulated type to float for convenience
+  // std::vector<float> y_vec;
+  // y_vec.push_back(output.at(0));
 
-  // create a FlatTable to store the results
-  auto out = std::make_unique<nanoaod::FlatTable>(1, name, false);
-  out->addColumn<float>("y", y_vec, "model prediction");
-  iEvent.put(std::move(out), name);
+  // // create a FlatTable to store the results
+  // auto out = std::make_unique<nanoaod::FlatTable>(1, name, false);
+  // out->addColumn<float>("y", y_vec, "model prediction");
+  // iEvent.put(std::move(out), name);
 }
 
 void L1TTopoBDTProducer::beginJob(){
