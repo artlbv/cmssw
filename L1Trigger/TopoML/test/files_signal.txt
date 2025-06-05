@@ -1,0 +1,1 @@
+file:/eos/cms/store/mc/Run3Winter25MiniAOD/GluGluToHHTo2B2Tau_Par-c2-0-kl-1-kt-1_TuneCP5_13p6TeV_powheg-pythia8/MINIAODSIM/142X_mcRun3_2025_realistic_v7-v3/2550000/078f3e8a-9b1b-4ad2-b6c8-60ac6d2ae4d2.root
