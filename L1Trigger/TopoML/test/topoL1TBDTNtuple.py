@@ -10,6 +10,10 @@ from Configuration.Eras.Era_Run3_2024_cff import Run3_2024
 
 process = cms.Process("l1tTopoBDT", Run3_2024)
 
+process.options = cms.untracked.PSet(
+    wantSummary = cms.untracked.bool(True)
+)
+
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
@@ -40,13 +44,20 @@ process.load('L1Trigger.TopoML.l1tTopoBDTProducer_cff')
 
 ## different instance of the BDT producer for testing separate model
 # process.l1tTopoBDTProducerOther  = process.l1tTopoBDTProducer.clone(
-#     name = cms.string("samesamebutdifferent"),
 #     model_path = cms.FileInPath("L1Trigger/TopoML/data/conifer_model_HH2b2t_2recotauh.json"),
 # )
 
-process.path = cms.Path(
+## filter for the BDT score
+process.hltL1TopoBDTFilter = cms.EDFilter("HLTFloatThresholdFilter",
+    src = cms.InputTag("l1tTopoBDTProducer","score"),
+    threshold = cms.double(1)  # your threshold
+)
+
+
+process.myTopoPath = cms.Path(
     process.l1tTopoBDTProducer
-    + process.l1tTopoBDTProducerOther 
+    # + process.l1tTopoBDTProducerOther 
+    + process.hltL1TopoBDTFilter
 )
 
 # # create an EDM output file to store the score
@@ -63,6 +74,9 @@ process.output = cms.OutputModule("PoolOutputModule",
         # "keep *_l1tTopoBDTProducer_*_*",
         "keep *_l1tTopoBDTProducer*_*_*",
         # "drop nanoaodFlatTable_*_*_*",
+    ),
+    SelectEvents = cms.untracked.PSet(
+        SelectEvents = cms.vstring("myTopoPath")
     )
 )
 process.out = cms.EndPath(process.output)
@@ -97,12 +111,11 @@ process.load('L1Trigger.TopoML.l1tTopoBDTNanotable_cff')
 process.l1tNanoTask.add(process.l1tTopoBDTNanotable)
 
 
-
 process.schedule = cms.Schedule(
-    process.user_step,
-    process.path,
-    process.end,
-    process.out,
+    process.user_step, # l1 nano
+    process.myTopoPath, # my producer
+    process.end, # nano
+    process.out, # raw/fevt
 )
 
 ### Add FULL NANO
