@@ -1,13 +1,14 @@
 // FWCore includes
-#include "FWCore/Framework/interface/global/EDProducer.h"
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/Utilities/interface/ESGetToken.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 // File writing includes
-// #include "DataFormats/NanoAOD/interface/FlatTable.h"
+#include "DataFormats/NanoAOD/interface/FlatTable.h"
 //#include "TTree.h"
 //#include "FWCore/ServiceRegistry/interface/Service.h"
 //#include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -25,25 +26,21 @@
 
 #include <iostream>
 
-class L1TTopoBDTProducer : public edm::global::EDProducer<> {
+class L1TTopoBDTProducer : public edm::stream::EDProducer<> {
 public:
   explicit L1TTopoBDTProducer(const edm::ParameterSet& cfg);
-  ~L1TTopoBDTProducer();
+  ~L1TTopoBDTProducer() override;
 
 private:
-  virtual void beginJob() override;
-  virtual void produce(edm::StreamID id, edm::Event& iEvent, const edm::EventSetup& iSetup) const override;
-  virtual void endJob() override;
+  void produce(edm::Event& iEvent, const edm::EventSetup& iSetup) override;
 
-  edm::EDGetToken muToken;
-  edm::EDGetToken egToken;
-  edm::EDGetToken tauToken;
-  edm::EDGetToken jetToken;
-  edm::EDGetToken sumToken;
+  edm::EDGetTokenT<l1t::MuonBxCollection> muToken;
+  edm::EDGetTokenT<l1t::EGammaBxCollection> egToken;
+  edm::EDGetTokenT<l1t::TauBxCollection> tauToken;
+  edm::EDGetTokenT<l1t::JetBxCollection> jetToken;
+  edm::EDGetTokenT<l1t::EtSumBxCollection> sumToken;
 
-  // number of objects to consider
-  // nSums is the number of sums to consider, e.g. HT, MET, etc.
-  bool useHT; // whether to use HT or not
+  bool useHT;
   unsigned nSums;
   unsigned nMu;
   unsigned nEG;
@@ -51,47 +48,33 @@ private:
   unsigned nJet;
   unsigned nFeatures;
 
-  // emulator model path
   std::string model_path;
-  // std::string name;
-
 };
 
-L1TTopoBDTProducer::L1TTopoBDTProducer(const edm::ParameterSet& cfg){
-  // consume
+L1TTopoBDTProducer::L1TTopoBDTProducer(const edm::ParameterSet& cfg) {
   muToken = consumes<l1t::MuonBxCollection>(cfg.getParameter<edm::InputTag>("muToken"));
   egToken = consumes<l1t::EGammaBxCollection>(cfg.getParameter<edm::InputTag>("egToken"));
   tauToken = consumes<l1t::TauBxCollection>(cfg.getParameter<edm::InputTag>("tauToken"));
   jetToken = consumes<l1t::JetBxCollection>(cfg.getParameter<edm::InputTag>("jetToken"));
   sumToken = consumes<l1t::EtSumBxCollection>(cfg.getParameter<edm::InputTag>("etSumToken"));
   useHT = cfg.getParameter<bool>("useHT");
-  nSums = 0; // initialize to 0, will be set later
+  nSums = 0;
   nMu = cfg.getParameter<unsigned>("nMu");
   nEG = cfg.getParameter<unsigned>("nEg");
   nTau = cfg.getParameter<unsigned>("nTau");
   nJet = cfg.getParameter<unsigned>("nJet");
-  // total number of inputs to NN
   if (useHT) {
-    nSums++; // use HT, so add 1 for HT
+    nSums++;
   }
-  nFeatures = nSums + nMu + nEG + nTau + nJet; // only one input for the BDT, the pT 
-
-  // collection name
-  // set the collection name to the name of the producer
-  // name = cfg.getParameter<std::string>("name");
-
-  // store the path to the .json file
+  nFeatures = nSums + nMu + nEG + nTau + nJet;
   model_path = cfg.getParameter<edm::FileInPath>("model_path").fullPath();
-
-  // produce
-  // produces<nanoaod::FlatTable>(name);
-  produces<float>("score"); 
+  produces<float>("score");
+  // produces<nanoaod::FlatTable>("scores");
 }
 
-L1TTopoBDTProducer::~L1TTopoBDTProducer(){
-}
+L1TTopoBDTProducer::~L1TTopoBDTProducer() {}
 
-void L1TTopoBDTProducer::produce(edm::StreamID id, edm::Event& iEvent, const edm::EventSetup& iSetup) const {
+void L1TTopoBDTProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   using namespace edm;
   // get input collections
   // BXVector: first index is BX, second index is object
@@ -172,12 +155,12 @@ void L1TTopoBDTProducer::produce(edm::StreamID id, edm::Event& iEvent, const edm
 
   // Print all features if cms log mode is set to DEBUG 
   
-  std::cout << "Features: N =";
-  std::cout << features.size() << ", ";
-  for (const auto& f : features) {
-    std::cout << f << " ";
-  }
-  std::cout << std::endl;
+  // std::cout << "Features: N =";
+  // std::cout << features.size() << ", ";
+  // for (const auto& f : features) {
+  //   std::cout << f << " ";
+  // }
+  // std::cout << std::endl;
 
   // inspiration from https://github.com/cms-sw/cmssw/blob/dfb36b819cec568bb2d2334380fabadf75329217/L1Trigger/L1TTrackMatch/plugins/DisplacedVertexProducer.cc
 
@@ -202,7 +185,7 @@ void L1TTopoBDTProducer::produce(edm::StreamID id, edm::Event& iEvent, const edm
   std::vector<float> output = bdt.decision_function(features);
 
   // print score
-  std::cout << "BDT score: " << output.at(0) << std::endl;
+  // std::cout << "BDT score: " << output.at(0) << std::endl;
 
   // store score in event
   // iEvent.put(std::make_unique<std::vector<float>>(y_vec), "scores");
@@ -215,15 +198,9 @@ void L1TTopoBDTProducer::produce(edm::StreamID id, edm::Event& iEvent, const edm
   // y_vec.push_back(output.at(0));
 
   // // create a FlatTable to store the results
-  // auto out = std::make_unique<nanoaod::FlatTable>(1, name, false);
+  // auto out = std::make_unique<nanoaod::FlatTable>(1, "scores", false);
   // out->addColumn<float>("y", y_vec, "model prediction");
-  // iEvent.put(std::move(out), name);
-}
-
-void L1TTopoBDTProducer::beginJob(){
-}
-
-void L1TTopoBDTProducer::endJob(){
+  // iEvent.put(std::move(out), "scores");
 }
 
 // // make fillDescriptions
