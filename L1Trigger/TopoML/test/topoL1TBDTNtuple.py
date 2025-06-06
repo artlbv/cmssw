@@ -23,6 +23,8 @@ process.load('Configuration.StandardSequences.SimL1Emulator_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
+
 NEvents = options.maxEvents
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(NEvents)
@@ -50,7 +52,7 @@ process.load('L1Trigger.TopoML.l1tTopoBDTProducer_cff')
 ## filter for the BDT score
 process.hltL1TopoBDTFilter = cms.EDFilter("HLTFloatThresholdFilter",
     src = cms.InputTag("l1tTopoBDTProducer","score"),
-    threshold = cms.double(1)  # your threshold
+    threshold = cms.double(-999)  # your threshold
 )
 
 
