@@ -37,7 +37,7 @@
 // Objects to produce for the output record.
 #include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
 #include "DataFormats/L1TGlobal/interface/GlobalExtBlk.h"
-#include "DataFormats/L1TGlobal/interface/MLNNScore.h"
+#include "DataFormats/L1TGlobal/interface/MLScore.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -86,7 +86,7 @@ namespace l1t {
 
     void receiveExternalData(const edm::Event&, const edm::EDGetTokenT<BXVector<GlobalExtBlk>>&, const bool receiveExt);
 
-    void fillMLNNScore(int iBxInEvent, std::unique_ptr<MLNNScoreBxCollection>& AxoScoreRecord);
+    void fillMLScore(int iBxInEvent, std::unique_ptr<MLScoreRefBxCollection>& MLScoreRecord);
 
     /// initialize the class (mainly reserve)
     void init(const int numberPhysTriggers,
@@ -213,7 +213,7 @@ namespace l1t {
   public:
     inline void setVerbosity(const int verbosity) { m_verbosity = verbosity; }
 
-    inline void enableMLNNScoreSaving(bool savescore) { m_saveMLNNScore = savescore; }
+    inline void enableMLScoreSaving(bool savescore) { m_saveMLScore = savescore; }
 
   private:
     BXVector<const l1t::Muon*>* m_candL1Mu;
@@ -241,10 +241,10 @@ namespace l1t {
     GlobalAlgBlk m_uGtAlgBlk;
 
     //for optional software-only saving of mlnn score
-    MLNNScore m_uGtMLNNScore;       //score dataformat
-    float m_storedMLNNScore = -999.f;  //score from cond class
-    bool m_saveMLNNScore = false;
-    std::string m_mlnnScoreConditionName;
+    MLScore m_uGtMLScore;       //score dataformat
+    float m_storedMLScore = -999.f;  //score from cond class
+    bool m_saveMLScore = false;
+    std::string m_mlScoreConditionName;
 
     // cache of maps
     std::vector<AlgorithmEvaluation::ConditionEvaluationMap> m_conditionResultMaps;

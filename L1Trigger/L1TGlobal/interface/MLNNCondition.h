@@ -80,8 +80,14 @@ namespace l1t {
 
     static constexpr char const* kModelNamePrefix = "";
 
+    // NN models based on hls4ml
     hls4mlEmulator::ModelLoader m_model_loader;
     std::shared_ptr<hls4mlEmulator::Model> m_model;
+
+    // BDT models based on conifer
+    // typedef ap_fixed<21, 12, AP_RND_CONV, AP_SAT> bdt_feature_t;
+    // typedef ap_fixed<12, 3, AP_RND_CONV, AP_SAT> bdt_score_t;
+    // std::unique_ptr<conifer::BDT<bdt_feature_t, bdt_score_t, false>> model_;
 
     ///mlnn score for possible score saving
     mutable float m_savedscore;

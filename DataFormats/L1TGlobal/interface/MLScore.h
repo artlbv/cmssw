@@ -1,11 +1,11 @@
-#ifndef DataFormats_L1TGlobal_AXOL1TLScore_h
-#define DataFormats_L1TGlobal_AXOL1TLScore_h
+#ifndef DataFormats_L1TGlobal_MLScore_h
+#define DataFormats_L1TGlobal_MLScore_h
 
 /**
-* \class AXOL1TLScore
+* \class MLScore
 *
 *
-* Description: L1 micro Global Trigger - Extra NN score emulation information for AXOL1TL.
+* Description: L1 micro Global Trigger - Extra NN score emulation information for ML.
 * 
 *
 * \author: Melissa Quinnan - UC San Diego
@@ -27,26 +27,26 @@
 // forward declarations
 
 // namespace l1t {
-class AXOL1TLScore;
-typedef BXVector<AXOL1TLScore> AXOL1TLScoreBxCollection;
+class MLScore;
+typedef BXVector<MLScore> MLScoreBxCollection;
 
-typedef l1t::ObjectRef<AXOL1TLScore> AXOL1TLScoreRef;
-typedef l1t::ObjectRefBxCollection<AXOL1TLScore> AXOL1TLScoreRefBxCollection;
-// typedef l1t::ObjectRefPair<AXOL1TLScore> AXOL1TLScoreRefPair;
-// typedef l1t::ObjectRefPairBxCollection<AXOL1TLScore> AXOL1TLScoreRefPairBxCollection; //dont think pair part is needed
+typedef l1t::ObjectRef<MLScore> MLScoreRef;
+typedef l1t::ObjectRefBxCollection<MLScore> MLScoreRefBxCollection;
+// typedef l1t::ObjectRefPair<MLScore> MLScoreRefPair;
+// typedef l1t::ObjectRefPairBxCollection<MLScore> MLScoreRefPairBxCollection; //dont think pair part is needed
 
 // class interface
-class AXOL1TLScore {
+class MLScore {
 public:
   /// constructors
-  AXOL1TLScore();  //empty constructor
+  MLScore();  //empty constructor
 
-  AXOL1TLScore(int bxInEvent);
+  MLScore(int bxInEvent);
 
-  AXOL1TLScore(int bxInEvent, float score);
+  MLScore(int bxInEvent, float score);
 
   /// destructor
-  virtual ~AXOL1TLScore();
+  virtual ~MLScore();
 
   ///set/get axo score and other simple members
   void setAXOScore(float score) { axoscore_ = score; }
@@ -68,4 +68,4 @@ private:
   // std::string nnversion;
 };
 //} l1t namespace
-#endif /*DataFormats_L1TGlobal_AXOL1TLScore_h*/
+#endif /*DataFormats_L1TGlobal_MLScore_h*/
