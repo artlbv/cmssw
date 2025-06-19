@@ -19,6 +19,7 @@
 #include <vector>
 #include <algorithm>
 #include "ap_fixed.h"
+#include "conifer.h"
 
 // user include files
 //   base classes
@@ -120,20 +121,15 @@ const bool l1t::TOPOCondition::evaluateCondition(const int bxEval) const {
   bool condResult = false;
   int useBx = bxEval + m_gtTOPOTemplate->condRelativeBx();
 
-  // //pointers to objects
-  const BXVector<const l1t::Muon*>* candMuVec = m_gtGTB->getCandL1Mu();
-  const BXVector<const l1t::L1Candidate*>* candTauVec = m_gtGTB->getCandL1Tau();
-  const BXVector<const l1t::L1Candidate*>* candJetVec = m_gtGTB->getCandL1Jet();
-  const BXVector<const l1t::L1Candidate*>* candEGVec = m_gtGTB->getCandL1EG();
-  const BXVector<const l1t::EtSum*>* candEtSumVec = m_gtGTB->getCandL1EtSum();
+  float score = -999.0;  //not sure what the best default is hm??
 
-  // const int NMuons = 4;
-  // const int NJets = 10;
-  // const int NEgammas = 4;
-  // const int NEtSums = 1;  
+  if (m_model_loader.model_name() == "TOPONN_v0") {
+    // //pointers to objects
+    const BXVector<const l1t::Muon*>* candMuVec = m_gtGTB->getCandL1Mu();
+    const BXVector<const l1t::L1Candidate*>* candJetVec = m_gtGTB->getCandL1Jet();
+    const BXVector<const l1t::L1Candidate*>* candEGVec = m_gtGTB->getCandL1EG();
+    const BXVector<const l1t::EtSum*>* candEtSumVec = m_gtGTB->getCandL1EtSum();
 
-
-  if (m_model_loader.model_name() == "TOPONN_v0")
     //define number of objects we expect
     const int NMuons = 2;
     const int NJets = 4;
@@ -169,7 +165,6 @@ const bool l1t::TOPOCondition::evaluateCondition(const int bxEval) const {
     // resulttype result;
     losstype loss;
     // pairtype MLNNModelResult;  //model outputs a pair of the (result vector, loss)
-    float score = -1.0;  //not sure what the best default is hm??
 
     //check number of input objects we actually have (muons, jets etc)
     int NCandMu = candMuVec->size(useBx);
@@ -265,138 +260,108 @@ const bool l1t::TOPOCondition::evaluateCondition(const int bxEval) const {
     //save score to class variable in case score saving needed
     setScore(score);
   }
-  else if (m_model_loader.model_name() == "TOPOBDT_v0")
-  {
+
+  else if (m_model_loader.model_name() == "TOPOBDT_v0") {
+  
+    //pointers to objects
+    const BXVector<const l1t::Muon*>* candMuVec = m_gtGTB->getCandL1Mu();
+    const BXVector<const l1t::L1Candidate*>* candTauVec = m_gtGTB->getCandL1Tau();
+    const BXVector<const l1t::L1Candidate*>* candJetVec = m_gtGTB->getCandL1Jet();
+    const BXVector<const l1t::L1Candidate*>* candEGVec = m_gtGTB->getCandL1EG();
+    const BXVector<const l1t::EtSum*>* candEtSumVec = m_gtGTB->getCandL1EtSum();
     
-    
-    const int NMuons = 2;
-    const int NJets = 4;
+    const int NMuons = 0;
+    const int NJets = 0;
     const int NEgammas = 0;
     const int NEtSums = 1;
+    const int NTaus = 6;
 
-    //number of indices in vector is #objects * 3 for et, eta, phi
-    const int MuVecSize = NMuons * 3;      //so 6
-    const int JVecSize = NJets * 3;        //so 12
-    const int EGVecSize = NEgammas * 3;    //so 0
-    const int EtSumVecSize = NEtSums * 3;    //so 3
+    // //number of indices in vector is #objects * 3 for et, eta, phi
+    // const int MuVecSize = NMuons * 1;      //so 6
+    // const int JVecSize = NJets * 1;        //so 12
+    // const int EGVecSize = NEgammas * 1;    //so 0
+    // const int EtSumVecSize = NEtSums * 1;    //so 3
 
-    //total # inputs in vector is (4+10+4+1)*3 = 57
-    const int NInputs = MuVecSize + JVecSize + EGVecSize + EtSumVecSize;  //so 21
+    // const bool useHT = 1; //
 
-    //types of inputs and outputs
-    typedef ap_fixed<18, 13> inputtype;
-    typedef ap_ufixed<18, 14> losstype;
-
-    //define zero
-    inputtype fillzero = 0.0;
-
-    //AD vector declaration, will fill later
-    inputtype MLNNModelInput[NInputs] = {};
-
-    //initializing vector by type for my sanity
-    inputtype MuInput[MuVecSize];
-    inputtype JetInput[JVecSize];
-    inputtype EgammaInput[EGVecSize];
-    inputtype EtSumInput[EtSumVecSize];
-
-    //declare result vectors +score
-    // resulttype result;
-    losstype loss;
-    // pairtype MLNNModelResult;  //model outputs a pair of the (result vector, loss)
-    float score = -1.0;  //not sure what the best default is hm??
+    const int nFeatures = NEtSums + NMuons + NEgammas + NTaus + NJets;
+    // model_path = cfg.getParameter<edm::FileInPath>("model_path").fullPath();
 
     //check number of input objects we actually have (muons, jets etc)
-    int NCandMu = candMuVec->size(useBx);
+    // int NCandMu = candMuVec->size(useBx);
     int NCandJet = candJetVec->size(useBx);
-    int NCandEG = candEGVec->size(useBx);
+    // int NCandEG = candEGVec->size(useBx);
+    int NCandTau = candTauVec->size(useBx);
     int NCandEtSum = candEtSumVec->size(useBx);
 
-    //initialize arrays to zero (std::fill(first, last, value);)
-    std::fill(EtSumInput, EtSumInput + EtSumVecSize, fillzero);
-    std::fill(MuInput, MuInput + MuVecSize, fillzero);
-    std::fill(JetInput, JetInput + JVecSize, fillzero);
-    std::fill(EgammaInput, EgammaInput + EGVecSize, fillzero);
-    std::fill(MLNNModelInput, MLNNModelInput + NInputs, fillzero);
+    std::vector<float> features(nFeatures, 0.0f);
 
-    //then fill the object vectors
-    //NOTE assume candidates are already sorted by pt
-    //loop over EtSums first, easy because there is max 1 of them
+    // // fill the inputs
+    unsigned ix = 0;
+    // // sums first, just find the MET
+    // // see https://github.com/cms-sw/cmssw/blob/master/DataFormats/L1Trigger/interface/EtSum.h#L21
     if (NCandEtSum > 0) {  //check if not empty
       for (int iEtSum = 0; iEtSum < NCandEtSum; iEtSum++) {
-        if ((candEtSumVec->at(useBx, iEtSum))->getType() == l1t::EtSum::EtSumType::kMissingEt) {
-          EtSumInput[0] =
-              ((candEtSumVec->at(useBx, iEtSum))->hwPt()) / 2;  //have to do hwPt/2 in order to match original et inputs
-          // EtSumInput[1] = (candEtSumVec->at(useBx, iEtSum))->hwEta(); //this one is zero, so leave it zero
-          EtSumInput[2] = (candEtSumVec->at(useBx, iEtSum))->hwPhi();
-        }
-      }
-    }
-
-    //next egammas
-    if (NCandEG > 0) {  //check if not empty
-      for (int iEG = 0; iEG < NCandEG; iEG++) {
-        if (iEG < NEgammas) {  //stop if fill the Nobjects we need
-          EgammaInput[0 + (3 * iEG)] = (candEGVec->at(useBx, iEG))->hwPt();   //index 0,3,6,9
-          EgammaInput[1 + (3 * iEG)] = (candEGVec->at(useBx, iEG))->hwEta();  //index 1,4,7,10
-          EgammaInput[2 + (3 * iEG)] = (candEGVec->at(useBx, iEG))->hwPhi();  //index 2,5,8,11
-        }
-      }
-    }
-
-    //next muons
-    if (NCandMu > 0) {  //check if not empty
-      for (int iMu = 0; iMu < NCandMu; iMu++) {
-        if (iMu < NMuons) {  //stop if fill the Nobjects we need
-          MuInput[0 + (3 * iMu)] = (candMuVec->at(useBx, iMu))->hwPt();        //index 0,3,6,9
-          MuInput[1 + (3 * iMu)] = (candMuVec->at(useBx, iMu))->hwEtaAtVtx();  //index 1,4,7,10
-          MuInput[2 + (3 * iMu)] = (candMuVec->at(useBx, iMu))->hwPhiAtVtx();  //index 2,5,8,11
+        if ((candEtSumVec->at(useBx, iEtSum))->getType() == l1t::EtSum::EtSumType::kTotalHt) {
+          features[ix++] = ((candEtSumVec->at(useBx, iEtSum))->pt()); 
         }
       }
     }
 
     //next jets
+    ix = 1 * ( NEtSums );
     if (NCandJet > 0) {  //check if not empty
       for (int iJet = 0; iJet < NCandJet; iJet++) {
         if (iJet < NJets) {  //stop if fill the Nobjects we need
-          JetInput[0 + (3 * iJet)] = (candJetVec->at(useBx, iJet))->hwPt(); //index 0,3,6,9
-          JetInput[1 + (3 * iJet)] = (candJetVec->at(useBx, iJet))->hwEta();  //index 1,4,7,10
-          JetInput[2 + (3 * iJet)] = (candJetVec->at(useBx, iJet))->hwPhi();  //index 2,5,8,11
+          features[ix++] = (candJetVec->at(useBx, iJet))->pt();
         }
       }
     }
 
-    //now put it all together-> EtSum+EGamma+Muon+Jet into MLNNModelInput
-    int index = 0;
-    for (int idET = 0; idET < EtSumVecSize; idET++) {
-      MLNNModelInput[index++] = EtSumInput[idET];
-    }
-    for (int idEG = 0; idEG < EGVecSize; idEG++) {
-      MLNNModelInput[index++] = EgammaInput[idEG];
-    }
-    for (int idMu = 0; idMu < MuVecSize; idMu++) {
-      MLNNModelInput[index++] = MuInput[idMu];
-    }
-    for (int idJ = 0; idJ < JVecSize; idJ++) {
-      MLNNModelInput[index++] = JetInput[idJ];
+    //next taus
+    ix = 1 * ( NEtSums + NJets );
+    if (NCandTau > 0) {  //check if not empty
+      for (int iTau = 0; iTau < NCandTau; iTau++) {
+        if (iTau < NTaus) {  //stop if fill the Nobjects we need
+          features[ix++] = (candTauVec->at(useBx, iTau))->pt();
+        }
+      }
     }
 
-    //now run the inference
-    m_model->prepare_input(MLNNModelInput);  //scaling internal here
-    m_model->predict();
-    // m_model->read_result(&MLNNModelResult);  // this should be the square sum model result
-    if ((m_model_loader.model_name() == "GTMLNNModel_v3") ||
-        (m_model_loader.model_name() == "GTMLNNModel_v4")) {  //v3/v4 overwrite
-      using resulttype = std::array<ap_fixed<10, 7, AP_RND_CONV, AP_SAT>, 8>;
-      loss = readResult<resulttype, losstype>(*m_model);
-    } else {  //v5 default
-      using resulttype = ap_fixed<18, 14, AP_RND_CONV, AP_SAT>;
-      loss = readResult<resulttype, losstype>(*m_model);
+    // Print all features if cms log mode is set to DEBUG 
+    
+    std::cout << "Features: N =";
+    std::cout << features.size() << ", ";
+    for (const auto& f : features) {
+      std::cout << f << " ";
     }
+    std::cout << std::endl;
 
-    // result = MLNNModelResult.first;
-    // loss = MLNNModelResult.second;
-    score = ((loss).to_float()) * 16.0;  //scaling to match threshold
-    //save score to class variable in case score saving needed
+    // inspiration from https://github.com/cms-sw/cmssw/blob/dfb36b819cec568bb2d2334380fabadf75329217/L1Trigger/L1TTrackMatch/plugins/DisplacedVertexProducer.cc
+
+    // load the BDT model
+    // conifer::BDT<ap_fixed<10, 5>, ap_fixed<10, 5>> bdt(model_path);
+    // conifer::BDT<float, float> bdt(model_path);
+    // model = conifer::BDT<float, float>(model_path);
+    // model_path = cfg.getParameter<edm::FileInPath>("model_path").fullPath();
+    // std::string model_path = m_model_loader.model_name();
+
+    // auto model_path = edm::FileInPath("L1Trigger/TopoML/data/conifer_model_HH2b2t_2recotauh.json").fullPath();
+    auto model_path = "L1Trigger/TopoML/data/conifer_model_HH2b2t_2recotauh.json";
+    // model_ = std::make_unique<conifer::BDT<bdt_feature_t, bdt_score_t, false>>(resolvedFileName);
+    // conifer::BDT<ap_fixed<10, 5>, ap_fixed<10, 5>> bdt(model_path);
+    conifer::BDT<float, float> bdt(model_path);
+
+    if (features.size() != 7) {
+      throw cms::Exception("L1TTopoBDTProducer") << "Number of features does not match expected size: "
+                                                << features.size() << " != " << 7;
+    }
+    std::vector<float> output = bdt.decision_function(features);
+
+    // print score
+    std::cout << "BDT score: " << output.at(0) << std::endl;
+
+    score = output.at(0);
     setScore(score);
   }
   

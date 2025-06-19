@@ -11,6 +11,7 @@
 <use name="xerces-c"/>
 <use name="hls"/>
 <use name="hls4mlEmulatorExtras"/>
+<use name="conifer"/>
 <use name="AXOL1TL"/>
 <export>
   <lib name="1"/>
