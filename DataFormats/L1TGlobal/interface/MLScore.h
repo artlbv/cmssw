@@ -48,11 +48,11 @@ public:
   /// destructor
   virtual ~MLScore();
 
-  ///set/get axo score and other simple members
-  void setAXOScore(float score) { axoscore_ = score; }
+  ///set/get ml score and other simple members
+  void setMLScore(float score) { mlscore_ = score; }
   void setbxInEventNr(int bxNr) { m_bxInEvent = bxNr; }
 
-  inline float const& getAXOScore() const { return axoscore_; }
+  inline float const& getMLScore() const { return mlscore_; }
   inline const int getbxInEventNr() const { return m_bxInEvent; }
 
   void reset();
@@ -61,8 +61,8 @@ private:
   /// bunch cross in the GT event record (E,F,0,1,2)
   int m_bxInEvent;
 
-  //axo score value
-  float axoscore_;
+  //ml score value
+  float mlscore_;
 
   //store version or type of network?
   // std::string nnversion;

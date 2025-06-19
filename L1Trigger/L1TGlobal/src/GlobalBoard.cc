@@ -86,8 +86,8 @@ l1t::GlobalBoard::GlobalBoard()
 
   m_prescaleCounterAlgoTrig.clear();
 
-  m_uGtMLNNScore.reset();
-  m_mlnnScoreConditionName = "";
+  m_uGtMLScore.reset();
+  m_MLScoreConditionName = "";
 }
 
 // Destructor
@@ -513,19 +513,19 @@ void l1t::GlobalBoard::receiveExternalData(const edm::Event& iEvent,
 }
 
 // fill mlnn score value per bx in event
-void l1t::GlobalBoard::fillMLNNScore(int iBxInEvent, std::unique_ptr<MLNNScoreBxCollection>& MLnnScoreRecord) {
-  m_uGtMLNNScore.reset();
-  m_uGtMLNNScore.setbxInEventNr((iBxInEvent & 0xF));
+void l1t::GlobalBoard::fillMLScore(int iBxInEvent, std::unique_ptr<MLScoreBxCollection>& MLScoreRecord) {
+  m_uGtMLScore.reset();
+  m_uGtMLScore.setbxInEventNr((iBxInEvent & 0xF));
 
   //save stored condition score if Bx is zero, else set to 0
   float scorevalue = 0.0;
   if (iBxInEvent == 0) {
-    scorevalue = m_storedMLNNScore;
+    scorevalue = m_storedMLScore;
   }
 
   //set dataformat value
-  m_uGtMLNNScore.setMLNNScore(scorevalue);
-  MLnnScoreRecord->push_back(iBxInEvent, m_uGtMLNNScore);
+  m_uGtMLScore.setMLScore(scorevalue);
+  MLScoreRecord->push_back(iBxInEvent, m_uGtMLScore);
 }
 
 // Initialise Trigger Conditions
@@ -642,8 +642,8 @@ void l1t::GlobalBoard::initTriggerConditions(const edm::EventSetup& evSetup,
           theCondition = std::make_unique<MLNNCondition>(itCond.second, this);
           theCondition->setVerbosity(m_verbosity);
 
-          if (m_saveMLNNScore and not m_mlnnScoreConditionName.empty()) {
-            m_mlnnScoreConditionName = itCond.first;
+          if (m_saveMLScore and not m_MLScoreConditionName.empty()) {
+            m_MLScoreConditionName = itCond.first;
           }
 
           if (m_verbosity && m_isDebugEnabled) {
@@ -658,8 +658,8 @@ void l1t::GlobalBoard::initTriggerConditions(const edm::EventSetup& evSetup,
           theCondition = std::make_unique<TOPOCondition>(itCond.second, this);
           theCondition->setVerbosity(m_verbosity);
 
-          if (m_saveMLNNScore and not m_mlnnScoreConditionName.empty()) {
-            m_mlnnScoreConditionName = itCond.first;
+          if (m_saveMLScore and not m_MLScoreConditionName.empty()) {
+            m_MLScoreConditionName = itCond.first;
           }
 
           if (m_verbosity && m_isDebugEnabled) {
@@ -922,11 +922,11 @@ void l1t::GlobalBoard::runGTL(const edm::Event&,
       cond.second->evaluateConditionStoreResult(iBxInEvent);
 
       // for optional software-only saving of mlnn score
-      // m_storedMLNNScore < 0.0 ensures this gets set only once per condition if score not default of -999
-      if (m_saveMLNNScore and m_storedMLNNScore < 0 and cond.first == m_mlnnScoreConditionName and
-          not m_mlnnScoreConditionName.empty()) {
+      // m_storedMLScore < 0.0 ensures this gets set only once per condition if score not default of -999
+      if (m_saveMLScore and m_storedMLScore < 0 and cond.first == m_MLScoreConditionName and
+          not m_MLScoreConditionName.empty()) {
         auto const* theCondition = dynamic_cast<MLNNCondition*>(cond.second.get());
-        m_storedMLNNScore = theCondition->getScore();
+        m_storedMLScore = theCondition->getScore();
       }
     }
   }
@@ -1174,9 +1174,9 @@ void l1t::GlobalBoard::reset() {
   m_uGtAlgBlk.reset();
 
   //reset MLNN score
-  m_storedMLNNScore = -999.f;
-  m_uGtMLNNScore.reset();
-  m_mlnnScoreConditionName = "";
+  m_storedMLScore = -999.f;
+  m_uGtMLScore.reset();
+  m_MLScoreConditionName = "";
 
   m_gtlDecisionWord.reset();
   m_gtlAlgorithmOR.reset();

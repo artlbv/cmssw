@@ -195,7 +195,7 @@ private:
   bool m_useMuonShowers;
 
   //switch to save mlnn scores in global board
-  bool m_produceMLNNScore;
+  bool m_produceMLScore;
 };
 
 #endif  // L1TGlobalProducer_h

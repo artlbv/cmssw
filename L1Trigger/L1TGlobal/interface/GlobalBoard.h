@@ -86,7 +86,7 @@ namespace l1t {
 
     void receiveExternalData(const edm::Event&, const edm::EDGetTokenT<BXVector<GlobalExtBlk>>&, const bool receiveExt);
 
-    void fillMLScore(int iBxInEvent, std::unique_ptr<MLScoreRefBxCollection>& MLScoreRecord);
+    void fillMLScore(int iBxInEvent, std::unique_ptr<MLScoreBxCollection>& MLScoreRecord);
 
     /// initialize the class (mainly reserve)
     void init(const int numberPhysTriggers,
@@ -240,11 +240,11 @@ namespace l1t {
 
     GlobalAlgBlk m_uGtAlgBlk;
 
-    //for optional software-only saving of mlnn score
+    //for optional software-only saving of ml score
     MLScore m_uGtMLScore;       //score dataformat
     float m_storedMLScore = -999.f;  //score from cond class
     bool m_saveMLScore = false;
-    std::string m_mlScoreConditionName;
+    std::string m_MLScoreConditionName;
 
     // cache of maps
     std::vector<AlgorithmEvaluation::ConditionEvaluationMap> m_conditionResultMaps;
