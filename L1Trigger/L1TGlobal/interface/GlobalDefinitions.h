@@ -82,7 +82,7 @@ namespace l1t {
     TypeAsymHtHF,
     TypeZDCP,
     TypeZDCM,
-    TypeAXOL1TL,
+    TypeMLNN,
     TypeTOPO,
     TypeCICADA,
     GtConditionTypeInvalid = -1
@@ -108,7 +108,7 @@ namespace l1t {
     CondCorrelationThreeBody,
     CondMuonShower,
     CondEnergySumZdc,
-    CondAXOL1TL,
+    CondMLNN,
     CondTOPO,
     CondCICADA,
     GtConditionCategoryInvalid = -1

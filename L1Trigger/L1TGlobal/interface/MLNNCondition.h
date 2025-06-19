@@ -1,10 +1,10 @@
-#ifndef L1Trigger_L1TGlobal_AXOL1TLCondition_h
-#define L1Trigger_L1TGlobal_AXOL1TLCondition_h
+#ifndef L1Trigger_L1TGlobal_MLNNCondition_h
+#define L1Trigger_L1TGlobal_MLNNCondition_h
 
 /**
- * \class AXOL1TLCondition
+ * \class MLNNCondition
  *
- * Description: evaluation of a CondAXOL1TL condition.
+ * Description: evaluation of a CondMLNN condition.
  */
 
 #include <iosfwd>
@@ -18,7 +18,7 @@
 
 // forward declarations
 class GlobalCondition;
-class AXOL1TLTemplate;
+class MLNNTemplate;
 
 namespace l1t {
 
@@ -26,22 +26,22 @@ namespace l1t {
   class GlobalBoard;
 
   // class declaration
-  class AXOL1TLCondition : public ConditionEvaluation {
+  class MLNNCondition : public ConditionEvaluation {
   public:
     /// constructors
     ///     default
-    AXOL1TLCondition();
+    MLNNCondition();
 
     ///     from base template condition (from event setup usually)
-    AXOL1TLCondition(const GlobalCondition*, const GlobalBoard*);
+    MLNNCondition(const GlobalCondition*, const GlobalBoard*);
 
     // copy constructor
-    AXOL1TLCondition(const AXOL1TLCondition&);
+    MLNNCondition(const MLNNCondition&);
     // destructor
-    ~AXOL1TLCondition() override;
+    ~MLNNCondition() override;
 
     // assign operator
-    AXOL1TLCondition& operator=(const AXOL1TLCondition&);
+    MLNNCondition& operator=(const MLNNCondition&);
 
     /// the core function to check if the condition matches
     const bool evaluateCondition(const int bxEval) const override;
@@ -50,9 +50,9 @@ namespace l1t {
     void print(std::ostream& myCout) const override;
 
     ///   get / set the pointer to a Condition
-    inline const AXOL1TLTemplate* gtAXOL1TLTemplate() const { return m_gtAXOL1TLTemplate; }
+    inline const MLNNTemplate* gtMLNNTemplate() const { return m_gtMLNNTemplate; }
 
-    void setGtAXOL1TLTemplate(const AXOL1TLTemplate*);
+    void setGtMLNNTemplate(const MLNNTemplate*);
 
     ///   get / set the pointer to GTL
     inline const GlobalBoard* gtGTB() const { return m_gtGTB; }
@@ -70,20 +70,20 @@ namespace l1t {
 
   private:
     /// copy function for copy constructor and operator=
-    void copy(const AXOL1TLCondition& cp);
+    void copy(const MLNNCondition& cp);
 
-    /// pointer to a AXOL1TLTemplate
-    const AXOL1TLTemplate* m_gtAXOL1TLTemplate;
+    /// pointer to a MLNNTemplate
+    const MLNNTemplate* m_gtMLNNTemplate;
 
     /// pointer to uGt GlobalBoard, to be able to get the trigger objects
     const GlobalBoard* m_gtGTB;
 
-    static constexpr char const* kModelNamePrefix = "GTADModel_";
+    static constexpr char const* kModelNamePrefix = "";
 
     hls4mlEmulator::ModelLoader m_model_loader;
     std::shared_ptr<hls4mlEmulator::Model> m_model;
 
-    ///axo score for possible score saving
+    ///mlnn score for possible score saving
     mutable float m_savedscore;
   };
 

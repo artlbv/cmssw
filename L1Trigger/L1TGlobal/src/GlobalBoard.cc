@@ -37,7 +37,7 @@
 #include "L1Trigger/L1TGlobal/interface/CaloTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/EnergySumTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/EnergySumZdcTemplate.h"
-#include "L1Trigger/L1TGlobal/interface/AXOL1TLTemplate.h"
+#include "L1Trigger/L1TGlobal/interface/MLNNTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/TOPOTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/CICADATemplate.h"
 #include "L1Trigger/L1TGlobal/interface/ExternalTemplate.h"
@@ -56,7 +56,7 @@
 #include "L1Trigger/L1TGlobal/interface/CaloCondition.h"
 #include "L1Trigger/L1TGlobal/interface/EnergySumCondition.h"
 #include "L1Trigger/L1TGlobal/interface/EnergySumZdcCondition.h"
-#include "L1Trigger/L1TGlobal/interface/AXOL1TLCondition.h"
+#include "L1Trigger/L1TGlobal/interface/MLNNCondition.h"
 #include "L1Trigger/L1TGlobal/interface/TOPOCondition.h"
 #include "L1Trigger/L1TGlobal/interface/CICADACondition.h"
 #include "L1Trigger/L1TGlobal/interface/ExternalCondition.h"
@@ -86,8 +86,8 @@ l1t::GlobalBoard::GlobalBoard()
 
   m_prescaleCounterAlgoTrig.clear();
 
-  m_uGtAXOScore.reset();
-  m_axoScoreConditionName = "";
+  m_uGtMLNNScore.reset();
+  m_mlnnScoreConditionName = "";
 }
 
 // Destructor
@@ -512,20 +512,20 @@ void l1t::GlobalBoard::receiveExternalData(const edm::Event& iEvent,
   }  //end if ReceiveExt data
 }
 
-// fill axo score value per bx in event
-void l1t::GlobalBoard::fillAXOScore(int iBxInEvent, std::unique_ptr<AXOL1TLScoreBxCollection>& AxoScoreRecord) {
-  m_uGtAXOScore.reset();
-  m_uGtAXOScore.setbxInEventNr((iBxInEvent & 0xF));
+// fill mlnn score value per bx in event
+void l1t::GlobalBoard::fillMLNNScore(int iBxInEvent, std::unique_ptr<MLNNScoreBxCollection>& MLnnScoreRecord) {
+  m_uGtMLNNScore.reset();
+  m_uGtMLNNScore.setbxInEventNr((iBxInEvent & 0xF));
 
   //save stored condition score if Bx is zero, else set to 0
   float scorevalue = 0.0;
   if (iBxInEvent == 0) {
-    scorevalue = m_storedAXOScore;
+    scorevalue = m_storedMLNNScore;
   }
 
   //set dataformat value
-  m_uGtAXOScore.setAXOScore(scorevalue);
-  AxoScoreRecord->push_back(iBxInEvent, m_uGtAXOScore);
+  m_uGtMLNNScore.setMLNNScore(scorevalue);
+  MLnnScoreRecord->push_back(iBxInEvent, m_uGtMLNNScore);
 }
 
 // Initialise Trigger Conditions
@@ -638,12 +638,12 @@ void l1t::GlobalBoard::initTriggerConditions(const edm::EventSetup& evSetup,
           }
         } break;
 
-        case CondAXOL1TL: {
-          theCondition = std::make_unique<AXOL1TLCondition>(itCond.second, this);
+        case CondMLNN: {
+          theCondition = std::make_unique<MLNNCondition>(itCond.second, this);
           theCondition->setVerbosity(m_verbosity);
 
-          if (m_saveAXOScore and not m_axoScoreConditionName.empty()) {
-            m_axoScoreConditionName = itCond.first;
+          if (m_saveMLNNScore and not m_mlnnScoreConditionName.empty()) {
+            m_mlnnScoreConditionName = itCond.first;
           }
 
           if (m_verbosity && m_isDebugEnabled) {
@@ -658,8 +658,8 @@ void l1t::GlobalBoard::initTriggerConditions(const edm::EventSetup& evSetup,
           theCondition = std::make_unique<TOPOCondition>(itCond.second, this);
           theCondition->setVerbosity(m_verbosity);
 
-          if (m_saveAXOScore and not m_axoScoreConditionName.empty()) {
-            m_axoScoreConditionName = itCond.first;
+          if (m_saveMLNNScore and not m_mlnnScoreConditionName.empty()) {
+            m_mlnnScoreConditionName = itCond.first;
           }
 
           if (m_verbosity && m_isDebugEnabled) {
@@ -921,12 +921,12 @@ void l1t::GlobalBoard::runGTL(const edm::Event&,
     for (auto& cond : condMap) {
       cond.second->evaluateConditionStoreResult(iBxInEvent);
 
-      // for optional software-only saving of axol1tl score
-      // m_storedAXOScore < 0.0 ensures this gets set only once per condition if score not default of -999
-      if (m_saveAXOScore and m_storedAXOScore < 0 and cond.first == m_axoScoreConditionName and
-          not m_axoScoreConditionName.empty()) {
-        auto const* theCondition = dynamic_cast<AXOL1TLCondition*>(cond.second.get());
-        m_storedAXOScore = theCondition->getScore();
+      // for optional software-only saving of mlnn score
+      // m_storedMLNNScore < 0.0 ensures this gets set only once per condition if score not default of -999
+      if (m_saveMLNNScore and m_storedMLNNScore < 0 and cond.first == m_mlnnScoreConditionName and
+          not m_mlnnScoreConditionName.empty()) {
+        auto const* theCondition = dynamic_cast<MLNNCondition*>(cond.second.get());
+        m_storedMLNNScore = theCondition->getScore();
       }
     }
   }
@@ -1173,10 +1173,10 @@ void l1t::GlobalBoard::reset() {
 
   m_uGtAlgBlk.reset();
 
-  //reset AXO score
-  m_storedAXOScore = -999.f;
-  m_uGtAXOScore.reset();
-  m_axoScoreConditionName = "";
+  //reset MLNN score
+  m_storedMLNNScore = -999.f;
+  m_uGtMLNNScore.reset();
+  m_mlnnScoreConditionName = "";
 
   m_gtlDecisionWord.reset();
   m_gtlAlgorithmOR.reset();

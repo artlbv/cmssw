@@ -78,12 +78,12 @@ namespace l1t {
     /// pointer to uGt GlobalBoard, to be able to get the trigger objects
     const GlobalBoard* m_gtGTB;
 
-    static constexpr char const* kModelNamePrefix = "GTADModel_";
+    static constexpr char const* kModelNamePrefix = "GTMLNNModel_";
 
     hls4mlEmulator::ModelLoader m_model_loader;
     std::shared_ptr<hls4mlEmulator::Model> m_model;
 
-    ///axo score for possible score saving
+    ///mlnn score for possible score saving
     mutable float m_savedscore;
   };
 

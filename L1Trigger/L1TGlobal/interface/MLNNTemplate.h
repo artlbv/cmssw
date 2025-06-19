@@ -1,11 +1,11 @@
-#ifndef L1Trigger_L1TGlobal_AXOL1TLTemplate_h
-#define L1Trigger_L1TGlobal_AXOL1TLTemplate_h
+#ifndef L1Trigger_L1TGlobal_MLNNTemplate_h
+#define L1Trigger_L1TGlobal_MLNNTemplate_h
 
 /**
- * \class AXOL1TLTemplate
+ * \class MLNNTemplate
  *
  *
- * Description: L1 Global Trigger AXOL1TL template.
+ * Description: L1 Global Trigger MLNN template.
  *
  * \author: Melissa Quinnan (UC San Diego)
  *
@@ -23,30 +23,30 @@
 // forward declarations
 
 // class declaration
-class AXOL1TLTemplate : public GlobalCondition {
+class MLNNTemplate : public GlobalCondition {
 public:
   // constructor
-  AXOL1TLTemplate();
+  MLNNTemplate();
 
   // constructor
-  AXOL1TLTemplate(const std::string&);
+  MLNNTemplate(const std::string&);
 
   // constructor
-  AXOL1TLTemplate(const std::string&, const l1t::GtConditionType&);
+  MLNNTemplate(const std::string&, const l1t::GtConditionType&);
 
   // copy constructor
-  AXOL1TLTemplate(const AXOL1TLTemplate&);
+  MLNNTemplate(const MLNNTemplate&);
 
   // destructor
-  ~AXOL1TLTemplate() override;
+  ~MLNNTemplate() override;
 
   // assign operator
-  AXOL1TLTemplate& operator=(const AXOL1TLTemplate&);
+  MLNNTemplate& operator=(const MLNNTemplate&);
 
   // typedef for a single object template
   struct ObjectParameter {
-    int minAXOL1TLThreshold;
-    int maxAXOL1TLThreshold;
+    int minMLNNThreshold;
+    int maxMLNNThreshold;
   };
 
 public:
@@ -63,11 +63,11 @@ public:
   void print(std::ostream& myCout) const override;
 
   /// output stream operator
-  friend std::ostream& operator<<(std::ostream&, const AXOL1TLTemplate&);
+  friend std::ostream& operator<<(std::ostream&, const MLNNTemplate&);
 
 private:
   /// copy function for copy constructor and operator=
-  void copy(const AXOL1TLTemplate& cp);
+  void copy(const MLNNTemplate& cp);
 
   /// variables containing the parameters
   std::vector<ObjectParameter> m_objectParameter;

@@ -37,7 +37,7 @@
 #include "L1Trigger/L1TGlobal/interface/CaloTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/EnergySumTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/EnergySumZdcTemplate.h"
-#include "L1Trigger/L1TGlobal/interface/AXOL1TLTemplate.h"
+#include "L1Trigger/L1TGlobal/interface/MLNNTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/TOPOTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/CICADATemplate.h"
 #include "L1Trigger/L1TGlobal/interface/CorrelationTemplate.h"
@@ -156,8 +156,8 @@ namespace l1t {
     void setVecEnergySumZdcTemplate(const std::vector<std::vector<EnergySumZdcTemplate> >&);
 
     //
-    inline const std::vector<std::vector<AXOL1TLTemplate> >& vecAXOL1TLTemplate() const { return m_vecAXOL1TLTemplate; }
-    void setVecAXOL1TLTemplate(const std::vector<std::vector<AXOL1TLTemplate> >&);
+    inline const std::vector<std::vector<MLNNTemplate> >& vecMLNNTemplate() const { return m_vecMLNNTemplate; }
+    void setVecMLNNTemplate(const std::vector<std::vector<MLNNTemplate> >&);
 
     //
     inline const std::vector<std::vector<TOPOTemplate> >& vecTOPOTemplate() const { return m_vecTOPOTemplate; }
@@ -317,7 +317,7 @@ namespace l1t {
 
     bool parseEnergySumZdc(L1TUtmCondition condEnergySumZdcs, unsigned int chipNr = 0, const bool corrFlag = false);
 
-    bool parseAXOL1TL(L1TUtmCondition condAXOL1TL, unsigned int chipNr = 0);
+    bool parseMLNN(L1TUtmCondition condMLNN, unsigned int chipNr = 0);
 
     bool parseTOPO(L1TUtmCondition condTOPO, unsigned int chipNr = 0);
 
@@ -429,7 +429,7 @@ namespace l1t {
     std::vector<std::vector<CaloTemplate> > m_vecCaloTemplate;
     std::vector<std::vector<EnergySumTemplate> > m_vecEnergySumTemplate;
     std::vector<std::vector<EnergySumZdcTemplate> > m_vecEnergySumZdcTemplate;
-    std::vector<std::vector<AXOL1TLTemplate> > m_vecAXOL1TLTemplate;
+    std::vector<std::vector<MLNNTemplate> > m_vecMLNNTemplate;
     std::vector<std::vector<TOPOTemplate> > m_vecTOPOTemplate;
     std::vector<std::vector<CICADATemplate> > m_vecCICADATemplate;
     std::vector<std::vector<ExternalTemplate> > m_vecExternalTemplate;

@@ -45,7 +45,7 @@ const bool l1t::CICADACondition::evaluateCondition(const int bxEval) const {
 
   // This gets rid of a GT emulator convention "iCondition".
   // This usually indexes the next line, which is somewhat concerning
-  // AXOL1TL operates this way, but it should be checked
+  // MLNN operates this way, but it should be checked
   const CICADATemplate::ObjectParameter objPar = (*(m_gtCICADATemplate->objectParameter()))[0];
 
   bool condGEqVal = m_gtCICADATemplate->condGEq();

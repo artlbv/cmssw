@@ -45,7 +45,7 @@ TriggerMenu::TriggerMenu(
     const std::vector<std::vector<CaloTemplate> >& vecCaloTemplateVal,
     const std::vector<std::vector<EnergySumTemplate> >& vecEnergySumTemplateVal,
     const std::vector<std::vector<EnergySumZdcTemplate> >& vecEnergySumZdcTemplateVal,
-    const std::vector<std::vector<AXOL1TLTemplate> >& vecAXOL1TLTemplateVal,
+    const std::vector<std::vector<MLNNTemplate> >& vecMLNNTemplateVal,
     const std::vector<std::vector<TOPOTemplate> >& vecTOPOTemplateVal,
     const std::vector<std::vector<CICADATemplate> >& vecCICADATemplateVal,
     const std::vector<std::vector<ExternalTemplate> >& vecExternalTemplateVal,
@@ -66,7 +66,7 @@ TriggerMenu::TriggerMenu(
       m_vecCaloTemplate(vecCaloTemplateVal),
       m_vecEnergySumTemplate(vecEnergySumTemplateVal),
       m_vecEnergySumZdcTemplate(vecEnergySumZdcTemplateVal),
-      m_vecAXOL1TLTemplate(vecAXOL1TLTemplateVal),
+      m_vecMLNNTemplate(vecMLNNTemplateVal),
       m_vecTOPOTemplate(vecTOPOTemplateVal),
       m_vecCICADATemplate(vecCICADATemplateVal),
       m_vecExternalTemplate(vecExternalTemplateVal),
@@ -95,7 +95,7 @@ TriggerMenu::TriggerMenu(const TriggerMenu& rhs) {
   m_vecCaloTemplate = rhs.m_vecCaloTemplate;
   m_vecEnergySumTemplate = rhs.m_vecEnergySumTemplate;
   m_vecEnergySumZdcTemplate = rhs.m_vecEnergySumZdcTemplate;
-  m_vecAXOL1TLTemplate = rhs.m_vecAXOL1TLTemplate;
+  m_vecMLNNTemplate = rhs.m_vecMLNNTemplate;
   m_vecTOPOTemplate = rhs.m_vecTOPOTemplate;
   m_vecCICADATemplate = rhs.m_vecCICADATemplate;
   m_vecExternalTemplate = rhs.m_vecExternalTemplate;
@@ -147,7 +147,7 @@ TriggerMenu& TriggerMenu::operator=(const TriggerMenu& rhs) {
     m_vecCaloTemplate = rhs.m_vecCaloTemplate;
     m_vecEnergySumTemplate = rhs.m_vecEnergySumTemplate;
     m_vecEnergySumZdcTemplate = rhs.m_vecEnergySumZdcTemplate;
-    m_vecAXOL1TLTemplate = rhs.m_vecAXOL1TLTemplate;
+    m_vecMLNNTemplate = rhs.m_vecMLNNTemplate;
     m_vecTOPOTemplate = rhs.m_vecTOPOTemplate;
     m_vecCICADATemplate = rhs.m_vecCICADATemplate;
     m_vecExternalTemplate = rhs.m_vecExternalTemplate;
@@ -286,20 +286,20 @@ void TriggerMenu::buildGtConditionMap() {
   }
 
   //
-  size_t vecAXOL1TLSize = m_vecAXOL1TLTemplate.size();
-  if (condMapSize < vecAXOL1TLSize) {
-    m_conditionMap.resize(vecAXOL1TLSize);
+  size_t vecMLNNSize = m_vecMLNNTemplate.size();
+  if (condMapSize < vecMLNNSize) {
+    m_conditionMap.resize(vecMLNNSize);
     condMapSize = m_conditionMap.size();
   }
 
   chipNr = -1;
 
-  for (std::vector<std::vector<AXOL1TLTemplate> >::iterator itCondOnChip = m_vecAXOL1TLTemplate.begin();
-       itCondOnChip != m_vecAXOL1TLTemplate.end();
+  for (std::vector<std::vector<MLNNTemplate> >::iterator itCondOnChip = m_vecMLNNTemplate.begin();
+       itCondOnChip != m_vecMLNNTemplate.end();
        itCondOnChip++) {
     chipNr++;
 
-    for (std::vector<AXOL1TLTemplate>::iterator itCond = itCondOnChip->begin(); itCond != itCondOnChip->end();
+    for (std::vector<MLNNTemplate>::iterator itCond = itCondOnChip->begin(); itCond != itCondOnChip->end();
          itCond++) {
       (m_conditionMap.at(chipNr))[itCond->condName()] = &(*itCond);
     }
@@ -464,8 +464,8 @@ void TriggerMenu::setVecEnergySumZdcTemplate(
   m_vecEnergySumZdcTemplate = vecEnergySumZdcTempl;
 }
 
-void TriggerMenu::setVecAXOL1TLTemplate(const std::vector<std::vector<AXOL1TLTemplate> >& vecAXOL1TLTempl) {
-  m_vecAXOL1TLTemplate = vecAXOL1TLTempl;
+void TriggerMenu::setVecMLNNTemplate(const std::vector<std::vector<MLNNTemplate> >& vecMLNNTempl) {
+  m_vecMLNNTemplate = vecMLNNTempl;
 }
 
 void TriggerMenu::setVecTOPOTemplate(const std::vector<std::vector<TOPOTemplate> >& vecTOPOTempl) {

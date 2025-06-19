@@ -1,8 +1,8 @@
 /**
- * \class AXOL1TLCondition
+ * \class MLNNCondition
  *
  *
- * Description: evaluation of a condition for axol1tl anomaly detection algorithm
+ * Description: evaluation of a condition for mlnn anomaly detection algorithm
  *
  * Author: Melissa Quinnan
  *
@@ -22,11 +22,11 @@
 
 // user include files
 //   base classes
-#include "L1Trigger/L1TGlobal/interface/AXOL1TLTemplate.h"
+#include "L1Trigger/L1TGlobal/interface/MLNNTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/ConditionEvaluation.h"
 
 #include "L1Trigger/L1TGlobal/interface/MuCondition.h"
-#include "L1Trigger/L1TGlobal/interface/AXOL1TLCondition.h"
+#include "L1Trigger/L1TGlobal/interface/MLNNCondition.h"
 #include "L1Trigger/L1TGlobal/interface/CaloCondition.h"
 #include "L1Trigger/L1TGlobal/interface/EnergySumCondition.h"
 #include "L1Trigger/L1TGlobal/interface/MuonTemplate.h"
@@ -45,26 +45,26 @@ namespace {
   //template function for reading results
   template <typename ResultType, typename LossType>
   LossType readResult(hls4mlEmulator::Model& model) {
-    std::pair<ResultType, LossType> ADModelResult;  //model outputs a pair of the (result vector, loss)
-    model.read_result(&ADModelResult);
-    return ADModelResult.second;
+    std::pair<ResultType, LossType> MLNNModelResult;  //model outputs a pair of the (result vector, loss)
+    model.read_result(&MLNNModelResult);
+    return MLNNModelResult.second;
   }
 }  // namespace
 
-l1t::AXOL1TLCondition::AXOL1TLCondition()
-    : ConditionEvaluation(), m_gtAXOL1TLTemplate{nullptr}, m_gtGTB{nullptr}, m_model{nullptr} {}
+l1t::MLNNCondition::MLNNCondition()
+    : ConditionEvaluation(), m_gtMLNNTemplate{nullptr}, m_gtGTB{nullptr}, m_model{nullptr} {}
 
-l1t::AXOL1TLCondition::AXOL1TLCondition(const GlobalCondition* axol1tlTemplate, const GlobalBoard* ptrGTB)
+l1t::MLNNCondition::MLNNCondition(const GlobalCondition* mlnnTemplate, const GlobalBoard* ptrGTB)
     : ConditionEvaluation(),
-      m_gtAXOL1TLTemplate(static_cast<const AXOL1TLTemplate*>(axol1tlTemplate)),
+      m_gtMLNNTemplate(static_cast<const MLNNTemplate*>(mlnnTemplate)),
       m_gtGTB(ptrGTB),
-      m_model_loader{kModelNamePrefix + m_gtAXOL1TLTemplate->modelVersion()} {
+      m_model_loader{kModelNamePrefix + m_gtMLNNTemplate->modelVersion()} {
   loadModel();
 }
 
 // copy constructor
-void l1t::AXOL1TLCondition::copy(const l1t::AXOL1TLCondition& cp) {
-  m_gtAXOL1TLTemplate = cp.gtAXOL1TLTemplate();
+void l1t::MLNNCondition::copy(const l1t::MLNNCondition& cp) {
+  m_gtMLNNTemplate = cp.gtMLNNTemplate();
   m_gtGTB = cp.gtGTB();
 
   m_condMaxNumberObjects = cp.condMaxNumberObjects();
@@ -77,46 +77,46 @@ void l1t::AXOL1TLCondition::copy(const l1t::AXOL1TLCondition& cp) {
   loadModel();
 }
 
-l1t::AXOL1TLCondition::AXOL1TLCondition(const l1t::AXOL1TLCondition& cp) : ConditionEvaluation() { copy(cp); }
+l1t::MLNNCondition::MLNNCondition(const l1t::MLNNCondition& cp) : ConditionEvaluation() { copy(cp); }
 
 // destructor
-l1t::AXOL1TLCondition::~AXOL1TLCondition() {
+l1t::MLNNCondition::~MLNNCondition() {
   // empty
 }
 
 // equal operator
-l1t::AXOL1TLCondition& l1t::AXOL1TLCondition::operator=(const l1t::AXOL1TLCondition& cp) {
+l1t::MLNNCondition& l1t::MLNNCondition::operator=(const l1t::MLNNCondition& cp) {
   copy(cp);
   return *this;
 }
 
 // methods
-void l1t::AXOL1TLCondition::setGtAXOL1TLTemplate(const AXOL1TLTemplate* caloTempl) { m_gtAXOL1TLTemplate = caloTempl; }
+void l1t::MLNNCondition::setGtMLNNTemplate(const MLNNTemplate* caloTempl) { m_gtMLNNTemplate = caloTempl; }
 
 ///   set the pointer to uGT GlobalBoard
-void l1t::AXOL1TLCondition::setuGtB(const GlobalBoard* ptrGTB) { m_gtGTB = ptrGTB; }
+void l1t::MLNNCondition::setuGtB(const GlobalBoard* ptrGTB) { m_gtGTB = ptrGTB; }
 
 /// set score for score saving
-void l1t::AXOL1TLCondition::setScore(const float scoreval) const { m_savedscore = scoreval; }
+void l1t::MLNNCondition::setScore(const float scoreval) const { m_savedscore = scoreval; }
 
-void l1t::AXOL1TLCondition::loadModel() {
+void l1t::MLNNCondition::loadModel() {
   try {
     m_model = m_model_loader.load_model();
   } catch (std::runtime_error& e) {
-    throw cms::Exception("ModelError") << " ERROR: failed to load AXOL1TL model version \""
+    throw cms::Exception("ModelError") << " ERROR: failed to load MLNN model version \""
                                        << m_model_loader.model_name()
                                        << "\". Model version not found in cms-hls4ml externals.";
   }
 }
 
-const bool l1t::AXOL1TLCondition::evaluateCondition(const int bxEval) const {
+const bool l1t::MLNNCondition::evaluateCondition(const int bxEval) const {
   if (m_model == nullptr) {
-    throw cms::Exception("ModelError") << " ERROR: no model was loaded for AXOL1TL model version \""
+    throw cms::Exception("ModelError") << " ERROR: no model was loaded for MLNN model version \""
                                        << m_model_loader.model_name() << "\".";
   }
 
   bool condResult = false;
-  int useBx = bxEval + m_gtAXOL1TLTemplate->condRelativeBx();
+  int useBx = bxEval + m_gtMLNNTemplate->condRelativeBx();
 
   // //pointers to objects
   const BXVector<const l1t::Muon*>* candMuVec = m_gtGTB->getCandL1Mu();
@@ -146,7 +146,7 @@ const bool l1t::AXOL1TLCondition::evaluateCondition(const int bxEval) const {
   inputtype fillzero = 0.0;
 
   //AD vector declaration, will fill later
-  inputtype ADModelInput[NInputs] = {};
+  inputtype MLNNModelInput[NInputs] = {};
 
   //initializing vector by type for my sanity
   inputtype MuInput[MuVecSize];
@@ -157,7 +157,7 @@ const bool l1t::AXOL1TLCondition::evaluateCondition(const int bxEval) const {
   //declare result vectors +score
   // resulttype result;
   losstype loss;
-  // pairtype ADModelResult;  //model outputs a pair of the (result vector, loss)
+  // pairtype MLNNModelResult;  //model outputs a pair of the (result vector, loss)
   float score = -1.0;  //not sure what the best default is hm??
 
   //check number of input objects we actually have (muons, jets etc)
@@ -171,7 +171,7 @@ const bool l1t::AXOL1TLCondition::evaluateCondition(const int bxEval) const {
   std::fill(MuInput, MuInput + MuVecSize, fillzero);
   std::fill(JetInput, JetInput + JVecSize, fillzero);
   std::fill(EgammaInput, EgammaInput + EGVecSize, fillzero);
-  std::fill(ADModelInput, ADModelInput + NInputs, fillzero);
+  std::fill(MLNNModelInput, MLNNModelInput + NInputs, fillzero);
 
   //then fill the object vectors
   //NOTE assume candidates are already sorted by pt
@@ -223,27 +223,27 @@ const bool l1t::AXOL1TLCondition::evaluateCondition(const int bxEval) const {
     }
   }
 
-  //now put it all together-> EtSum+EGamma+Muon+Jet into ADModelInput
+  //now put it all together-> EtSum+EGamma+Muon+Jet into MLNNModelInput
   int index = 0;
   for (int idET = 0; idET < EtSumVecSize; idET++) {
-    ADModelInput[index++] = EtSumInput[idET];
+    MLNNModelInput[index++] = EtSumInput[idET];
   }
   for (int idEG = 0; idEG < EGVecSize; idEG++) {
-    ADModelInput[index++] = EgammaInput[idEG];
+    MLNNModelInput[index++] = EgammaInput[idEG];
   }
   for (int idMu = 0; idMu < MuVecSize; idMu++) {
-    ADModelInput[index++] = MuInput[idMu];
+    MLNNModelInput[index++] = MuInput[idMu];
   }
   for (int idJ = 0; idJ < JVecSize; idJ++) {
-    ADModelInput[index++] = JetInput[idJ];
+    MLNNModelInput[index++] = JetInput[idJ];
   }
 
   //now run the inference
-  m_model->prepare_input(ADModelInput);  //scaling internal here
+  m_model->prepare_input(MLNNModelInput);  //scaling internal here
   m_model->predict();
-  // m_model->read_result(&ADModelResult);  // this should be the square sum model result
-  if ((m_model_loader.model_name() == "GTADModel_v3") ||
-      (m_model_loader.model_name() == "GTADModel_v4")) {  //v3/v4 overwrite
+  // m_model->read_result(&MLNNModelResult);  // this should be the square sum model result
+  if ((m_model_loader.model_name() == "GTMLNNModel_v3") ||
+      (m_model_loader.model_name() == "GTMLNNModel_v4")) {  //v3/v4 overwrite
     using resulttype = std::array<ap_fixed<10, 7, AP_RND_CONV, AP_SAT>, 8>;
     loss = readResult<resulttype, losstype>(*m_model);
   } else {  //v5 default
@@ -251,27 +251,27 @@ const bool l1t::AXOL1TLCondition::evaluateCondition(const int bxEval) const {
     loss = readResult<resulttype, losstype>(*m_model);
   }
 
-  // result = ADModelResult.first;
-  // loss = ADModelResult.second;
+  // result = MLNNModelResult.first;
+  // loss = MLNNModelResult.second;
   score = ((loss).to_float()) * 16.0;  //scaling to match threshold
   //save score to class variable in case score saving needed
   setScore(score);
 
   //number of objects/thrsholds to check
   int iCondition = 0;  // number of conditions: there is only one
-  int nObjInCond = m_gtAXOL1TLTemplate->nrObjects();
+  int nObjInCond = m_gtMLNNTemplate->nrObjects();
 
   if (iCondition >= nObjInCond || iCondition < 0) {
     return false;
   }
 
-  const AXOL1TLTemplate::ObjectParameter objPar = (*(m_gtAXOL1TLTemplate->objectParameter()))[iCondition];
+  const MLNNTemplate::ObjectParameter objPar = (*(m_gtMLNNTemplate->objectParameter()))[iCondition];
 
   // condGEqVal indicates the operator used for the condition (>=, =): true for >=
-  bool condGEqVal = m_gtAXOL1TLTemplate->condGEq();
+  bool condGEqVal = m_gtMLNNTemplate->condGEq();
   bool passCondition = false;
 
-  passCondition = checkCut(objPar.minAXOL1TLThreshold, score, condGEqVal);
+  passCondition = checkCut(objPar.minMLNNThreshold, score, condGEqVal);
 
   condResult |= passCondition;  //condresult true if passCondition true else it is false
 
@@ -279,9 +279,9 @@ const bool l1t::AXOL1TLCondition::evaluateCondition(const int bxEval) const {
   return condResult;
 }
 
-void l1t::AXOL1TLCondition::print(std::ostream& myCout) const {
-  myCout << "Dummy Print for AXOL1TLCondition" << std::endl;
-  m_gtAXOL1TLTemplate->print(myCout);
+void l1t::MLNNCondition::print(std::ostream& myCout) const {
+  myCout << "Dummy Print for MLNNCondition" << std::endl;
+  m_gtMLNNTemplate->print(myCout);
 
   ConditionEvaluation::print(myCout);
 }

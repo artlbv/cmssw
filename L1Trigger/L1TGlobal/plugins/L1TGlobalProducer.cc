@@ -27,7 +27,7 @@
 #include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
 #include "DataFormats/L1TGlobal/interface/GlobalExtBlk.h"
 #include "DataFormats/L1TGlobal/interface/GlobalObjectMapRecord.h"
-#include "DataFormats/L1TGlobal/interface/AXOL1TLScore.h"
+#include "DataFormats/L1TGlobal/interface/MLNNScore.h"
 
 #include "L1Trigger/L1TGlobal/interface/TriggerMenu.h"
 
@@ -74,8 +74,8 @@ void L1TGlobalProducer::fillDescriptions(edm::ConfigurationDescriptions& descrip
   // switch for muon showers in Run-3
   desc.add<bool>("useMuonShowers", false);
 
-  //switch for saving AXO score
-  desc.add<bool>("produceAXOL1TLScore", false);
+  //switch for saving MLNN score
+  desc.add<bool>("produceMLNNScore", false);
 
   // disables resetting the prescale counters each lumisection (needed for offline)
   //  originally, the L1T firmware applied the reset of prescale counters at the end of every LS;
@@ -138,7 +138,7 @@ L1TGlobalProducer::L1TGlobalProducer(const edm::ParameterSet& parSet)
       m_resetPSCountersEachLumiSec(parSet.getParameter<bool>("resetPSCountersEachLumiSec")),
       m_semiRandomInitialPSCounters(parSet.getParameter<bool>("semiRandomInitialPSCounters")),
       m_useMuonShowers(parSet.getParameter<bool>("useMuonShowers")),
-      m_produceAXOL1TLScore(parSet.getParameter<bool>("produceAXOL1TLScore")) {
+      m_produceMLNNScore(parSet.getParameter<bool>("produceMLNNScore")) {
   m_egInputToken = consumes(m_egInputTag);
   m_tauInputToken = consumes(m_tauInputTag);
   m_jetInputToken = consumes(m_jetInputTag);
@@ -219,8 +219,8 @@ L1TGlobalProducer::L1TGlobalProducer(const edm::ParameterSet& parSet)
     produces<GlobalObjectMapRecord>();
   }
 
-  if (m_produceAXOL1TLScore) {
-    produces<AXOL1TLScoreBxCollection>("AXOScore");
+  if (m_produceMLNNScore) {
+    produces<MLNNScoreBxCollection>("MLNNScore");
   }
 
   // create new uGt Board
@@ -337,7 +337,7 @@ void L1TGlobalProducer::beginRun(edm::Run const& iRun, const edm::EventSetup& ev
                                              gtParser.vecCaloTemplate(),
                                              gtParser.vecEnergySumTemplate(),
                                              gtParser.vecEnergySumZdcTemplate(),
-                                             gtParser.vecAXOL1TLTemplate(),
+                                             gtParser.vecMLNNTemplate(),
                                              gtParser.vecTOPOTemplate(),
                                              gtParser.vecCICADATemplate(),
                                              gtParser.vecExternalTemplate(),
@@ -528,9 +528,9 @@ void L1TGlobalProducer::produce(edm::Event& iEvent, const edm::EventSetup& evSet
   // * produce the GlobalObjectMapRecord
   std::unique_ptr<GlobalObjectMapRecord> gtObjectMapRecord(new GlobalObjectMapRecord());
 
-  std::unique_ptr<AXOL1TLScoreBxCollection> uGtAXOScoreRecord(nullptr);
-  if (m_produceAXOL1TLScore) {
-    uGtAXOScoreRecord = std::make_unique<AXOL1TLScoreBxCollection>();
+  std::unique_ptr<MLNNScoreBxCollection> uGtMLNNScoreRecord(nullptr);
+  if (m_produceMLNNScore) {
+    uGtMLNNScoreRecord = std::make_unique<MLNNScoreBxCollection>();
   }
 
   // fill the boards not depending on the BxInEvent in the L1 GT DAQ record
@@ -603,8 +603,8 @@ void L1TGlobalProducer::produce(edm::Event& iEvent, const edm::EventSetup& evSet
   if (m_useMuonShowers)
     m_uGtBrd->receiveMuonShowerObjectData(iEvent, m_muShowerInputToken, receiveMuShower, m_nrL1MuShower);
 
-  //tell board to save axo scores when running GTL
-  m_uGtBrd->enableAXOScoreSaving(m_produceAXOL1TLScore);
+  //tell board to save mlnn scores when running GTL
+  m_uGtBrd->enableMLNNScoreSaving(m_produceMLNNScore);
 
   m_uGtBrd->receiveExternalData(iEvent, m_extInputToken, receiveExt);
 
@@ -646,8 +646,8 @@ void L1TGlobalProducer::produce(edm::Event& iEvent, const edm::EventSetup& evSet
     }
 
     //save scores to score collection
-    if (m_produceAXOL1TLScore) {
-      m_uGtBrd->fillAXOScore(iBxInEvent, uGtAXOScoreRecord);
+    if (m_produceMLNNScore) {
+      m_uGtBrd->fillMLNNScore(iBxInEvent, uGtMLNNScoreRecord);
     }
 
   }  //End Loop over Bx
@@ -693,8 +693,8 @@ void L1TGlobalProducer::produce(edm::Event& iEvent, const edm::EventSetup& evSet
     iEvent.put(std::move(gtObjectMapRecord));
   }
 
-  if (m_produceAXOL1TLScore) {
-    iEvent.put(std::move(uGtAXOScoreRecord), "AXOScore");
+  if (m_produceMLNNScore) {
+    iEvent.put(std::move(uGtMLNNScoreRecord), "MLNNScore");
   }
 }
 
