@@ -93,7 +93,8 @@ void l1t::TOPOCondition::setScore(const float scoreval) const { m_savedscore = s
 void l1t::TOPOCondition::loadModel() {
   try {
     // m_model = m_model_loader.load_model();
-    std::string TOPOmodelversion = "/afs/desy.de/user/e/ebelingl/topo/compile/topo_v1";
+    // std::string TOPOmodelversion = "/afs/desy.de/user/e/ebelingl/topo/compile/topo_v1";
+    std::string TOPOmodelversion = "/afs/cern.ch/user/a/alobanov/work/L1T/run3/TOPO/emu/bdt_w_nn/CMSSW_15_0_7/src/L1Trigger/L1TGlobal/data/TOPO/topo_v1";
     hls4mlEmulator::ModelLoader loader(TOPOmodelversion);
     m_model = loader.load_model();
   } catch (std::runtime_error& e) {
@@ -134,7 +135,7 @@ const bool l1t::TOPOCondition::evaluateCondition(const int bxEval) const {
 
   //types of inputs and outputs modified for topo
   typedef ap_fixed<16, 6> inputtype;
-  typedef ap_fixed<16, 6> losstype;
+  typedef ap_fixed<16, 6> resulttype;
 
   //define zero
   inputtype fillzero = 0.0;
@@ -150,8 +151,8 @@ const bool l1t::TOPOCondition::evaluateCondition(const int bxEval) const {
   double EtSumInput[EtSumVecSize];
 
   //declare result vectors +score
-  losstype loss;
-  float score = -1.0; 
+  resulttype result;
+  int score = -1.0; 
 
   //check number of input objects we actually have (muons, jets etc)
   int NCandMu = candMuVec->size(useBx);
@@ -236,8 +237,8 @@ const bool l1t::TOPOCondition::evaluateCondition(const int bxEval) const {
   //now run the inference
   m_model->prepare_input(scaledInput);  //scaling internal here
   m_model->predict();
-  m_model->read_result(&loss); //store result as loss variable
-  score = ((loss).to_float()); 
+  m_model->read_result(&result); //store result as result variable
+  score = ((result).to_float())*1023;
   setScore(score);
 
   // Write ADModelInput to text file (append mode)
@@ -273,6 +274,8 @@ const bool l1t::TOPOCondition::evaluateCondition(const int bxEval) const {
   // condGEqVal indicates the operator used for the condition (>=, =): true for >=
   bool condGEqVal = m_gtTOPOTemplate->condGEq();
   bool passCondition = false;
+
+  std::cout << "TOPO condition: score = " << score << " threshold = " << objPar.minTOPOThreshold << std::endl;
 
   passCondition = checkCut(objPar.minTOPOThreshold, score, condGEqVal);
 
