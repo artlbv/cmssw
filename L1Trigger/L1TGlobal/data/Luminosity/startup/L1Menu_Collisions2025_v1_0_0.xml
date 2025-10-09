@@ -13217,7 +13217,7 @@ https://its.cern.ch/jira/browse/CMSLITDPG-1344</comment>
       <name>TOPO-SCORE_VVLose</name>
       <object>TOPO</object>
       <type>SCORE</type>
-      <minimum>+0.0000000000000000E+00</minimum>
+      <minimum>+0.1000000000000000E+03</minimum>
       <maximum>+0.0000000000000000E+00</maximum>
       <data/>
     </cut>
@@ -13238,6 +13238,66 @@ https://its.cern.ch/jira/browse/CMSLITDPG-1344</comment>
     </object_requirement>
   </algorithm>
   <algorithm>
+    <name>L1_TOPO_Lose</name>
+    <expression>TOPO[TOPO-MODEL_v1,TOPO-SCORE_Lose]</expression>
+    <index>433</index>
+    <module_id>0</module_id>
+    <module_index>433</module_index>
+    <cut>
+      <name>TOPO-SCORE_Lose</name>
+      <object>TOPO</object>
+      <type>SCORE</type>
+      <minimum>+0.5000000000000000E+03</minimum>
+      <maximum>+0.0000000000000000E+00</maximum>
+      <data/>
+    </cut>
+    <cut>
+      <name>TOPO-MODEL_v1</name>
+      <object>TOPO</object>
+      <type>MODEL</type>
+      <minimum>+0.0000000000000000E+00</minimum>
+      <maximum>+0.0000000000000000E+00</maximum>
+      <data>v1</data>
+    </cut>
+    <object_requirement>
+      <name>TOPO</name>
+      <type>TOPO</type>
+      <comparison_operator>.ge.</comparison_operator>
+      <threshold>+0.0000000000000000E+00</threshold>
+      <bx_offset>0</bx_offset>
+    </object_requirement>
+  </algorithm>
+  <algorithm>
+    <name>L1_TOPO_Medium</name>
+    <expression>TOPO[TOPO-MODEL_v1,TOPO-SCORE_Medium]</expression>
+    <index>434</index>
+    <module_id>0</module_id>
+    <module_index>434</module_index>
+    <cut>
+      <name>TOPO-SCORE_Medium</name>
+      <object>TOPO</object>
+      <type>SCORE</type>
+      <minimum>+0.8500000000000000E+03</minimum>
+      <maximum>+0.0000000000000000E+00</maximum>
+      <data/>
+    </cut>
+    <cut>
+      <name>TOPO-MODEL_v1</name>
+      <object>TOPO</object>
+      <type>MODEL</type>
+      <minimum>+0.0000000000000000E+00</minimum>
+      <maximum>+0.0000000000000000E+00</maximum>
+      <data>v1</data>
+    </cut>
+    <object_requirement>
+      <name>TOPO</name>
+      <type>TOPO</type>
+      <comparison_operator>.ge.</comparison_operator>
+      <threshold>+0.0000000000000000E+00</threshold>
+      <bx_offset>0</bx_offset>
+    </object_requirement>
+  </algorithm>
+  <!-- <algorithm>
     <name>L1_CICADA_VVTight</name>
     <expression>CICADA[CICADA-CSCORE_110]</expression>
     <index>433</index>
@@ -13311,7 +13371,7 @@ https://its.cern.ch/jira/browse/CMSLITDPG-1343</comment>
       <threshold>+0.0000000000000000E+00</threshold>
       <bx_offset>0</bx_offset>
     </object_requirement>
-  </algorithm>
+  </algorithm> -->
   <algorithm>
     <name>L1_DoubleJet_110_35_DoubleJet35_Mass_Min1000</name>
     <expression>comb{JET110,JET35} AND mass_inv{JET35,JET35}[MASS_MIN_1000]</expression>
