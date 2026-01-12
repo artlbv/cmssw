@@ -7,5 +7,6 @@ l1tTopoBDTProducer = cms.EDProducer('L1TTopoBDTProducer',
     jetToken   = cms.InputTag("caloStage2Digis:Jet"),
     etSumToken = cms.InputTag("caloStage2Digis:EtSum"),
     bx = cms.int32(0),
-    model_path = cms.string("L1Trigger/TopoML/data/conifer_model_HH2b2t_2recotauh.json"),
+    model_path = cms.FileInPath("L1Trigger/TopoML/data/conifer_model_HH2b2t_2recotauh.json"),
+    debug = cms.bool(False),
 )
