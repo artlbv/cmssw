@@ -6,8 +6,7 @@
 class HLTFloatThresholdFilter : public edm::stream::EDFilter<> {
 public:
   explicit HLTFloatThresholdFilter(const edm::ParameterSet& config)
-      : src_(config.getParameter<edm::InputTag>("src")),
-        threshold_(config.getParameter<double>("threshold")) {
+      : src_(config.getParameter<edm::InputTag>("src")), threshold_(config.getParameter<double>("threshold")) {
     token_ = consumes<float>(src_);
   }
 

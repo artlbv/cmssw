@@ -26,32 +26,23 @@
 // L1 collections wrapper (zero-overhead)
 //============================================================
 struct L1Collections {
-  const BXVector<l1t::Muon>&   mu;
+  const BXVector<l1t::Muon>& mu;
   const BXVector<l1t::EGamma>& eg;
-  const BXVector<l1t::Tau>&    tau;
-  const BXVector<l1t::Jet>&    jet;
-  const BXVector<l1t::EtSum>&  sum;
+  const BXVector<l1t::Tau>& tau;
+  const BXVector<l1t::Jet>& jet;
+  const BXVector<l1t::EtSum>& sum;
 };
 
 //============================================================
 // Object reference (type-safe)
 //============================================================
-using ObjectRef = std::variant<
-  std::monostate,
-  const l1t::Muon*,
-  const l1t::EGamma*,
-  const l1t::Tau*,
-  const l1t::Jet*,
-  const l1t::EtSum*
->;
+using ObjectRef = std::
+    variant<std::monostate, const l1t::Muon*, const l1t::EGamma*, const l1t::Tau*, const l1t::Jet*, const l1t::EtSum*>;
 
 //============================================================
 // Object getter function type
 //============================================================
-using ObjectGetterFn = ObjectRef (*)(
-  int bx, unsigned idx,
-  const L1Collections&
-);
+using ObjectGetterFn = ObjectRef (*)(int bx, unsigned idx, const L1Collections&);
 
 //============================================================
 // Concrete object getters
@@ -84,24 +75,30 @@ static ObjectRef getHT(int bx, unsigned, const L1Collections& c) {
 // Variable visitors (NOT constexpr)
 //============================================================
 struct GetPt {
-  float operator()(const l1t::Muon*   o) const { return o->pt(); }
+  float operator()(const l1t::Muon* o) const { return o->pt(); }
   float operator()(const l1t::EGamma* o) const { return o->pt(); }
-  float operator()(const l1t::Tau*    o) const { return o->pt(); }
-  float operator()(const l1t::Jet*    o) const { return o->pt(); }
-  float operator()(const l1t::EtSum*  o) const { return o->pt(); }
-  float operator()(std::monostate)    const { return 0.f; }
+  float operator()(const l1t::Tau* o) const { return o->pt(); }
+  float operator()(const l1t::Jet* o) const { return o->pt(); }
+  float operator()(const l1t::EtSum* o) const { return o->pt(); }
+  float operator()(std::monostate) const { return 0.f; }
 };
 
 struct GetHwIso {
   float operator()(const l1t::EGamma* o) const { return o->hwIso(); }
-  float operator()(std::monostate)    const { return 0.f; }
-  template<typename T> float operator()(const T*) const { return 0.f; }
+  float operator()(std::monostate) const { return 0.f; }
+  template <typename T>
+  float operator()(const T*) const {
+    return 0.f;
+  }
 };
 
 struct GetHwQual {
   float operator()(const l1t::Muon* o) const { return o->hwQual(); }
-  float operator()(std::monostate)  const { return 0.f; }
-  template<typename T> float operator()(const T*) const { return 0.f; }
+  float operator()(std::monostate) const { return 0.f; }
+  template <typename T>
+  float operator()(const T*) const {
+    return 0.f;
+  }
 };
 
 //============================================================
@@ -109,34 +106,26 @@ struct GetHwQual {
 //============================================================
 using VarFn = float (*)(const ObjectRef&);
 
-static float varPt(const ObjectRef& r)     { return std::visit(GetPt{}, r); }
-static float varHwIso(const ObjectRef& r)  { return std::visit(GetHwIso{}, r); }
+static float varPt(const ObjectRef& r) { return std::visit(GetPt{}, r); }
+static float varHwIso(const ObjectRef& r) { return std::visit(GetHwIso{}, r); }
 static float varHwQual(const ObjectRef& r) { return std::visit(GetHwQual{}, r); }
 
 static const std::unordered_map<std::string, VarFn> kVarMap = {
-  {"pt",     &varPt},
-  {"hwIso",  &varHwIso},
-  {"hwQual", &varHwQual}
-};
+    {"pt", &varPt}, {"hwIso", &varHwIso}, {"hwQual", &varHwQual}};
 
 //============================================================
 // Object getter registry
 //============================================================
 static const std::unordered_map<std::string, ObjectGetterFn> kObjectGetters_ = {
-  {"L1Mu",  &getMu},
-  {"L1EG",  &getEG},
-  {"L1Tau", &getTau},
-  {"L1Jet", &getJet},
-  {"L1HT",  &getHT}
-};
+    {"L1Mu", &getMu}, {"L1EG", &getEG}, {"L1Tau", &getTau}, {"L1Jet", &getJet}, {"L1HT", &getHT}};
 
 //============================================================
 // Feature definition
 //============================================================
 struct Feature {
   ObjectGetterFn getObj;
-  VarFn          getVar;
-  unsigned       index;
+  VarFn getVar;
+  unsigned index;
 };
 
 //============================================================
@@ -144,11 +133,10 @@ struct Feature {
 //============================================================
 class L1TFeatureVectorExtractor {
 public:
-  L1TFeatureVectorExtractor(const edm::FileInPath& jsonPath, int bx)
-    : bx_(bx)
-  {
+  L1TFeatureVectorExtractor(const edm::FileInPath& jsonPath, int bx) : bx_(bx) {
     std::ifstream f(jsonPath.fullPath());
-    if(!f) throw cms::Exception("Configuration") << "Cannot open JSON file: " << jsonPath.fullPath() << "\n";
+    if (!f)
+      throw cms::Exception("Configuration") << "Cannot open JSON file: " << jsonPath.fullPath() << "\n";
 
     nlohmann::json j;
     f >> j;
@@ -157,30 +145,30 @@ public:
     nFeatures_ = fmap.size();
     features_.resize(nFeatures_);
 
-    for(auto& [name, idx] : fmap.items()) {
+    for (auto& [name, idx] : fmap.items()) {
       auto p1 = name.find('_');
-      auto p2 = name.find('_', p1+1);
-      std::string obj = name.substr(0,p1);
-      unsigned index = std::stoi(name.substr(p1+1, p2-p1-1));
-      std::string var = name.substr(p2+1);
+      auto p2 = name.find('_', p1 + 1);
+      std::string obj = name.substr(0, p1);
+      unsigned index = std::stoi(name.substr(p1 + 1, p2 - p1 - 1));
+      std::string var = name.substr(p2 + 1);
 
       auto itObj = kObjectGetters_.find(obj);
-      if(itObj == kObjectGetters_.end())
-        throw cms::Exception("Configuration") 
-          << "Unknown object in feature map: " << obj << " for feature " << name << "\n";
+      if (itObj == kObjectGetters_.end())
+        throw cms::Exception("Configuration")
+            << "Unknown object in feature map: " << obj << " for feature " << name << "\n";
 
       auto itVar = kVarMap.find(var);
-      if(itVar == kVarMap.end())
-        throw cms::Exception("Configuration") 
-          << "Unknown variable in feature map: " << var << " for feature " << name << "\n";
+      if (itVar == kVarMap.end())
+        throw cms::Exception("Configuration")
+            << "Unknown variable in feature map: " << var << " for feature " << name << "\n";
 
       features_[idx] = {itObj->second, itVar->second, index};
     }
   }
 
   std::vector<float> getFeatures(const L1Collections& cols) const {
-    std::vector<float> x(nFeatures_,0.f);
-    for(unsigned i=0; i<nFeatures_; ++i) {
+    std::vector<float> x(nFeatures_, 0.f);
+    for (unsigned i = 0; i < nFeatures_; ++i) {
       const auto& f = features_[i];
       ObjectRef ref = f.getObj(bx_, f.index, cols);
       x[i] = f.getVar(ref);
@@ -207,7 +195,8 @@ public:
           break;
         }
       }
-      std::cout << "  Feature " << i << ": object type '" << objName << "', index " << f.index << ", variable '" << var << "'" << std::endl;
+      std::cout << "  Feature " << i << ": object type '" << objName << "', index " << f.index << ", variable '" << var
+                << "'" << std::endl;
     }
   }
 
@@ -251,9 +240,9 @@ private:
 // Constructor
 // =====================================================
 
-L1TTopoBDTProducer::L1TTopoBDTProducer(const edm::ParameterSet& cfg) :
-  featureExtractor_(cfg.getParameter<edm::FileInPath>("model_path"), cfg.getParameter<int>("bx"))
-  {
+L1TTopoBDTProducer::L1TTopoBDTProducer(const edm::ParameterSet& cfg)
+    :  // initialise feature extractor
+      featureExtractor_(cfg.getParameter<edm::FileInPath>("model_path"), cfg.getParameter<int>("bx")) {
   muToken_ = consumes<l1t::MuonBxCollection>(cfg.getParameter<edm::InputTag>("muToken"));
   egToken_ = consumes<l1t::EGammaBxCollection>(cfg.getParameter<edm::InputTag>("egToken"));
   tauToken_ = consumes<l1t::TauBxCollection>(cfg.getParameter<edm::InputTag>("tauToken"));
@@ -262,8 +251,6 @@ L1TTopoBDTProducer::L1TTopoBDTProducer(const edm::ParameterSet& cfg) :
   bx_ = cfg.getParameter<int>("bx");
   debug_ = cfg.getParameter<bool>("debug");
   edm::FileInPath modelPath = cfg.getParameter<edm::FileInPath>("model_path");
-  
-  produces<float>("score");
 
   // ---- Load JSON: Model and feature names --------------------------------------------
 
@@ -278,6 +265,9 @@ L1TTopoBDTProducer::L1TTopoBDTProducer(const edm::ParameterSet& cfg) :
   } catch (const std::exception& e) {
     throw cms::Exception("L1TTopoBDTProducer") << "Error loading BDT model from " << modelPath << ": " << e.what();
   }
+
+  // register products
+  produces<float>("score");
 }
 
 L1TTopoBDTProducer::~L1TTopoBDTProducer() {}
@@ -291,7 +281,7 @@ void L1TTopoBDTProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
   edm::Handle<BXVector<l1t::Tau>> taus;
   edm::Handle<BXVector<l1t::Jet>> jets;
   edm::Handle<BXVector<l1t::EtSum>> sums;
-  
+
   iEvent.getByToken(muToken_, muons);
   iEvent.getByToken(egToken_, egammas);
   iEvent.getByToken(tauToken_, taus);
@@ -330,9 +320,10 @@ void L1TTopoBDTProducer::fillDescriptions(edm::ConfigurationDescriptions& descri
   desc.add<edm::InputTag>("jetToken", edm::InputTag("l1tJet"));
   desc.add<edm::InputTag>("etSumToken", edm::InputTag("l1tEtSum"));
   desc.add<int>("bx", 0)->setComment("BX to process");
-  desc.add<edm::FileInPath>("model_path", edm::FileInPath("L1Trigger/TopoML/data/conifer_model_HH2b2t_2recotauh.json"))->setComment("Path to BDT model JSON file");
+  desc.add<edm::FileInPath>("model_path", edm::FileInPath("L1Trigger/TopoML/data/conifer_model_HH2b2t_2recotauh.json"))
+      ->setComment("Path to BDT model JSON file");
   desc.add<bool>("debug", false)->setComment("Enable debug printouts");
-  
+
   descriptions.addWithDefaultLabel(desc);
 }
 
