@@ -1,0 +1,10 @@
+<use name="FWCore/Framework"/>
+<use name="FWCore/ParameterSet"/>
+<use name="FWCore/PluginManager"/>
+<use name="DataFormats/L1Trigger"/>
+<use name="DataFormats/NanoAOD"/>
+<use name="L1Trigger/DemonstratorTools"/>
+<use name="hls"/>
+<use name="hls4mlEmulatorExtras"/>
+<use name="conifer"/>
+<flags EDM_PLUGIN="1"/>
