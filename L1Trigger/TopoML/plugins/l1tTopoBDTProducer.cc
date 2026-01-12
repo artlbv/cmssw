@@ -155,13 +155,13 @@ public:
       auto itObj = kObjectGetters_.find(obj);
       if (itObj == kObjectGetters_.end())
         throw cms::Exception("Configuration")
-            << "Unknown object in feature map: " << obj << " for feature " << name << "\n";
+            << "Unknown object in feature map: " << obj << " for feature " << name << "\n"
             << "Check the feature_map in the JSON file:" << jsonPath.fullPath() << "\n";
 
       auto itVar = kVarMap.find(var);
       if (itVar == kVarMap.end())
         throw cms::Exception("Configuration")
-            << "Unknown variable in feature map: " << var << " for feature " << name << "\n";
+            << "Unknown variable in feature map: " << var << " for feature " << name << "\n"
             << "Check the feature_map in the JSON file:" << jsonPath.fullPath() << "\n";
 
       features_[idx] = {itObj->second, itVar->second, index};
