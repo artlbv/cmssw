@@ -1,0 +1,294 @@
+# Auto generated configuration file
+# using: 
+# Revision: 1.19 
+# Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
+# with command line options: myNano --conditions 151X_dataRun3_HLT_v1 --era Run3_2025 -s HLT:GRun,NANO:@ScoutMonitor --datatier NANOAOD --eventcontent NANOAOD --data --scenario pp --process reHLT --customise Configuration/DataProcessing/RecoTLR.customisePostEra_Run3 -n 100 --filein file:/eos/cms/store/data/Run2025G/EphemeralHLTPhysics0/RAW/v1/000/398/183/00000/029d80cb-ade3-472d-8085-4a4d955b3882.root --fileout file:nanoScout_reHLT_data.root --python_filename=data_reHLT_nanoScoutPrompt_cfg.py
+
+import FWCore.ParameterSet.Config as cms
+
+from Configuration.Eras.Era_Run3_2025_cff import Run3_2025
+
+process = cms.Process('reHLT',Run3_2025)
+
+# import of standard configurations
+process.load('Configuration.StandardSequences.Services_cff')
+process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
+process.load('FWCore.MessageService.MessageLogger_cfi')
+process.load('Configuration.EventContent.EventContent_cff')
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.StandardSequences.MagneticField_cff')
+# process.load('HLTrigger.Configuration.HLT_GRun_cff')
+process.load('HLTrigger.Configuration.HLT_Mu12HT1b_cff')
+process.load('PhysicsTools.NanoAOD.custom_run3scouting_cff')
+process.load('Configuration.StandardSequences.EndOfProcess_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+
+process.maxEvents = cms.untracked.PSet(
+    input = cms.untracked.int32(-1),
+    output = cms.optional.untracked.allowed(cms.int32,cms.PSet)
+)
+
+# Input source
+process.source = cms.Source("PoolSource",
+    fileNames = cms.untracked.vstring(
+        # '/store/mc/Run3Winter25Digi/GluGlutoHHto2B2WtoLNu2Q_Par-c2-0-kl-1-kt-1_TuneCP5_13p6TeV_powheg-pythia8/GEN-SIM-RAW/142X_mcRun3_2025_realistic_v7-v2/140000/04c25b22-2076-4473-8a3b-e156bcab8dc7.root',
+        # 'file:/eos/cms/store/data/Run2025G/EphemeralHLTPhysics0/RAW/v1/000/398/183/00000/029d80cb-ade3-472d-8085-4a4d955b3882.root'
+        # 'file:/eos/cms/store/data/Run2025G/Muon0/RAW/v1/000/397/954/00000/0f819bfe-edde-4f0c-9ee1-64cbe1c608d4.root',
+        # 'file:/eos/cms/store/data/Run2025G/ParkingSingleMuon0/RAW/v1/000/397/954/00000/0cb2bd3c-e745-4f58-bb26-0516d7bb4592.root',
+        'file:/eos/cms/store/data/Run2025G/ScoutingPFMonitor/RAW/v1/000/398/012/00000/38acea35-20a6-461c-835a-800abdb0a462.root',
+        ),
+    secondaryFileNames = cms.untracked.vstring()
+)
+
+process.options = cms.untracked.PSet(
+    IgnoreCompletely = cms.untracked.vstring(),
+    Rethrow = cms.untracked.vstring(),
+    # TryToContinue = cms.untracked.vstring(),
+    TryToContinue = cms.untracked.vstring('ProductNotFound'),
+    accelerators = cms.untracked.vstring('*'),
+    allowUnscheduled = cms.obsolete.untracked.bool,
+    canDeleteEarly = cms.untracked.vstring(),
+    deleteNonConsumedUnscheduledModules = cms.untracked.bool(True),
+    dumpOptions = cms.untracked.bool(False),
+    emptyRunLumiMode = cms.obsolete.untracked.string,
+    eventSetup = cms.untracked.PSet(
+        forceNumberOfConcurrentIOVs = cms.untracked.PSet(
+            allowAnyLabel_=cms.required.untracked.uint32
+        ),
+        numberOfConcurrentIOVs = cms.untracked.uint32(0)
+    ),
+    fileMode = cms.untracked.string('FULLMERGE'),
+    forceEventSetupCacheClearOnNewRun = cms.untracked.bool(False),
+    holdsReferencesToDeleteEarly = cms.untracked.VPSet(),
+    makeTriggerResults = cms.obsolete.untracked.bool,
+    modulesToCallForTryToContinue = cms.untracked.vstring(),
+    modulesToIgnoreForDeleteEarly = cms.untracked.vstring(),
+    numberOfConcurrentLuminosityBlocks = cms.untracked.uint32(0),
+    numberOfConcurrentRuns = cms.untracked.uint32(1),
+    numberOfStreams = cms.untracked.uint32(0),
+    numberOfThreads = cms.untracked.uint32(1),
+    printDependencies = cms.untracked.bool(False),
+    sizeOfStackForThreadsInKB = cms.optional.untracked.uint32,
+    throwIfIllegalParameter = cms.untracked.bool(True),
+    wantSummary = cms.untracked.bool(True)
+)
+
+# Production Info
+process.configurationMetadata = cms.untracked.PSet(
+    annotation = cms.untracked.string('myNano nevts:100'),
+    name = cms.untracked.string('Applications'),
+    version = cms.untracked.string('$Revision: 1.19 $')
+)
+
+# Output definition
+
+process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
+    compressionAlgorithm = cms.untracked.string('LZMA'),
+    compressionLevel = cms.untracked.int32(9),
+    dataset = cms.untracked.PSet(
+        dataTier = cms.untracked.string('NANOAOD'),
+        filterName = cms.untracked.string('')
+    ),
+    fileName = cms.untracked.string('file:nanoScout_reHLT_data.root'),
+    outputCommands = process.NANOAODEventContent.outputCommands
+)
+
+# Additional output definition
+
+# Other statements
+from HLTrigger.Configuration.CustomConfigs import ProcessName
+process = ProcessName(process)
+
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, '151X_dataRun3_HLT_v1', '')
+
+# Path and EndPath definitions
+process.nanoAOD_step = cms.Path(process.scoutingNanoSequence)
+process.endjob_step = cms.EndPath(process.endOfProcess)
+process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
+
+# Schedule definition
+# process.schedule imported from cff in HLTrigger.Configuration
+process.schedule.extend([process.nanoAOD_step,process.endjob_step,process.NANOAODoutput_step])
+from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
+associatePatAlgosToolsTask(process)
+
+# customisation of the process.
+
+# Automatic addition of the customisation function from Configuration.DataProcessing.RecoTLR
+from Configuration.DataProcessing.RecoTLR import customisePostEra_Run3 
+
+#call to customisation function customisePostEra_Run3 imported from Configuration.DataProcessing.RecoTLR
+process = customisePostEra_Run3(process)
+
+# Automatic addition of the customisation function from PhysicsTools.NanoAOD.custom_run3scouting_cff
+from PhysicsTools.NanoAOD.custom_run3scouting_cff import customiseScoutingNano,customiseScoutingNanoForScoutingPFMonitor 
+
+#call to customisation function customiseScoutingNano imported from PhysicsTools.NanoAOD.custom_run3scouting_cff
+process = customiseScoutingNano(process)
+
+#call to customisation function customiseScoutingNanoForScoutingPFMonitor imported from PhysicsTools.NanoAOD.custom_run3scouting_cff
+process = customiseScoutingNanoForScoutingPFMonitor(process)
+
+# End of customisation functions
+
+
+# Customisation from command line
+
+# Add early deletion of temporary data products to reduce peak memory need
+from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
+process = customiseEarlyDelete(process)
+# End adding early deletion
+
+### Make my path
+
+## taking Mu12+HT+1btag as example
+# HLT_Mu12_IsoVVL_PFHT150_PNetBTag0p53_v7 = cms.Path(
+# 	process.HLTBeginSequence +
+# 	process.hltL1sMu12HTT150er +
+# 	process.hltPreMu12IsoVVLPFHT150PNetBTag0p53 +
+# 	cms.ignore(
+# 	process.hltL1sSingleMuOpenObjectMap
+# ) +
+# 	process.HLTAK4CaloJetsSequence +
+# 	process.hltHtMhtJet30 +
+# 	process.hltHT100Jet30 +
+# 	process.hltL1fL1sSingleMuOpenCandidateL1Filtered0 +
+# 	process.HLTL2muonrecoSequence +
+# 	cms.ignore(
+# 	process.hltL2fL1sSingleMuOpenCandidateL1f0L2Filtered0Q
+# ) +
+# 	process.HLTL3muonrecoSequence +
+# 	cms.ignore(
+# 	process.hltL1fForIterL3L1fL1sSingleMuOpenCandidateL1Filtered0
+# ) +
+# 	process.hltL3fL1sSingleMuOpenCandidateL1f0L2f3QL3Filtered12Q +
+# 	process.HLTMu12IsoVVLSequence +
+# 	process.hltL3crIsoL1sMu12L1f0L2f3QL3f12QL3trkIsoFilteredVVL +
+# 	process.HLTAK4PFJetsSequence +
+# 	process.hltPFHTJet30 +
+# 	process.hltPFHT150Jet30 +
+# 	process.HLTJetFlavourTagParticleNetSequencePF +
+# 	process.hltBTagPFPNet0p53Single +
+# 	process.HLTEndSequence
+# )
+
+from L1Trigger.TopoML.l1tTopoBDTProducer_cff import l1tTopoBDTProducer
+
+process.l1tTopoBDTProducerHH1muMuHT  = l1tTopoBDTProducer.clone(
+    model_path = cms.FileInPath("L1Trigger/TopoML/data/winter25/HH2b2W1L/Jan26_L1_conif_model_HH2b2W1L_1mu_Mu0_pt-qual_HT.json"),
+    # debug = cms.bool(True),
+)
+
+## BDT score to probability mapping (logit function):
+# prob = 1 / (1 + exp(-score))
+# score = -log(1/prob - 1)
+# 0.1 -2.1972245773362196
+# 0.2 -1.3862943611198906
+# 0.3 -0.8472978603872034
+# 0.4 -0.4054651081081644
+# 0.5 0.0
+# 0.6 0.4054651081081642
+# 0.7 0.8472978603872034
+# 0.8 1.3862943611198908
+# 0.9 2.1972245773362196 
+
+# import numpy as np
+# for thr in np.arange(0.1,1.0,0.1):
+#     score_thr = -1.0 * np.log(1.0/thr - 1.0)
+#     # print(f"prob {thr:.1f} -> score {score_thr:.6f}")
+
+#     print(f"Adding filter for BDT score > {score_thr:.3f} (prob>{thr:.1f})")
+#     print(f'hltL1TopoBDTHH1Mu{str(thr)[:3].replace(".", "p")}')
+
+#     process.__setattr__(f'hltL1TopoBDTHH1Mu{str(thr)[:3].replace(".", "p")}', cms.EDFilter("HLTFloatThresholdFilter",
+#         src = cms.InputTag("l1tTopoBDTProducerHH1muMuHT","score"),
+#         threshold = cms.double(score_thr),
+#         greaterThan = cms.bool(True),
+#     ))
+
+# exit()
+
+# ## filter for the L1 BDT score
+process.hltL1TopoBDTHH1Mu1p35 = cms.EDFilter("HLTFloatThresholdFilter",
+    src = cms.InputTag("l1tTopoBDTProducerHH1muMuHT","score"),
+    threshold = cms.double(1.35),  # 0.8 prob score
+    greaterThan = cms.bool(True),
+)
+
+## HLT TOPO
+
+from L1Trigger.TopoML.hltTopoBDTProducer_cff import hltTopoMuonBDTProducer
+process.hltTopoMuonBDTProducer = hltTopoMuonBDTProducer.clone(
+    modelPath = cms.string("L1Trigger/TopoML/data/Jan26_HLT_conif_model_HH2b2W1L_1mu_L1MuTOPOMuHT_Mu_pt-iso.json"),
+    l1tTopoScore = cms.InputTag("l1tTopoBDTProducerHH1muMuHT", "score"),
+)
+
+# ## filter for the HLT BDT score
+process.hltTopoBDTHH1MuProb0p8 = cms.EDFilter("HLTFloatThresholdFilter",
+    src = cms.InputTag("hltTopoMuonBDTProducer","score"),
+    threshold = cms.double(1.35),  # 0.8 prob score
+    greaterThan = cms.bool(True),
+)
+
+process.HLT_L1TopoHH1Mu_1p35_Mu12_IsoVVL = cms.Path(
+	process.HLTBeginSequence +
+    process.l1tTopoBDTProducerHH1muMuHT + ## replaces L1 seed in GT for now   
+    
+    # filter for different BDT score thresholds
+    # process.hltL1TopoBDTHH1Mu0p2 +
+    # process.hltL1TopoBDTHH1Mu0p3 +
+    # process.hltL1TopoBDTHH1Mu0p4 +
+    # process.hltL1TopoBDTHH1Mu0p5 +
+    # process.hltL1TopoBDTHH1Mu0p6 +
+    # process.hltL1TopoBDTHH1Mu0p7 +
+    # process.hltL1TopoBDTHH1Mu0p8 +
+    # process.hltL1TopoBDTHH1Mu1p35 +
+# 	process.hltL1sMu12HTT150er +
+# 	process.hltPreMu12IsoVVLPFHT150PNetBTag0p53 +
+	cms.ignore(
+    	process.hltL1sSingleMuOpenObjectMap
+    ) +
+# 	process.HLTAK4CaloJetsSequence +
+# 	process.hltHtMhtJet30 +
+# 	process.hltHT100Jet30 +
+	process.hltL1fL1sSingleMuOpenCandidateL1Filtered0 +
+	process.HLTL2muonrecoSequence +
+        cms.ignore(
+        process.hltL2fL1sSingleMuOpenCandidateL1f0L2Filtered0Q
+    ) +
+	process.HLTL3muonrecoSequence +
+        cms.ignore(
+        process.hltL1fForIterL3L1fL1sSingleMuOpenCandidateL1Filtered0
+    ) +
+	process.hltL3fL1sSingleMuOpenCandidateL1f0L2f3QL3Filtered12Q +
+	process.HLTMu12IsoVVLSequence +
+    ## final muon iso filter
+	# process.hltL3crIsoL1sMu12L1f0L2f3QL3f12QL3trkIsoFilteredVVL +
+# 	process.HLTAK4PFJetsSequence +
+# 	process.hltPFHTJet30 +
+# 	process.hltPFHT150Jet30 +
+# 	process.HLTJetFlavourTagParticleNetSequencePF +
+# 	process.hltBTagPFPNet0p53Single +
+    ## adding HLT TOPO
+    process.hltTopoMuonBDTProducer +   
+    process.hltTopoBDTHH1MuProb0p8 +
+	process.HLTEndSequence
+)
+
+## add my path to the schedule
+process.schedule.append(process.HLT_L1TopoHH1Mu_1p35_Mu12_IsoVVL)
+
+# ## add score to the nanoAOD
+process.load('L1Trigger.TopoML.l1tTopoBDTNanotable_cff')
+from PhysicsTools.NanoAOD.common_cff import ExtVar
+
+process.l1tTopoBDTNanotable.variables = cms.PSet(
+    # process.l1tTopoBDTNanotable.variables,
+    l1tBdtScore_HH1mu_MuHT = ExtVar( cms.InputTag("l1tTopoBDTProducerHH1muMuHT","score"),"float", doc="BDT score (model: HH 1mu, Mu+HT)" ),
+    # bdtScore_HH1mu_AllFeat = ExtVar( cms.InputTag("l1tTopoBDTProducerHH1muAllFeat","score"),"float", doc="BDT score (model: HH 1mu, Mu+HT+EG+JET+Tau)" ),
+    # hltBdtScore_HH1mu_MuHT = ExtVar( cms.InputTag("hltTopoMuonBDTProducer","score"),"float", doc="HLT BDT score (model: HH 1mu, Mu+HT)" ),
+)
+
+# process.scoutingNanoTableTask.add(process.l1tTopoBDTNanotable)
+process.scoutingNanoSequence.insert(0, process.l1tTopoBDTNanotable)
