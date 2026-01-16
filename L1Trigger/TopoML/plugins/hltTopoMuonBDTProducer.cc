@@ -75,7 +75,7 @@ HLTTopoMuonBDTProducer::HLTTopoMuonBDTProducer(edm::ParameterSet const& iConfig)
       trackIsoMapToken_(consumes<edm::ValueMap<double>>(iConfig.getParameter<edm::InputTag>("TrackIsoMap"))),
       muonPtCut_(iConfig.getParameter<double>("muonPtCut")),
       muonEtaCut_(iConfig.getParameter<double>("muonEtaCut")),
-      debug_(iConfig.getUntrackedParameter<bool>("debug", false)) {
+      debug_(iConfig.getParameter<bool>("debug")) {
   produces<float>("score");
 
   // Load conifer model from JSON located via FileInPath
@@ -131,23 +131,6 @@ void HLTTopoMuonBDTProducer::produce(edm::StreamID,
     return;
   }
 
-  // if (!chargedCandidatesH.isValid() || !ecalIsoMapH.isValid() || !hcalIsoMapH.isValid() || !trackIsoMapH.isValid()) {
-  //   edm::LogError("HLTTopoMuonBDTProducer")
-  //       << "Missing one or more required inputs: ChargedCandidates / EcalIsoMap / HcalIsoMap / TrackIsoMap.";
-  //   // print out which inputs are missing
-  //   if (!chargedCandidatesH.isValid())
-  //     edm::LogError("HLTTopoMuonBDTProducer") << "  - Missing Muon ChargedCandidates";
-  //   if (!ecalIsoMapH.isValid())
-  //     edm::LogError("HLTTopoMuonBDTProducer") << "  - Missing EcalIsoMap";
-  //   if (!hcalIsoMapH.isValid())
-  //     edm::LogError("HLTTopoMuonBDTProducer") << "  - Missing HcalIsoMap";
-  //   if (!trackIsoMapH.isValid())
-  //     edm::LogError("HLTTopoMuonBDTProducer") << "  - Missing TrackIsoMap"; 
-
-  //   iEvent.put(std::make_unique<float>(outScore), "score");
-  //   return;
-  // }
-
   // Find leading muon-candidate passing cuts
   int bestIdx = -1;
   float bestPt = -1.f;
@@ -172,10 +155,6 @@ void HLTTopoMuonBDTProducer::produce(edm::StreamID,
     const float ecalIso = ecalIsoMapH.isValid()  ? (*ecalIsoMapH)[muonRef] : 10.f;
     const float hcalIso = hcalIsoMapH.isValid()  ? (*hcalIsoMapH)[muonRef] : 10.f;
     const float trkIso  = trackIsoMapH.isValid() ? (*trackIsoMapH)[muonRef] : 10.f;
-    // double trackiso = -1.0;
-    // if (TrackIsoMap.isValid()) {
-    //   trackiso = (*TrackIsoMap)[muonRef];
-    // }
 
     // Feature order as requested:
     // [0] external score (from l1tTopoBDTProducer:score)
@@ -187,15 +166,14 @@ void HLTTopoMuonBDTProducer::produce(edm::StreamID,
     features.reserve(5);
     features.push_back(extScore);
     features.push_back(bestPt);
-    features.push_back((10 - trkIso) / bestPt);
-    features.push_back((10 - ecalIso) / bestPt);
-    features.push_back((10 - hcalIso) / bestPt);
+    features.push_back(10 - (trkIso) / bestPt);
+    features.push_back(10 - (ecalIso) / bestPt);
+    features.push_back(10 - (hcalIso) / bestPt);
 
     const std::vector<float> output = bdt_->decision_function(features);
     if (!output.empty()) outScore = output[0];
 
     // print debug info
-
     if (debug_) {
       // print out features for debugging
       std::cout << "HLTTopoMuonBDTProducer: features: ";
@@ -211,8 +189,8 @@ void HLTTopoMuonBDTProducer::produce(edm::StreamID,
                                             //  << " hcalIso: " << hcalIso << " trkIso: " << trkIso
                                             << " --> BDT score: " << outScore << std::endl;
     }
-  }
 
+  }
   iEvent.put(std::make_unique<float>(outScore), "score");
 }
 
@@ -235,7 +213,7 @@ void HLTTopoMuonBDTProducer::fillDescriptions(edm::ConfigurationDescriptions& de
   desc.add<double>("muonPtCut", 4.0);
   desc.add<double>("muonEtaCut", 2.4);
 
-  desc.addUntracked<bool>("debug", false);
+  desc.add<bool>("debug", false)->setComment("Enable debug printouts");
 
   descriptions.add("HLTTopoMuonBDTProducer", desc);
 }

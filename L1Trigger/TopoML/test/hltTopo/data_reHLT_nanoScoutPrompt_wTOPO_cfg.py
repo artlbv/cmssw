@@ -43,8 +43,8 @@ process.source = cms.Source("PoolSource",
 process.options = cms.untracked.PSet(
     IgnoreCompletely = cms.untracked.vstring(),
     Rethrow = cms.untracked.vstring(),
-    # TryToContinue = cms.untracked.vstring(),
-    TryToContinue = cms.untracked.vstring('ProductNotFound'),
+    TryToContinue = cms.untracked.vstring(),
+    # TryToContinue = cms.untracked.vstring('ProductNotFound'),
     accelerators = cms.untracked.vstring('*'),
     allowUnscheduled = cms.obsolete.untracked.bool,
     canDeleteEarly = cms.untracked.vstring(),
@@ -218,10 +218,22 @@ process.hltL1TopoBDTHH1Mu1p35 = cms.EDFilter("HLTFloatThresholdFilter",
 
 ## HLT TOPO
 
+## copied from the scouting pf sequence
+process.HLTMuIsolationSequence = cms.Sequence( 
+    process.HLTL3muonEcalPFisorecoSequenceNoBoolsForMuons + 
+    process.HLTL3muonHcalPFisorecoSequenceNoBoolsForMuons + 
+    process.HLTTrackReconstructionForIsoL3MuonIter02 + 
+    # process.hltMuonTkRelIsolationCut0p14Map 
+    process.hltMuonTkRelIsolationCut0p3Map
+    )
+
 from L1Trigger.TopoML.hltTopoBDTProducer_cff import hltTopoMuonBDTProducer
 process.hltTopoMuonBDTProducer = hltTopoMuonBDTProducer.clone(
     modelPath = cms.string("L1Trigger/TopoML/data/Jan26_HLT_conif_model_HH2b2W1L_1mu_L1MuTOPOMuHT_Mu_pt-iso.json"),
     l1tTopoScore = cms.InputTag("l1tTopoBDTProducerHH1muMuHT", "score"),
+    TrackIsoMap = cms.InputTag("hltMuonTkRelIsolationCut0p3Map", "combinedRelativeIsoDeposits"), # from Mu12Isolation sequence
+    #TrackIsoMap = cms.InputTag("hltMuonTkRelIsolationCut0p14Map", "combinedRelativeIsoDeposits"), # from scouting MuonIsolation sequence
+    debug = cms.bool(True),
 )
 
 # ## filter for the HLT BDT score
@@ -231,11 +243,41 @@ process.hltTopoBDTHH1MuProb0p8 = cms.EDFilter("HLTFloatThresholdFilter",
     greaterThan = cms.bool(True),
 )
 
-process.HLT_L1TopoHH1Mu_1p35_Mu12_IsoVVL = cms.Path(
+process.hltTopoBDTHH1MuProb0p9 = cms.EDFilter("HLTFloatThresholdFilter",
+    src = cms.InputTag("hltTopoMuonBDTProducer","score"),
+    threshold = cms.double(2.19),  # 0.9 prob score
+    greaterThan = cms.bool(True),
+)
+
+## TOPO path with producer only
+process.HLT_TopoHH1Mu_NoFilter = cms.Path(
+	process.HLTBeginSequence +
+    process.l1tTopoBDTProducerHH1muMuHT + ## replaces L1 seed in GT for now   
+	# cms.ignore(
+    # 	process.hltL1sSingleMuOpenObjectMap
+    # ) +
+	# process.hltL1fL1sSingleMuOpenCandidateL1Filtered0 +
+    process.HLTL2muonrecoSequence +
+	process.HLTL3muonrecoSequence +
+	# process.hltL3fL1sSingleMuOpenCandidateL1f0L2f3QL3Filtered12Q + # pt > 12 cut
+	# process.HLTMu12IsoVVLSequence +
+    process.HLTMuIsolationSequence +
+	# process.hltL3crIsoL1sMu12L1f0L2f3QL3f12QL3trkIsoFilteredVVL +
+    ## adding HLT TOPO
+    process.hltTopoMuonBDTProducer +  
+	process.HLTEndSequence
+)
+
+## add my path to the schedule
+process.schedule.append(process.HLT_TopoHH1Mu_NoFilter)
+
+
+## TOPO path with filters
+process.HLT_TopoHH1Mu_L1Tprob0p8_HLTprob0p9_Mu12_IsoVVL = cms.Path(
 	process.HLTBeginSequence +
     process.l1tTopoBDTProducerHH1muMuHT + ## replaces L1 seed in GT for now   
     
-    # filter for different BDT score thresholds
+    # # filter for different BDT score thresholds
     # process.hltL1TopoBDTHH1Mu0p2 +
     # process.hltL1TopoBDTHH1Mu0p3 +
     # process.hltL1TopoBDTHH1Mu0p4 +
@@ -243,41 +285,50 @@ process.HLT_L1TopoHH1Mu_1p35_Mu12_IsoVVL = cms.Path(
     # process.hltL1TopoBDTHH1Mu0p6 +
     # process.hltL1TopoBDTHH1Mu0p7 +
     # process.hltL1TopoBDTHH1Mu0p8 +
-    # process.hltL1TopoBDTHH1Mu1p35 +
+    # process.hltL1TopoBDTHH1Mu0p9 +
+
+    # process.hltL1TopoBDTHH1Mu1p35 + ## equivalent to prob>0.8
+    
 # 	process.hltL1sMu12HTT150er +
 # 	process.hltPreMu12IsoVVLPFHT150PNetBTag0p53 +
 	cms.ignore(
     	process.hltL1sSingleMuOpenObjectMap
     ) +
+	process.hltL1fL1sSingleMuOpenCandidateL1Filtered0 +
+
 # 	process.HLTAK4CaloJetsSequence +
 # 	process.hltHtMhtJet30 +
 # 	process.hltHT100Jet30 +
-	process.hltL1fL1sSingleMuOpenCandidateL1Filtered0 +
-	process.HLTL2muonrecoSequence +
-        cms.ignore(
+	
+    process.HLTL2muonrecoSequence +
+    cms.ignore(
         process.hltL2fL1sSingleMuOpenCandidateL1f0L2Filtered0Q
     ) +
 	process.HLTL3muonrecoSequence +
-        cms.ignore(
+    cms.ignore(
         process.hltL1fForIterL3L1fL1sSingleMuOpenCandidateL1Filtered0
     ) +
 	process.hltL3fL1sSingleMuOpenCandidateL1f0L2f3QL3Filtered12Q +
-	process.HLTMu12IsoVVLSequence +
-    ## final muon iso filter
+	# process.HLTMu12IsoVVLSequence +
+    process.HLTMuIsolationSequence +
 	# process.hltL3crIsoL1sMu12L1f0L2f3QL3f12QL3trkIsoFilteredVVL +
+    ## adding HLT TOPO
+    process.hltTopoMuonBDTProducer +   
+    # process.hltTopoBDTHH1MuProb0p8 +
+    # process.hltTopoBDTHH1MuProb0p9 + 
+
+
+    ## add jet and btagging sequences
 # 	process.HLTAK4PFJetsSequence +
 # 	process.hltPFHTJet30 +
 # 	process.hltPFHT150Jet30 +
 # 	process.HLTJetFlavourTagParticleNetSequencePF +
 # 	process.hltBTagPFPNet0p53Single +
-    ## adding HLT TOPO
-    process.hltTopoMuonBDTProducer +   
-    process.hltTopoBDTHH1MuProb0p8 +
 	process.HLTEndSequence
 )
 
 ## add my path to the schedule
-process.schedule.append(process.HLT_L1TopoHH1Mu_1p35_Mu12_IsoVVL)
+process.schedule.append(process.HLT_TopoHH1Mu_L1Tprob0p8_HLTprob0p9_Mu12_IsoVVL)
 
 # ## add score to the nanoAOD
 process.load('L1Trigger.TopoML.l1tTopoBDTNanotable_cff')
@@ -285,10 +336,13 @@ from PhysicsTools.NanoAOD.common_cff import ExtVar
 
 process.l1tTopoBDTNanotable.variables = cms.PSet(
     # process.l1tTopoBDTNanotable.variables,
-    l1tBdtScore_HH1mu_MuHT = ExtVar( cms.InputTag("l1tTopoBDTProducerHH1muMuHT","score"),"float", doc="BDT score (model: HH 1mu, Mu+HT)" ),
-    # bdtScore_HH1mu_AllFeat = ExtVar( cms.InputTag("l1tTopoBDTProducerHH1muAllFeat","score"),"float", doc="BDT score (model: HH 1mu, Mu+HT+EG+JET+Tau)" ),
-    # hltBdtScore_HH1mu_MuHT = ExtVar( cms.InputTag("hltTopoMuonBDTProducer","score"),"float", doc="HLT BDT score (model: HH 1mu, Mu+HT)" ),
+    l1tBdtScore_HH1mu_MuHT = ExtVar( cms.InputTag("l1tTopoBDTProducerHH1muMuHT","score"),"float", doc="L1 Topo BDT score (model: HH 1mu, Mu+HT)" ),
+    # l1tBdtScore_HH1mu_AllFeat = ExtVar( cms.InputTag("l1tTopoBDTProducerHH1muAllFeat","score"),"float", doc="L1 Topo BDT score (model: HH 1mu, Mu+HT+EG+JET+Tau)" ),
+    hltBdtScore_HH1mu_MuHT = ExtVar( cms.InputTag("hltTopoMuonBDTProducer","score"),"float", doc="HLT Topo BDT score (model: HH 1mu, Mu+HT)" ),
 )
 
-# process.scoutingNanoTableTask.add(process.l1tTopoBDTNanotable)
-process.scoutingNanoSequence.insert(0, process.l1tTopoBDTNanotable)
+# add l1tTopoBDTNanotable to the scouting nano sequence and event content
+process.scoutingNanoSequence.insert(-1, process.l1tTopoBDTNanotable)
+# process.scoutingNanoTaskCommon.add(process.l1tTopoBDTNanotable)
+
+process.NANOAODoutput.outputCommands.append("keep nanoaodFlatTable_l1tTopoBDTNanotable_*_*")

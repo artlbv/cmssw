@@ -28,7 +28,7 @@ hltTopoMuonBDTProducer = cms.EDProducer('HLTTopoMuonBDTProducer',
     modelPath = cms.string("L1Trigger/TopoML/data/Jan26_HLT_conif_model_HH2b2W1L_1mu_L1MuTOPOMuHT_Mu_pt-iso.json"),
 
     # selection cuts for the leading muon used as input to the BDT
-    muonPtCut  = cms.double(4.0),
+    muonPtCut  = cms.double(8.0),
     muonEtaCut = cms.double(2.4),
 )
 
