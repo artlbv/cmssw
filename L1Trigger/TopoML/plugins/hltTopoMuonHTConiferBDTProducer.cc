@@ -1,5 +1,5 @@
-#ifndef HLTrigger_Muon_HLTTopoMuonBDTProducer_h
-#define HLTrigger_Muon_HLTTopoMuonBDTProducer_h
+#ifndef HLTrigger_Muon_HLTTopoMuonHTConiferBDTProducer_h
+#define HLTrigger_Muon_HLTTopoMuonHTConiferBDTProducer_h
 
 #include <memory>
 
@@ -24,13 +24,13 @@
 
 #include "conifer.h"
 
-class HLTTopoMuonBDTProducer : public edm::global::EDProducer<> {
+class HLTTopoMuonHTConiferBDTProducer : public edm::global::EDProducer<> {
     public:
         using RecoChargedCandMap =
             edm::AssociationMap<edm::OneToValue<std::vector<reco::RecoChargedCandidate>, float, unsigned int>>;
 
-        explicit HLTTopoMuonBDTProducer(edm::ParameterSet const&);
-        ~HLTTopoMuonBDTProducer() override = default;
+        explicit HLTTopoMuonHTConiferBDTProducer(edm::ParameterSet const&);
+        ~HLTTopoMuonHTConiferBDTProducer() override = default;
 
         static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -56,7 +56,7 @@ class HLTTopoMuonBDTProducer : public edm::global::EDProducer<> {
 #endif
 
 // cpp /src below
-// #include "L1Trigger/TopoML/plugins/HLTTopoMuonBDTProducer.h"
+// #include "L1Trigger/TopoML/plugins/HLTTopoMuonHTConiferBDTProducer.h"
 
 #include <cmath>
 #include <memory>
@@ -66,7 +66,7 @@ class HLTTopoMuonBDTProducer : public edm::global::EDProducer<> {
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/getRef.h"
 
-HLTTopoMuonBDTProducer::HLTTopoMuonBDTProducer(edm::ParameterSet const& iConfig)
+HLTTopoMuonHTConiferBDTProducer::HLTTopoMuonHTConiferBDTProducer(edm::ParameterSet const& iConfig)
     : l1tTopoScoreToken_(consumes<float>(iConfig.getParameter<edm::InputTag>("l1tTopoScore"))),
       chargedCandidatesToken_(
           consumes<reco::RecoChargedCandidateCollection>(iConfig.getParameter<edm::InputTag>("ChargedCandidates"))),
@@ -82,24 +82,24 @@ HLTTopoMuonBDTProducer::HLTTopoMuonBDTProducer(edm::ParameterSet const& iConfig)
   const edm::FileInPath modelPath(iConfig.getParameter<std::string>("modelPath"));
   // print model path
   if (debug_)
-    std::cout << "HLTTopoMuonBDTProducer: loading model from " << modelPath.fullPath() << std::endl;
+    std::cout << "HLTTopoMuonHTConiferBDTProducer: loading model from " << modelPath.fullPath() << std::endl;
 
   // Load BDT model
   try {
     bdt_ = std::make_unique<BDT_t>(modelPath.fullPath());
   } catch (const std::exception& e) {
-    throw cms::Exception("HLTTopoMuonBDTProducer") << "Error loading BDT model from " << modelPath.fullPath() << ": " << e.what();
+    throw cms::Exception("HLTTopoMuonHTConiferBDTProducer") << "Error loading BDT model from " << modelPath.fullPath() << ": " << e.what();
   }
 }
 
-void HLTTopoMuonBDTProducer::produce(edm::StreamID,
+void HLTTopoMuonHTConiferBDTProducer::produce(edm::StreamID,
                                     edm::Event& iEvent,
                                     edm::EventSetup const&) const {
   // Always put a product, even if inputs missing
   float outScore = -999.f;
 
   if (!bdt_) {
-    edm::LogError("HLTTopoMuonBDTProducer") << "Conifer BDT pointer is null.";
+    edm::LogError("HLTTopoMuonHTConiferBDTProducer") << "Conifer BDT pointer is null.";
     iEvent.put(std::make_unique<float>(outScore), "score");
     return;
   }
@@ -113,7 +113,7 @@ void HLTTopoMuonBDTProducer::produce(edm::StreamID,
     if (extH.isValid()) {
       extScore = *extH;
     } else {
-      edm::LogError("HLTTopoMuonBDTProducer") << "Missing external l1tTopoScore product.";
+      edm::LogError("HLTTopoMuonHTConiferBDTProducer") << "Missing external l1tTopoScore product.";
       iEvent.put(std::make_unique<float>(outScore), "score");
     }
   }
@@ -125,7 +125,7 @@ void HLTTopoMuonBDTProducer::produce(edm::StreamID,
   const auto trackIsoMapH = iEvent.getHandle(trackIsoMapToken_);
   
   if (!chargedCandidatesH.isValid()) {
-    edm::LogError("HLTTopoMuonBDTProducer")
+    edm::LogError("HLTTopoMuonHTConiferBDTProducer")
         << "Missing ChargedCandidates input.";
     iEvent.put(std::make_unique<float>(outScore), "score");
     return;
@@ -176,7 +176,7 @@ void HLTTopoMuonBDTProducer::produce(edm::StreamID,
     // print debug info
     if (debug_) {
       // print out features for debugging
-      std::cout << "HLTTopoMuonBDTProducer: features: ";
+      std::cout << "HLTTopoMuonHTConiferBDTProducer: features: ";
       for (const auto& f : features) {
         std::cout << f << " ";
       }
@@ -184,7 +184,7 @@ void HLTTopoMuonBDTProducer::produce(edm::StreamID,
       std::cout << " extScore: " << extScore << " muPt: " << bestPt << " ecalIso: " << ecalIso
                 << " hcalIso: " << hcalIso << " trkIso: " << trkIso << std::endl;
       
-      std::cout << "HLTTopoMuonBDTProducer: "
+      std::cout << "HLTTopoMuonHTConiferBDTProducer: "
                                             //  << " extScore: " << extScore << " muPt: " << bestPt << " ecalIso: " << ecalIso
                                             //  << " hcalIso: " << hcalIso << " trkIso: " << trkIso
                                             << " --> BDT score: " << outScore << std::endl;
@@ -194,7 +194,7 @@ void HLTTopoMuonBDTProducer::produce(edm::StreamID,
   iEvent.put(std::make_unique<float>(outScore), "score");
 }
 
-void HLTTopoMuonBDTProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void HLTTopoMuonHTConiferBDTProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
 
   // External float from earlier producer
@@ -215,8 +215,8 @@ void HLTTopoMuonBDTProducer::fillDescriptions(edm::ConfigurationDescriptions& de
 
   desc.add<bool>("debug", false)->setComment("Enable debug printouts");
 
-  descriptions.add("HLTTopoMuonBDTProducer", desc);
+  descriptions.add("HLTTopoMuonHTConiferBDTProducer", desc);
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
-DEFINE_FWK_MODULE(HLTTopoMuonBDTProducer);
+DEFINE_FWK_MODULE(HLTTopoMuonHTConiferBDTProducer);
