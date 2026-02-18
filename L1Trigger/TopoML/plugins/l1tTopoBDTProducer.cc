@@ -1,26 +1,26 @@
 // FWCore includes
-#include "FWCore/Framework/interface/stream/EDProducer.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
-#include "FWCore/Utilities/interface/ESGetToken.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
+#include "FWCore/Utilities/interface/ESGetToken.h"
 
 // L1T includes
-#include "DataFormats/L1Trigger/interface/Muon.h"
 #include "DataFormats/L1Trigger/interface/EGamma.h"
-#include "DataFormats/L1Trigger/interface/Tau.h"
-#include "DataFormats/L1Trigger/interface/Jet.h"
 #include "DataFormats/L1Trigger/interface/EtSum.h"
+#include "DataFormats/L1Trigger/interface/Jet.h"
+#include "DataFormats/L1Trigger/interface/Muon.h"
+#include "DataFormats/L1Trigger/interface/Tau.h"
 
 // conifer includes
+#include <iostream>
+
 #include "ap_fixed.h"
 #include "conifer.h"
-
-#include <iostream>
 
 //============================================================
 // L1 collections wrapper (zero-overhead)
@@ -36,13 +36,15 @@ struct L1Collections {
 //============================================================
 // Object reference (type-safe)
 //============================================================
-using ObjectRef = std::
-    variant<std::monostate, const l1t::Muon*, const l1t::EGamma*, const l1t::Tau*, const l1t::Jet*, const l1t::EtSum*>;
+using ObjectRef =
+    std::variant<std::monostate, const l1t::Muon*, const l1t::EGamma*,
+                 const l1t::Tau*, const l1t::Jet*, const l1t::EtSum*>;
 
 //============================================================
 // Object getter function type
 //============================================================
-using ObjectGetterFn = ObjectRef (*)(int bx, unsigned idx, const L1Collections&);
+using ObjectGetterFn = ObjectRef (*)(int bx, unsigned idx,
+                                     const L1Collections&);
 
 //============================================================
 // Concrete object getters
@@ -108,7 +110,9 @@ using VarFn = float (*)(const ObjectRef&);
 
 static float varPt(const ObjectRef& r) { return std::visit(GetPt{}, r); }
 static float varHwIso(const ObjectRef& r) { return std::visit(GetHwIso{}, r); }
-static float varHwQual(const ObjectRef& r) { return std::visit(GetHwQual{}, r); }
+static float varHwQual(const ObjectRef& r) {
+  return std::visit(GetHwQual{}, r);
+}
 
 static const std::unordered_map<std::string, VarFn> kVarMap = {
     {"pt", &varPt}, {"hwIso", &varHwIso}, {"hwQual", &varHwQual}};
@@ -117,7 +121,11 @@ static const std::unordered_map<std::string, VarFn> kVarMap = {
 // Object getter registry
 //============================================================
 static const std::unordered_map<std::string, ObjectGetterFn> kObjectGetters_ = {
-    {"L1Mu", &getMu}, {"L1EG", &getEG}, {"L1Tau", &getTau}, {"L1Jet", &getJet}, {"L1HT", &getHT}};
+    {"L1Mu", &getMu},
+    {"L1EG", &getEG},
+    {"L1Tau", &getTau},
+    {"L1Jet", &getJet},
+    {"L1HT", &getHT}};
 
 //============================================================
 // Feature definition
@@ -132,11 +140,12 @@ struct Feature {
 // Helper: L1TFeatureVectorExtractor
 //============================================================
 class L1TFeatureVectorExtractor {
-public:
+ public:
   L1TFeatureVectorExtractor(const edm::FileInPath& jsonPath, int bx) : bx_(bx) {
     std::ifstream f(jsonPath.fullPath());
     if (!f)
-      throw cms::Exception("Configuration") << "Cannot open JSON file: " << jsonPath.fullPath() << "\n";
+      throw cms::Exception("Configuration")
+          << "Cannot open JSON file: " << jsonPath.fullPath() << "\n";
 
     nlohmann::json j;
     f >> j;
@@ -155,14 +164,18 @@ public:
       auto itObj = kObjectGetters_.find(obj);
       if (itObj == kObjectGetters_.end())
         throw cms::Exception("Configuration")
-            << "Unknown object in feature map: " << obj << " for feature " << name << "\n"
-            << "Check the feature_map in the JSON file:" << jsonPath.fullPath() << "\n";
+            << "Unknown object in feature map: " << obj << " for feature "
+            << name << "\n"
+            << "Check the feature_map in the JSON file:" << jsonPath.fullPath()
+            << "\n";
 
       auto itVar = kVarMap.find(var);
       if (itVar == kVarMap.end())
         throw cms::Exception("Configuration")
-            << "Unknown variable in feature map: " << var << " for feature " << name << "\n"
-            << "Check the feature_map in the JSON file:" << jsonPath.fullPath() << "\n";
+            << "Unknown variable in feature map: " << var << " for feature "
+            << name << "\n"
+            << "Check the feature_map in the JSON file:" << jsonPath.fullPath()
+            << "\n";
 
       features_[idx] = {itObj->second, itVar->second, index};
     }
@@ -197,12 +210,13 @@ public:
           break;
         }
       }
-      std::cout << "  Feature " << i << ": object type '" << objName << "', index " << f.index << ", variable '" << var
-                << "'" << std::endl;
+      std::cout << "  Feature " << i << ": object type '" << objName
+                << "', index " << f.index << ", variable '" << var << "'"
+                << std::endl;
     }
   }
 
-private:
+ private:
   int bx_;
   unsigned nFeatures_;
   std::vector<Feature> features_;
@@ -211,13 +225,13 @@ private:
 //============================================================
 
 class L1TTopoBDTProducer : public edm::stream::EDProducer<> {
-public:
+ public:
   explicit L1TTopoBDTProducer(const edm::ParameterSet& cfg);
   ~L1TTopoBDTProducer() override;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
-private:
+ private:
   void produce(edm::Event& iEvent, const edm::EventSetup& iSetup) override;
 
   // config parameters
@@ -244,28 +258,37 @@ private:
 
 L1TTopoBDTProducer::L1TTopoBDTProducer(const edm::ParameterSet& cfg)
     :  // initialise feature extractor
-      featureExtractor_(cfg.getParameter<edm::FileInPath>("model_path"), cfg.getParameter<int>("bx")) {
-  muToken_ = consumes<l1t::MuonBxCollection>(cfg.getParameter<edm::InputTag>("muToken"));
-  egToken_ = consumes<l1t::EGammaBxCollection>(cfg.getParameter<edm::InputTag>("egToken"));
-  tauToken_ = consumes<l1t::TauBxCollection>(cfg.getParameter<edm::InputTag>("tauToken"));
-  jetToken_ = consumes<l1t::JetBxCollection>(cfg.getParameter<edm::InputTag>("jetToken"));
-  sumToken_ = consumes<l1t::EtSumBxCollection>(cfg.getParameter<edm::InputTag>("etSumToken"));
+      featureExtractor_(cfg.getParameter<edm::FileInPath>("model_path"),
+                        cfg.getParameter<int>("bx")) {
+  muToken_ = consumes<l1t::MuonBxCollection>(
+      cfg.getParameter<edm::InputTag>("muToken"));
+  egToken_ = consumes<l1t::EGammaBxCollection>(
+      cfg.getParameter<edm::InputTag>("egToken"));
+  tauToken_ = consumes<l1t::TauBxCollection>(
+      cfg.getParameter<edm::InputTag>("tauToken"));
+  jetToken_ = consumes<l1t::JetBxCollection>(
+      cfg.getParameter<edm::InputTag>("jetToken"));
+  sumToken_ = consumes<l1t::EtSumBxCollection>(
+      cfg.getParameter<edm::InputTag>("etSumToken"));
   bx_ = cfg.getParameter<int>("bx");
   debug_ = cfg.getParameter<bool>("debug");
   edm::FileInPath modelPath = cfg.getParameter<edm::FileInPath>("model_path");
 
-  // ---- Load JSON: Model and feature names --------------------------------------------
+  // ---- Load JSON: Model and feature names
+  // --------------------------------------------
 
   // print model path for debugging
   if (debug_) {
-    std::cout << "Loading BDT model and features from JSON: " << modelPath.fullPath() << std::endl;
+    std::cout << "Loading BDT model and features from JSON: "
+              << modelPath.fullPath() << std::endl;
     featureExtractor_.printFeatures();
   }
   // Load BDT model
   try {
     bdt_ = std::make_unique<BDT_t>(modelPath.fullPath());
   } catch (const std::exception& e) {
-    throw cms::Exception("L1TTopoBDTProducer") << "Error loading BDT model from " << modelPath << ": " << e.what();
+    throw cms::Exception("L1TTopoBDTProducer")
+        << "Error loading BDT model from " << modelPath << ": " << e.what();
   }
 
   // register products
@@ -274,7 +297,8 @@ L1TTopoBDTProducer::L1TTopoBDTProducer(const edm::ParameterSet& cfg)
 
 L1TTopoBDTProducer::~L1TTopoBDTProducer() {}
 
-void L1TTopoBDTProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void L1TTopoBDTProducer::produce(edm::Event& iEvent,
+                                 const edm::EventSetup& iSetup) {
   using namespace edm;
   // get input collections
   // BXVector: first index is BX_, second index is object
@@ -314,7 +338,8 @@ void L1TTopoBDTProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
 
 // make fillDescriptions
 
-void L1TTopoBDTProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void L1TTopoBDTProducer::fillDescriptions(
+    edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.add<edm::InputTag>("muToken", edm::InputTag("l1tMuons"));
   desc.add<edm::InputTag>("egToken", edm::InputTag("l1tEGamma"));
@@ -322,7 +347,10 @@ void L1TTopoBDTProducer::fillDescriptions(edm::ConfigurationDescriptions& descri
   desc.add<edm::InputTag>("jetToken", edm::InputTag("l1tJet"));
   desc.add<edm::InputTag>("etSumToken", edm::InputTag("l1tEtSum"));
   desc.add<int>("bx", 0)->setComment("BX to process");
-  desc.add<edm::FileInPath>("model_path", edm::FileInPath("L1Trigger/TopoML/data/conifer_model_HH2b2t_2recotauh.json"))
+  desc.add<edm::FileInPath>(
+          "model_path",
+          edm::FileInPath(
+              "L1Trigger/TopoML/data/conifer_model_HH2b2t_2recotauh.json"))
       ->setComment("Path to BDT model JSON file");
   desc.add<bool>("debug", false)->setComment("Enable debug printouts");
 

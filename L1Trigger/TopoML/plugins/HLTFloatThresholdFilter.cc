@@ -1,12 +1,13 @@
-#include "FWCore/Framework/interface/stream/EDFilter.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Common/interface/Handle.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/stream/EDFilter.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 class HLTFloatThresholdFilter : public edm::stream::EDFilter<> {
-public:
+ public:
   explicit HLTFloatThresholdFilter(const edm::ParameterSet& config)
-      : src_(config.getParameter<edm::InputTag>("src")), threshold_(config.getParameter<double>("threshold")) {
+      : src_(config.getParameter<edm::InputTag>("src")),
+        threshold_(config.getParameter<double>("threshold")) {
     token_ = consumes<float>(src_);
   }
 
@@ -16,7 +17,7 @@ public:
     return (handle.isValid() && *handle > threshold_);
   }
 
-private:
+ private:
   edm::InputTag src_;
   edm::EDGetTokenT<float> token_;
   double threshold_;
