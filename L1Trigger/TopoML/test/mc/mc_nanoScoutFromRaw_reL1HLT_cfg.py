@@ -2,23 +2,23 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: myNano --conditions 151X_dataRun3_HLT_v1 --era Run3_2025 -s HLT:GRun,NANO:@ScoutMonitor --datatier NANOAOD --eventcontent NANOAOD --data --scenario pp --process reHLT --customise Configuration/DataProcessing/RecoTLR.customisePostEra_Run3 -n 100 --filein file:/eos/cms/store/data/Run2025G/EphemeralHLTPhysics0/RAW/v1/000/398/183/00000/029d80cb-ade3-472d-8085-4a4d955b3882.root --fileout file:nanoScout_reHLT_data.root --python_filename=data_reHLT_nanoScoutPrompt_cfg.py
-
+# with command line options: myNanoReL1HLT --conditions=150X_mcRun3_2025_realistic_v12 --era Run3_2025 -s L1REPACK:uGT,HLT:GRun,NANO:@ScoutMonitor --datatier NANOAOD --eventcontent NANOAOD --mc --scenario pp --process reL1HLT --customise Configuration/DataProcessing/RecoTLR.customisePostEra_Run3 -n 100 --filein /store/mc/Run3Winter25Digi/GluGlutoHHto2B2WtoLNu2Q_Par-c2-0-kl-1-kt-1_TuneCP5_13p6TeV_powheg-pythia8/GEN-SIM-RAW/142X_mcRun3_2025_realistic_v7-v2/140000/04c25b22-2076-4473-8a3b-e156bcab8dc7.root --fileout file:mc_nanoScout_reL1HLT.root --python_filename=mc_nanoScoutFromRaw_reL1HLT_cfg.py
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.Eras.Era_Run3_2025_cff import Run3_2025
 
-process = cms.Process('reHLT',Run3_2025)
+process = cms.Process('reL1HLT',Run3_2025)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
+process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
-# process.load('HLTrigger.Configuration.HLT_GRun_cff')
-process.load('HLTrigger.Configuration.HLT_Mu12HT1b_cff')
+process.load('Configuration.StandardSequences.SimL1EmulatorRepack_uGT_cff')
+process.load('HLTrigger.Configuration.HLT_GRun_cff')
 process.load('PhysicsTools.NanoAOD.custom_run3scouting_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -30,13 +30,7 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring(
-        # '/store/mc/Run3Winter25Digi/GluGlutoHHto2B2WtoLNu2Q_Par-c2-0-kl-1-kt-1_TuneCP5_13p6TeV_powheg-pythia8/GEN-SIM-RAW/142X_mcRun3_2025_realistic_v7-v2/140000/04c25b22-2076-4473-8a3b-e156bcab8dc7.root',
-        # 'file:/eos/cms/store/data/Run2025G/EphemeralHLTPhysics0/RAW/v1/000/398/183/00000/029d80cb-ade3-472d-8085-4a4d955b3882.root'
-        # 'file:/eos/cms/store/data/Run2025G/Muon0/RAW/v1/000/397/954/00000/0f819bfe-edde-4f0c-9ee1-64cbe1c608d4.root',
-        # 'file:/eos/cms/store/data/Run2025G/ParkingSingleMuon0/RAW/v1/000/397/954/00000/0cb2bd3c-e745-4f58-bb26-0516d7bb4592.root',
-        'file:/eos/cms/store/data/Run2025G/ScoutingPFMonitor/RAW/v1/000/398/012/00000/38acea35-20a6-461c-835a-800abdb0a462.root',
-        ),
+    fileNames = cms.untracked.vstring('/store/mc/Run3Winter25Digi/GluGlutoHHto2B2WtoLNu2Q_Par-c2-0-kl-1-kt-1_TuneCP5_13p6TeV_powheg-pythia8/GEN-SIM-RAW/142X_mcRun3_2025_realistic_v7-v2/140000/04c25b22-2076-4473-8a3b-e156bcab8dc7.root'),
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -44,7 +38,6 @@ process.options = cms.untracked.PSet(
     IgnoreCompletely = cms.untracked.vstring(),
     Rethrow = cms.untracked.vstring(),
     TryToContinue = cms.untracked.vstring(),
-    # TryToContinue = cms.untracked.vstring('ProductNotFound'),
     accelerators = cms.untracked.vstring('*'),
     allowUnscheduled = cms.obsolete.untracked.bool,
     canDeleteEarly = cms.untracked.vstring(),
@@ -70,12 +63,12 @@ process.options = cms.untracked.PSet(
     printDependencies = cms.untracked.bool(False),
     sizeOfStackForThreadsInKB = cms.optional.untracked.uint32,
     throwIfIllegalParameter = cms.untracked.bool(True),
-    wantSummary = cms.untracked.bool(True)
+    wantSummary = cms.untracked.bool(False)
 )
 
 # Production Info
 process.configurationMetadata = cms.untracked.PSet(
-    annotation = cms.untracked.string('myNano nevts:100'),
+    annotation = cms.untracked.string('myNanoReL1HLT nevts:100'),
     name = cms.untracked.string('Applications'),
     version = cms.untracked.string('$Revision: 1.19 $')
 )
@@ -89,12 +82,8 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
         dataTier = cms.untracked.string('NANOAOD'),
         filterName = cms.untracked.string('')
     ),
-    fileName = cms.untracked.string('file:nanoScout_reHLT_data.root'),
-    outputCommands = process.NANOAODEventContent.outputCommands,
-
-    SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring("hltMu12HT1501bFilter")
-    ),
+    fileName = cms.untracked.string('file:mc_nanoScout_reL1HLT.root'),
+    outputCommands = process.NANOAODEventContent.outputCommands
 )
 
 # Additional output definition
@@ -104,18 +93,17 @@ from HLTrigger.Configuration.CustomConfigs import ProcessName
 process = ProcessName(process)
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '151X_dataRun3_HLT_v1', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '150X_mcRun3_2025_realistic_v12', '')
 
 # Path and EndPath definitions
-process.path = cms.Path(
-    process.hltPFJetForBtagSelector
-)
+process.L1RePack_step = cms.Path(process.SimL1Emulator)
 process.nanoAOD_step = cms.Path(process.scoutingNanoSequence)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 
 # Schedule definition
 # process.schedule imported from cff in HLTrigger.Configuration
+process.schedule.insert(0, process.L1RePack_step)
 process.schedule.extend([process.nanoAOD_step,process.endjob_step,process.NANOAODoutput_step])
 from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
@@ -127,6 +115,12 @@ from Configuration.DataProcessing.RecoTLR import customisePostEra_Run3
 
 #call to customisation function customisePostEra_Run3 imported from Configuration.DataProcessing.RecoTLR
 process = customisePostEra_Run3(process)
+
+# Automatic addition of the customisation function from HLTrigger.Configuration.customizeHLTforMC
+from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforMC 
+
+#call to customisation function customizeHLTforMC imported from HLTrigger.Configuration.customizeHLTforMC
+process = customizeHLTforMC(process)
 
 # Automatic addition of the customisation function from PhysicsTools.NanoAOD.custom_run3scouting_cff
 from PhysicsTools.NanoAOD.custom_run3scouting_cff import customiseScoutingNano,customiseScoutingNanoForScoutingPFMonitor 
@@ -146,6 +140,7 @@ process = customiseScoutingNanoForScoutingPFMonitor(process)
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
 process = customiseEarlyDelete(process)
 # End adding early deletion
+
 
 ### Make my path
 
@@ -274,6 +269,24 @@ process.hltTopoBDTHH1MuHTBProb0p5 = cms.EDFilter("HLTFloatThresholdFilter",
     greaterThan = cms.bool(True),
 )
 
+## model with 1+2 muons
+process.hltTopoMuonHTPNetBXGBProducerMu12 = hltTopoMuonHTPNetBXGBProducer.clone(
+    modelPath = cms.string("L1Trigger/TopoML/data/Feb19_HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mu1-2pt-absiso_PNetB.json"),
+    TrackIsoMap = cms.InputTag("hltMuonTkRelIsolationCut0p3Map", "combinedRelativeIsoDeposits"), # from Mu12Isolation sequence
+    #TrackIsoMap = cms.InputTag("hltMuonTkRelIsolationCut0p14Map", "combinedRelativeIsoDeposits"), # from scouting MuonIsolation sequence
+    nMuons = cms.uint32(2),
+    debug = cms.bool(True),
+)
+
+## model with 1 muon but sorted by tkIso
+process.hltTopoMuonHTPNetBXGBProducerMuSortIso = hltTopoMuonHTPNetBXGBProducer.clone(
+    modelPath = cms.string("L1Trigger/TopoML/data/Feb19_HLT_xgb_model_HH2b2W1L_1mu_HLTHT_sorttkisoMupt-absiso_PNetB.json"),
+    TrackIsoMap = cms.InputTag("hltMuonTkRelIsolationCut0p3Map", "combinedRelativeIsoDeposits"), # from Mu12Isolation sequence
+    #TrackIsoMap = cms.InputTag("hltMuonTkRelIsolationCut0p14Map", "combinedRelativeIsoDeposits"), # from scouting MuonIsolation sequence
+    muonSortByTkIso = cms.bool(True),
+    debug = cms.bool(True),
+)
+
 ## change hltPFJetForBtagSelector to not filter events
 
 # process.hltPFJetForBtagSelector.MinN = cms.int32(0)
@@ -300,6 +313,8 @@ process.HLT_TopoHH1Mu_NoFilter = cms.Path(
 	process.HLTJetFlavourTagParticleNetSequencePF +
     ## run HLT TOPO with Mu+HT+1b
     process.hltTopoMuonHTPNetBXGBProducer +
+    process.hltTopoMuonHTPNetBXGBProducerMuSortIso +
+    process.hltTopoMuonHTPNetBXGBProducerMu12 +
 	process.HLTEndSequence
 )
 
@@ -380,6 +395,8 @@ process.l1tTopoBDTNanotable.variables = cms.PSet(
     # l1tBdtScore_HH1mu_AllFeat = ExtVar( cms.InputTag("l1tTopoBDTProducerHH1muAllFeat","score"),"float", doc="L1 Topo BDT score (model: HH 1mu, Mu+HT+EG+JET+Tau)" ),
     hltBdtScore_HH1mu_MuHT = ExtVar( cms.InputTag("hltTopoMuonHTBDTProducer","score"),"float", doc="HLT Topo BDT score (model: HH 1mu, Mu+HT)" ),
     hltBdtScore_HH1mu_MuHTPNetB = ExtVar( cms.InputTag("hltTopoMuonHTPNetBXGBProducer","score"),"float", doc="HLT Topo BDT score (model: HH 1mu, Mu+HT+PNetB)" ),
+    hltBdtScore_HH1mu_MuHTPNetBMuSortIso = ExtVar( cms.InputTag("hltTopoMuonHTPNetBXGBProducerMuSortIso","score"),"float", doc="HLT Topo BDT score (model: HH 1mu, Mu+HT+PNetB, muon sorted by tkIso)" ),
+    hltBdtScore_HH1mu_MuHTPNetBMu12 = ExtVar( cms.InputTag("hltTopoMuonHTPNetBXGBProducerMu12","score"),"float", doc="HLT Topo BDT score (model: HH 1mu, Mu+HT+PNetB, sorted by tkIso with up to 2 muons)" ),
 )
 
 # add l1tTopoBDTNanotable to the scouting nano sequence and event content
@@ -397,198 +414,20 @@ process.NANOAODoutput.outputCommands.append("keep nanoaodFlatTable_l1tTopoBDTNan
 # HLT Trigger Filter
 # -------------------------------------------------------------------
 ## HLT FILTER
-import HLTrigger.HLTfilters.hltHighLevel_cfi
-process.skimHLTFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
-process.skimHLTFilter.TriggerResultsTag = cms.InputTag("TriggerResults", "", "HLT") # explicity specify the process name
-process.skimHLTFilter.throw=cms.bool(False) # otherwise will throw if it cant match to a hlt path, depends on whether you want to silently ignore unmatched paths
+# import HLTrigger.HLTfilters.hltHighLevel_cfi
+# process.skimHLTFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
+# process.skimHLTFilter.TriggerResultsTag = cms.InputTag("TriggerResults", "", "HLT") # explicity specify the process name
+# process.skimHLTFilter.throw=cms.bool(False) # otherwise will throw if it cant match to a hlt path, depends on whether you want to silently ignore unmatched paths
 
-process.skimHLTFilter.HLTPaths = cms.vstring("HLT_Mu12_IsoVVL_PFHT150_PNetBTag0p53*")  # the * allows us to match all version, you could also other wild card expressions
+# #process.skimHLTFilter.HLTPaths = cms.vstring("HLT_Mu12_IsoVVL_PFHT150_PNetBTag0p53*")  # the * allows us to match all version, you could also other wild card expressions
 # process.skimHLTFilter.HLTPaths = cms.vstring("HLT_IsoMu24*")  # the * allows us to match all version, you could also other wild card expressions
-process.HLTskim_step = cms.Path(process.skimHLTFilter)
-process.NANOAODoutput.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring("HLTskim_step"))
+# process.HLTskim_step = cms.Path(process.skimHLTFilter)
+# process.NANOAODoutput.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring("HLTskim_step"))
 
-# Schedule definition
-process.schedule.insert(0, process.HLTskim_step)  # insert the skim step at the beginning of the schedule so it runs first
+# # Schedule definition
+# process.schedule.insert(0, process.HLTskim_step)  # insert the skim step at the beginning of the schedule so it runs first
 
-process.nanoAOD_step = cms.Path(process.skimHLTFilter*process.scoutingNanoSequence)
+# process.nanoAOD_step = cms.Path(process.skimHLTFilter*process.scoutingNanoSequence)
 
-# insert the skim filter at the beginning of the HLT begin sequence so that it runs before any other HLT module, this way we can skip all the HLT processing for events that don't pass the skim
-process.HLTBeginSequence.insert(0, process.skimHLTFilter)
-
-
-
-### add hltJets with btagging to nano
-
-
-process.HLTTauVertexSequencePF = cms.Sequence(
-    process.hltVerticesPF
-    + process.hltVerticesPFSelector
-    + cms.ignore(process.hltVerticesPFFilter)
-    + process.hltDeepInclusiveVertexFinderPF
-    + process.hltDeepInclusiveSecondaryVerticesPF
-)
-
-process.HLTJetFlavourTagParticleNetSequencePFMod = cms.Sequence(
-    process.hltVerticesPF
-    + process.hltVerticesPFSelector
-    + cms.ignore(process.hltVerticesPFFilter)
-    + cms.ignore(process.hltPFJetForBtagSelector)
-    + process.hltPFJetForBtag
-    + process.hltDeepBLifetimeTagInfosPF
-    + process.hltDeepInclusiveVertexFinderPF
-    + process.hltDeepInclusiveSecondaryVerticesPF
-    + process.hltDeepTrackVertexArbitratorPF
-    + process.hltDeepInclusiveMergedVerticesPF
-    + process.hltPrimaryVertexAssociation
-    + process.hltParticleNetJetTagInfos
-    + process.hltParticleNetONNXJetTags
-    + process.hltParticleNetDiscriminatorsJetTags
-)
-
-# ## change defaults
-# process.hltPFJetForBtagSelector.MinPt = 15
-# process.hltPFJetForBtagSelector.MaxEta = 2.7
-# process.hltParticleNetJetTagInfos.min_jet_pt = 15
-# process.hltParticleNetJetTagInfos.max_jet_eta = 2.7
-
-#process.scoutingNanoSequence.add(
-# process.nanoAOD_step = cms.Path(
-#     process.HLTL1UnpackerSequence
-#     + process.HLTBeamSpot
-#     # + process.HLTL2TauTagNNSequence
-#     # + process.HLTGlobalPFTauHPSSequence
-#     # + process.HLTHPSDeepTauPFTauSequenceForVBFIsoTau
-#     + process.HLTAK4PFJetsSequence
-#     + process.HLTJetFlavourTagParticleNetSequencePFMod
-#     # + process.HLTTauVertexSequencePF
-#     # + process.l1bits
-#     + process.scoutingNanoSequence
-# )
-
-
-process.load('PhysicsTools.NanoAOD.nano_cff')
-from PhysicsTools.NanoAOD.common_cff import Var, P4Vars, ExtVar
-
-process.AK4PFJetsTable = cms.EDProducer("SimplePFJetFlatTableProducer",
-    src = cms.InputTag( "hltAK4PFJetsCorrected" ),
-    cut = cms.string("pt > 10"),
-    name= cms.string("hltAK4Jet"),
-    doc = cms.string("HLT AK4 PF Jets"),
-    singleton = cms.bool(False), # the number of entries is variable
-    extension = cms.bool(False), # this is the main table
-    variables = cms.PSet(
-      P4Vars,
-      chargedHadronEnergy = Var("chargedHadronEnergy", float, doc = "chargedHadronEnergy"),
-      chargedHadronEnergyFraction = Var("chargedHadronEnergyFraction", float, doc = "chargedHadronEnergyFraction"),
-      neutralHadronEnergy = Var("neutralHadronEnergy", float, doc = "neutralHadronEnergy"),
-      neutralHadronEnergyFraction = Var("neutralHadronEnergyFraction", float, doc = "neutralHadronEnergyFraction"),
-      photonEnergy = Var("photonEnergy", float, doc = "photonEnergy"),
-      photonEnergyFraction = Var("photonEnergyFraction", float, doc = "photonEnergyFraction"),
-      muonEnergy = Var("muonEnergy", float, doc = "muonEnergy"),
-      muonEnergyFraction = Var("muonEnergyFraction", float, doc = "muonEnergyFraction"),
-      HFHadronEnergy = Var("HFHadronEnergy", float, doc = "HFHadronEnergy"),
-      HFHadronEnergyFraction = Var("HFHadronEnergyFraction", float, doc = "HFHadronEnergyFraction"),
-      HFEMEnergy = Var("HFEMEnergy", float, doc = "HFEMEnergy"),
-      HFEMEnergyFraction = Var("HFEMEnergyFraction", float, doc = "HFEMEnergyFraction"),
-      chargedHadronMultiplicity = Var("chargedHadronMultiplicity", float, doc = "chargedHadronMultiplicity"),
-      neutralHadronMultiplicity = Var("neutralHadronMultiplicity", float, doc = "neutralHadronMultiplicity"),
-      photonMultiplicity = Var("photonMultiplicity", float, doc = "photonMultiplicity"),
-      muonMultiplicity = Var("muonMultiplicity", float, doc = "muonMultiplicity"),
-      HFHadronMultiplicity = Var("HFHadronMultiplicity", float, doc = "HFHadronMultiplicity"),
-      HFEMMultiplicity = Var("HFEMMultiplicity", float, doc = "HFEMMultiplicity"),
-      chargedMuEnergy = Var("chargedMuEnergy", float, doc = "chargedMuEnergy"),
-      chargedMuEnergyFraction = Var("chargedMuEnergyFraction", float, doc = "chargedMuEnergyFraction"),
-      neutralEmEnergy = Var("neutralEmEnergy", float, doc = "neutralEmEnergy"),
-      neutralEmEnergyFraction = Var("neutralEmEnergyFraction", float, doc = "neutralEmEnergyFraction"),
-      chargedMultiplicity = Var("chargedMultiplicity", float, doc = "chargedMultiplicity"),
-      neutralMultiplicity = Var("neutralMultiplicity", float, doc = "neutralMultiplicity"),
-      nConstituents = Var("nConstituents", int, doc = "nConstituents"),
-      etaetaMoment =  Var("etaetaMoment", float, doc = " eta-eta second moment, ET weighted " ),
-      phiphiMoment =  Var("phiphiMoment", float, doc = " phi-phi second moment, ET weighted " ),
-      etaphiMoment =  Var("etaphiMoment", float, doc = " eta-phi second moment, ET weighted " ),
-      maxDistance =  Var("maxDistance", float, doc = " maximum distance from jet to constituent " ),
-      constituentPtDistribution =  Var("constituentPtDistribution", float, doc = " jet structure variables: constituentPtDistribution is the pT distribution among the jet constituents (ptDistribution = 1 if jet made by one constituent carrying all its momentum,  ptDistribution = 0 if jet made by infinite constituents carrying an infinitesimal fraction of pt) "    ),
-      constituentEtaPhiSpread =  Var("constituentEtaPhiSpread", float, doc = " the rms of the eta-phi spread of the jet's constituents wrt the jet axis " ),
-      jetArea =  Var("jetArea", float, doc = " get jet area " ),
-    )
-)
-
-pnet_discriminator_names = ["BvsAll", "CvsAll", "CvsL", "TauhvsAll"]
-pnet_score_names = ["probb","probc","probuds","probg","probtauhp","probtauhm","ptcorr"]
-
-process.hltPFJetForBtagPAT = cms.EDProducer("PATJetProducer",
-    jetSource = cms.InputTag("hltPFJetForBtag"),  # Input HLT jets
-    addJetCorrFactors = cms.bool(False),  # No JEC applied
-    addBTagInfo = cms.bool(True),
-    discriminatorSources = cms.VInputTag(
-        # cms.InputTag("hltParticleNetDiscriminatorsJetTags", "BvsAll"),
-        # cms.InputTag("hltParticleNetDiscriminatorsJetTags", "CvsAll"),
-        # cms.InputTag("hltParticleNetDiscriminatorsJetTags", "CvsL"),
-        # cms.InputTag("hltParticleNetDiscriminatorsJetTags", "TauhvsAll"),
-        # ## raw scores
-        # cms.InputTag("hltParticleNetONNXJetTags", "probb"),
-        # cms.InputTag("hltParticleNetONNXJetTags", "probc"),
-        # cms.InputTag("hltParticleNetONNXJetTags", "probuds"),
-        # cms.InputTag("hltParticleNetONNXJetTags", "probg"),
-        # cms.InputTag("hltParticleNetONNXJetTags", "probtauhp"),
-        # cms.InputTag("hltParticleNetONNXJetTags", "probtauhm"),
-        # cms.InputTag("hltParticleNetONNXJetTags", "ptcorr"),
-        
-        # compact form
-        *[cms.InputTag("hltParticleNetDiscriminatorsJetTags", name) for name in pnet_discriminator_names],
-        *[cms.InputTag("hltParticleNetONNXJetTags", name) for name in pnet_score_names],
-
-    ),
-    addDiscriminators = cms.bool(True),
-    addJetCharge = cms.bool(False),
-    addGenPartonMatch = cms.bool(False),
-    addAssociatedTracks = cms.bool(False),
-    addGenJetMatch = cms.bool(False),
-    getJetMCFlavour = cms.bool(False),
-    addJetFlavourInfo = cms.bool(False),
-)
-
-process.hltPFJetForBtagTable = cms.EDProducer("SimplePATJetFlatTableProducer",
-    src = cms.InputTag( "hltPFJetForBtagPAT" ),
-    name= cms.string("hltAK4JetPNet"),
-    doc = cms.string("HLT AK4 PF Jets w PNet"),
-    singleton = cms.bool(False), # the number of entries is variable
-    extension = cms.bool(False), # this is the main table
-    variables = cms.PSet(
-        process.AK4PFJetsTable.variables,
-        btagPNetB = Var("bDiscriminator('hltParticleNetDiscriminatorsJetTags:BvsAll')",float, doc="BvsAll"),
-        btagPNetC = Var("bDiscriminator('hltParticleNetDiscriminatorsJetTags:CvsAll')",float, doc="CvsAll"),
-        btagPNetCvsL = Var("bDiscriminator('hltParticleNetDiscriminatorsJetTags:CvsL')",float, doc="CvsL"),
-        btagPNetTauVJet = Var("bDiscriminator('hltParticleNetDiscriminatorsJetTags:TauhvsAll')",float, doc="TauVsJet"),
-        # raw scores
-        btagPNet_probb = Var("bDiscriminator('hltParticleNetONNXJetTags:probb')",float, doc="probb"),
-        btagPNet_probc = Var("bDiscriminator('hltParticleNetONNXJetTags:probc')",float, doc="probc"),
-        btagPNet_probuds = Var("bDiscriminator('hltParticleNetONNXJetTags:probuds')",float, doc="probuds"),
-        btagPNet_probg = Var("bDiscriminator('hltParticleNetONNXJetTags:probg')",float, doc="probg"),
-        btagPNet_probtauhp = Var("bDiscriminator('hltParticleNetONNXJetTags:probtauhp')",float, doc="probtauhp"),
-        btagPNet_probtauhm = Var("bDiscriminator('hltParticleNetONNXJetTags:probtauhm')",float, doc="probtauhm"),
-        btagPNet_ptcorr = Var("bDiscriminator('hltParticleNetONNXJetTags:ptcorr')",float, doc="ptcorr"),
-
-        # compact form - wip
-        # **{f"btagPNet{name}": Var( f"bDiscriminator('hltParticleNetDiscriminatorsJetTags:{name}')",
-        #                           float, doc = f"ParticleNet {name} discriminator", precision = 10,
-        #                           ) for name in pnet_discriminator_names},
-
-        # **{f"btagPNet_{name}": Var( f"bDiscriminator('hltParticleNetONNXJetTags:{name}')", 
-        #                            float, doc = f"ParticleNet {name} discriminator", precision = 10,
-        #                            ) for name in pnet_score_names},
-    ),
-)
-
-process.scoutingTriggerTask.add(
-    # process.pfCandTable,
-    # process.AK4PFJetsTable,
-
-    ## pnet jets
-    process.hltPFJetForBtagPAT,
-    process.hltPFJetForBtagTable,
-
-    ## vertices
-    # process.pfVertexTable, # wip
-    # process.svCandidateTable,
-    )
+# # insert the skim filter at the beginning of the HLT begin sequence so that it runs before any other HLT module, this way we can skip all the HLT processing for events that don't pass the skim
+# process.HLTBeginSequence.insert(0, process.skimHLTFilter)

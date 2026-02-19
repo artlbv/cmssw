@@ -3,16 +3,17 @@
 #ifndef HLTrigger_Muon_HLTTopoMuonHTPNetBXGBProducer_h
 #define HLTrigger_Muon_HLTTopoMuonHTPNetBXGBProducer_h
 
-#include <array>
 #include <memory>
 #include <sstream>
+#include <string>
+#include <vector>
 
-#include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/Common/interface/AssociationMap.h"
 #include "DataFormats/Common/interface/OneToValue.h"
 #include "DataFormats/Common/interface/ValueMap.h"
 #include "DataFormats/METReco/interface/MET.h"
 #include "DataFormats/METReco/interface/METCollection.h"
+#include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidateFwd.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -24,14 +25,18 @@
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/Utilities/interface/EDGetToken.h"
 #include "FWCore/Utilities/interface/InputTag.h"
+
 #include "xgboost/c_api.h"
 
 class HLTTopoMuonHTPNetBXGBProducer : public edm::stream::EDProducer<> {
  public:
-  // using RecoChargedCandMap = edm::AssociationMap
-  //   edm::OneToValue<std::vector<reco::RecoChargedCandidate>, float>>;
 
-  static constexpr unsigned int kNFeatures = 6;
+ using RecoChargedCandMap = edm::AssociationMap<edm::OneToValue<
+      std::vector<reco::RecoChargedCandidate>, float, unsigned int>>;
+
+  // 2 global features (PFHT, MaxPNetB) + 4 features per muon
+  static constexpr unsigned int kGlobalFeatures  = 2;
+  static constexpr unsigned int kFeaturesPerMuon = 4;
 
   explicit HLTTopoMuonHTPNetBXGBProducer(edm::ParameterSet const&);
   ~HLTTopoMuonHTPNetBXGBProducer() override;
@@ -42,26 +47,27 @@ class HLTTopoMuonHTPNetBXGBProducer : public edm::stream::EDProducer<> {
   void produce(edm::Event&, edm::EventSetup const&) override;
 
   /* Tokens */
-  edm::EDGetTokenT<reco::RecoChargedCandidateCollection>
-      chargedCandidatesToken_;
-  edm::EDGetTokenT<edm::ValueMap<float>> ecalIsoMapToken_;
-  edm::EDGetTokenT<edm::ValueMap<float>> hcalIsoMapToken_;
-  edm::EDGetTokenT<edm::ValueMap<double>> trackIsoMapToken_;
-  edm::EDGetTokenT<reco::METCollection> pfhtToken_;
-  edm::EDGetTokenT<reco::JetTagCollection> pnetToken_;
+  edm::EDGetTokenT<reco::RecoChargedCandidateCollection> chargedCandidatesToken_;
+  edm::EDGetTokenT<RecoChargedCandMap>                 ecalIsoMapToken_;
+  edm::EDGetTokenT<RecoChargedCandMap>                 hcalIsoMapToken_;
+  edm::EDGetTokenT<edm::ValueMap<double>>                trackIsoMapToken_;
+  edm::EDGetTokenT<reco::METCollection>                  pfhtToken_;
+  edm::EDGetTokenT<reco::JetTagCollection>               pnetToken_;
 
   /* Cuts */
   double muonPtCut_;
   double muonEtaCut_;
 
-  /* XGBoost — one instance per stream, no sharing, no locking needed */
-  BoosterHandle booster_ = nullptr;
-  DMatrixHandle dmat_ = nullptr;
+  /* Config */
+  unsigned int nMuons_;           // number of muons used as input features
+  unsigned int nFeatures_;        // kGlobalFeatures + kFeaturesPerMuon * nMuons_
+  bool         muonSortByTkIso_;  // if true: ascending tkiso; if false: descending pt
 
-  // Persistent feature buffer; filled each event, then passed to XGBoost
-  mutable std::array<float, kNFeatures> buffer_;
-
-  std::string xgbConfig_;
+  /* XGBoost */
+  BoosterHandle      booster_ = nullptr;
+  DMatrixHandle      dmat_    = nullptr;
+  std::vector<float> buffer_;
+  std::string        xgbConfig_;
 
   bool debug_;
 };
@@ -70,8 +76,10 @@ class HLTTopoMuonHTPNetBXGBProducer : public edm::stream::EDProducer<> {
 
 // MAIN SOURCE
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <limits>
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/getRef.h"
@@ -92,7 +100,10 @@ HLTTopoMuonHTPNetBXGBProducer::HLTTopoMuonHTPNetBXGBProducer(
       pnetToken_(consumes(iConfig.getParameter<edm::InputTag>("PNetBscore"))),
       muonPtCut_(iConfig.getParameter<double>("muonPtCut")),
       muonEtaCut_(iConfig.getParameter<double>("muonEtaCut")),
-      buffer_{},
+      nMuons_(iConfig.getParameter<unsigned int>("nMuons")),
+      nFeatures_(kGlobalFeatures + kFeaturesPerMuon * nMuons_),
+      muonSortByTkIso_(iConfig.getParameter<bool>("muonSortByTkIso")),
+      buffer_(nFeatures_, 0.f),
       debug_(iConfig.getParameter<bool>("debug")) {
   produces<float>("score");
 
@@ -101,19 +112,19 @@ HLTTopoMuonHTPNetBXGBProducer::HLTTopoMuonHTPNetBXGBProducer(
       iConfig.getParameter<std::string>("modelPath"));
 
   if (debug_) {
-    edm::LogInfo("HLTTopoMuonHTPNetBXGBProducer")
-        << "Loading XGBoost model from " << modelPath.fullPath();
+    // edm::LogInfo("HLTTopoMuonHTPNetBXGBProducer")
+    std::cout
+        << "Loading XGBoost model from " << modelPath.fullPath() << std::endl
+        << " nMuons=" << nMuons_
+        << " nFeatures=" << nFeatures_
+        << " muonSortByTkIso=" << muonSortByTkIso_
+        << std::endl;
   }
 
   XGBoosterCreate(nullptr, 0, &booster_);
   XGBoosterLoadModel(booster_, modelPath.fullPath().c_str());
 
-  /* Allocate DMatrix once; buffer_ address is stable for the lifetime of
-     the producer since it is a value member, not a pointer.
-     NOTE: XGBoost copies the data at creation time, so dmat_ is only used
-     as a pre-allocated handle — we recreate it from buffer_ each event via
-     XGDMatrixCreateFromMat, which reuses this same allocation. */
-  XGDMatrixCreateFromMat(buffer_.data(), 1, kNFeatures, -999.f, &dmat_);
+  XGDMatrixCreateFromMat(buffer_.data(), 1, nFeatures_, -999.f, &dmat_);
 
   xgbConfig_ =
       "{\"training\": false, \"type\": 0, "
@@ -124,31 +135,85 @@ HLTTopoMuonHTPNetBXGBProducer::HLTTopoMuonHTPNetBXGBProducer(
 /* ------------------------------------------------------------ */
 
 HLTTopoMuonHTPNetBXGBProducer::~HLTTopoMuonHTPNetBXGBProducer() {
-  if (dmat_) XGDMatrixFree(dmat_);
+  if (dmat_)    XGDMatrixFree(dmat_);
   if (booster_) XGBoosterFree(booster_);
 }
 
 /* ------------------------------------------------------------ */
 
-void HLTTopoMuonHTPNetBXGBProducer::produce(edm::Event& iEvent,
-                                            edm::EventSetup const&) {
+void HLTTopoMuonHTPNetBXGBProducer::produce(
+    edm::Event& iEvent, edm::EventSetup const&) {
   float outScore = -999.f;
 
-  if (debug_) {
-    std::cout
-        << "HLTTopoMuonHTPNetBXGBProducer: Starting produce method for event "
-        << iEvent.id() << std::endl;
+  /* ---------------- Muons: collect passing cuts ---------------- */
+
+  const auto muonsH = iEvent.getHandle(chargedCandidatesToken_);
+
+  if (!muonsH.isValid()) {
+    edm::LogError("HLTTopoMuonHTPNetBXGBProducer") << "Missing ChargedCandidates";
+    iEvent.put(std::make_unique<float>(outScore), "score");
+    return;
   }
+
+  // Fetch track iso map once — needed for sorting and/or feature filling
+  const auto trkH = iEvent.getHandle(trackIsoMapToken_);
+
+  std::vector<size_t> muonIndices;
+  muonIndices.reserve(muonsH->size());
+
+  for (size_t i = 0; i < muonsH->size(); ++i) {
+    const auto& mu = (*muonsH)[i];
+    if (mu.pt() < muonPtCut_) continue;
+    if (std::abs(mu.eta()) > muonEtaCut_) continue;
+    muonIndices.push_back(i);
+  }
+
+  if (muonIndices.empty()) {
+    iEvent.put(std::make_unique<float>(outScore), "score");
+    return;
+  }
+
+  /* ---------------- Sort ---------------- */
+
+  if (muonSortByTkIso_) {
+    // Ascending track iso — tightest isolation first.
+    // Muons with missing track iso map are pushed to the back.
+    std::sort(muonIndices.begin(), muonIndices.end(), [&](size_t a, size_t b) {
+      const float isoA = trkH.isValid()
+                             ? static_cast<float>((*trkH)[edm::getRef(muonsH, a)])
+                             : std::numeric_limits<float>::max();
+      const float isoB = trkH.isValid()
+                             ? static_cast<float>((*trkH)[edm::getRef(muonsH, b)])
+                             : std::numeric_limits<float>::max();
+      // get pt of muons too to make relative isolation sorting
+      const float ptA = (*muonsH)[a].pt();
+      const float ptB = (*muonsH)[b].pt();
+
+      return (isoA/ptA) < (isoB/ptB);
+      // return isoA < isoB;
+    });
+  } else {
+    // Descending pt
+    std::sort(muonIndices.begin(), muonIndices.end(), [&](size_t a, size_t b) {
+      return (*muonsH)[a].pt() > (*muonsH)[b].pt();
+    });
+  }
+
+  /* ---------------- Isolations (ECAL/HCAL) ---------------- */
+
+  const auto ecalH = iEvent.getHandle(ecalIsoMapToken_);
+  const auto hcalH = iEvent.getHandle(hcalIsoMapToken_);
+
 
   /* ---------------- PFHT ---------------- */
 
   float pfht = 0.f;
 
   if (auto h = iEvent.getHandle(pfhtToken_); h.isValid()) {
-    if (!h->empty()) pfht = h->front().sumEt();
+    if (!h->empty())
+      pfht = h->front().sumEt();
   } else {
-    edm::LogWarning("HLTTopoMuonHTPNetBXGBProducer")
-        << "Missing PFHT collection";
+    edm::LogWarning("HLTTopoMuonHTPNetBXGBProducer") << "Missing PFHT collection";
   }
 
   /* ---------------- PNetB ---------------- */
@@ -156,83 +221,63 @@ void HLTTopoMuonHTPNetBXGBProducer::produce(edm::Event& iEvent,
   float maxPNetB = -1.f;
 
   if (auto h = iEvent.getHandle(pnetToken_); h.isValid()) {
-    for (auto const& tag : *h) maxPNetB = std::max(maxPNetB, tag.second);
+    for (auto const& tag : *h)
+      maxPNetB = std::max(maxPNetB, tag.second);
   } else {
     edm::LogWarning("HLTTopoMuonHTPNetBXGBProducer") << "Missing PNetB JetTags";
   }
 
-  /* ---------------- Muons ---------------- */
+  /* ---------------- Fill buffer ---------------- */
 
-  const auto muonsH = iEvent.getHandle(chargedCandidatesToken_);
-
-  if (!muonsH.isValid()) {
-    edm::LogError("HLTTopoMuonHTPNetBXGBProducer")
-        << "Missing ChargedCandidates";
-    iEvent.put(std::make_unique<float>(outScore), "score");
-    return;
-  }
-
-  int bestIdx = -1;
-  float bestPt = -1.f;
-
-  for (size_t i = 0; i < muonsH->size(); ++i) {
-    const auto& mu = (*muonsH)[i];
-    if (mu.pt() < muonPtCut_) continue;
-    if (std::abs(mu.eta()) > muonEtaCut_) continue;
-    if (mu.pt() > bestPt) {
-      bestPt = mu.pt();
-      bestIdx = static_cast<int>(i);
-    }
-  }
-
-  if (bestIdx < 0) {
-    iEvent.put(std::make_unique<float>(outScore), "score");
-    return;
-  }
-
-  const auto muRef = edm::getRef(muonsH, bestIdx);
-
-  /* ---------------- Isolations ---------------- */
-
-  const auto ecalH = iEvent.getHandle(ecalIsoMapToken_);
-  const auto hcalH = iEvent.getHandle(hcalIsoMapToken_);
-  const auto trkH = iEvent.getHandle(trackIsoMapToken_);
-
-  const float ecalIso = ecalH.isValid() ? (*ecalH)[muRef] : 10.f;
-  const float hcalIso = hcalH.isValid() ? (*hcalH)[muRef] : 10.f;
-  const float trkIso = trkH.isValid() ? (*trkH)[muRef] : 10.f;
-
-  /* ---------------- Fill buffer & recreate DMatrix ---------------- */
+  // Reset to zero so padding slots for missing muons are well-defined
+  std::fill(buffer_.begin(), buffer_.end(), 0.f);
 
   buffer_[0] = pfht;
   buffer_[1] = maxPNetB;
-  buffer_[2] = bestPt;
-  buffer_[3] = 10.f - trkIso / bestPt;
-  buffer_[4] = 10.f - ecalIso / bestPt;
-  buffer_[5] = 10.f - hcalIso / bestPt;
 
-  // Free the old DMatrix and recreate from the updated buffer_.
-  // This is necessary because XGBoost copies data at DMatrix creation time
-  // and provides no API to update values in place.
-  XGDMatrixFree(dmat_);
-  XGDMatrixCreateFromMat(buffer_.data(), 1, kNFeatures, -999.f, &dmat_);
+  const unsigned int nFill =
+      std::min(muonIndices.size(), static_cast<size_t>(nMuons_));
+
+  for (unsigned int m = 0; m < nFill; ++m) {
+    const size_t idx   = muonIndices[m];
+    const auto&  mu    = (*muonsH)[idx];
+    const float  pt    = mu.pt();
+    const auto   muRef = edm::getRef(muonsH, idx);
+
+    const float ecalIso = ecalH.isValid() ? (*ecalH)[muRef] : 10.f;
+    const float hcalIso = hcalH.isValid() ? (*hcalH)[muRef] : 10.f;
+    const float trkIso  = trkH.isValid()
+                              ? static_cast<float>((*trkH)[muRef])
+                              : 10.f;
+
+    const unsigned int base = kGlobalFeatures + m * kFeaturesPerMuon;
+    buffer_[base + 0] = pt;
+    buffer_[base + 1] = trkIso;
+    buffer_[base + 2] = ecalIso;
+    buffer_[base + 3] = hcalIso;
+  }
 
   /* ---------------- XGBoost inference ---------------- */
 
-  uint64_t const* outShape = nullptr;
-  uint64_t outDim = 0;
-  const float* outResult = nullptr;
+  XGDMatrixFree(dmat_);
+  XGDMatrixCreateFromMat(buffer_.data(), 1, nFeatures_, -999.f, &dmat_);
 
-  XGBoosterPredictFromDMatrix(booster_, dmat_, xgbConfig_.c_str(), &outShape,
-                              &outDim, &outResult);
+  uint64_t const* outShape  = nullptr;
+  uint64_t        outDim    = 0;
+  const float*    outResult = nullptr;
 
-  if (outResult != nullptr) outScore = outResult[0];
+  XGBoosterPredictFromDMatrix(booster_, dmat_, xgbConfig_.c_str(),
+                               &outShape, &outDim, &outResult);
+
+  if (outResult != nullptr)
+    outScore = outResult[0];
 
   /* ---------------- Debug ---------------- */
 
   if (debug_) {
     std::ostringstream ss;
-    ss << "Features: ";
+    ss << "HLTTopoMuonHTPNetBXGBProducer: nMuons(found)=" << muonIndices.size() << std::endl;
+    ss << " Features: ";
     for (float f : buffer_) ss << f << " ";
     ss << " --> score=" << outScore;
     std::cout << ss.str() << std::endl;
@@ -247,28 +292,22 @@ void HLTTopoMuonHTPNetBXGBProducer::fillDescriptions(
     edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
 
-  desc.add<edm::InputTag>("PFHT", edm::InputTag("hltPFHTJet30"));
-  desc.add<edm::InputTag>(
-      "PNetBscore",
-      edm::InputTag("hltParticleNetDiscriminatorsJetTags", "BvsAll"));
-  desc.add<edm::InputTag>("ChargedCandidates",
-                          edm::InputTag("hltL3MuonCandidates"));
-  desc.add<edm::InputTag>("EcalPFClusterIsoMap",
-                          edm::InputTag("hltMuonEcalPFClusterIsoForMuons"));
-  desc.add<edm::InputTag>("HcalPFClusterIsoMap",
-                          edm::InputTag("hltMuonHcalPFClusterIsoForMuons"));
-  desc.add<edm::InputTag>("TrackIsoMap",
-                          edm::InputTag("hltMuonTkRelIsolationCut0p09Map",
-                                        "combinedRelativeIsoDeposits"));
+  desc.add<edm::InputTag>("PFHT",              edm::InputTag("hltPFHTJet30"));
+  desc.add<edm::InputTag>("PNetBscore",        edm::InputTag("hltParticleNetDiscriminatorsJetTags", "BvsAll"));
+  desc.add<edm::InputTag>("ChargedCandidates", edm::InputTag("hltL3MuonCandidates"));
+  desc.add<edm::InputTag>("EcalPFClusterIsoMap", edm::InputTag("hltMuonEcalPFClusterIsoForMuons"));
+  desc.add<edm::InputTag>("HcalPFClusterIsoMap", edm::InputTag("hltMuonHcalPFClusterIsoForMuons"));
+  desc.add<edm::InputTag>("TrackIsoMap",       edm::InputTag("hltMuonTkRelIsolationCut0p09Map",
+                                                              "combinedRelativeIsoDeposits"));
+  desc.add<std::string>("modelPath",
+      "L1Trigger/TopoML/data/HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mu_pt-iso_PNetB.json");
 
-  desc.add<std::string>(
-      "modelPath",
-      "L1Trigger/TopoML/data/"
-      "HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mu_pt-iso_PNetB.json");
-
-  desc.add<double>("muonPtCut", 4.0);
-  desc.add<double>("muonEtaCut", 2.4);
-  desc.add<bool>("debug", false);
+  desc.add<unsigned int>("nMuons",          1);
+  desc.add<double>      ("muonPtCut",       4.0);
+  desc.add<double>      ("muonEtaCut",      2.4);
+  desc.add<bool>        ("muonSortByTkIso", false);  // false: sort by descending pt
+                                                      // true:  sort by ascending tkiso
+  desc.add<bool>        ("debug",           false);
 
   descriptions.add("HLTTopoMuonHTPNetBXGBProducer", desc);
 }
