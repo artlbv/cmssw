@@ -1,7 +1,8 @@
 /*
 
-This is the producer module for the HLT version of the TopoMuonHTPNetBConiferBDT, 
-which uses a conifer BDT to combine the following inputs:
+This is the producer module for the HLT version of the
+TopoMuonHTPNetBConiferBDT, which uses a conifer BDT to combine the following
+inputs:
 
     - PF HT
     - Max PNetB score among jets
@@ -10,7 +11,8 @@ which uses a conifer BDT to combine the following inputs:
     - Leading muon ecal isolation
     - Leading muon hcal isolation
 
-"feature_names":["PFHT","Max PNetB","hlt 1. Mu pt","hlt 1. Mu tkiso","hlt 1. Mu ecaliso","hlt 1. Mu hcaliso"]
+"feature_names":["PFHT","Max PNetB","hlt 1. Mu pt","hlt 1. Mu tkiso","hlt 1. Mu
+ecaliso","hlt 1. Mu hcaliso"]
 */
 
 /*
@@ -18,17 +20,22 @@ which uses a conifer BDT to combine the following inputs:
 Muon iso  from the below collections:
 
   // Inputs for leading muon + isolations
-  desc.add<edm::InputTag>("ChargedCandidates", edm::InputTag("hltL3MuonCandidates"));
-  desc.add<edm::InputTag>("EcalPFClusterIsoMap", edm::InputTag("hltMuonEcalPFClusterIsoForMuons"));
-  desc.add<edm::InputTag>("HcalPFClusterIsoMap", edm::InputTag("hltMuonHcalPFClusterIsoForMuons"));
+  desc.add<edm::InputTag>("ChargedCandidates",
+edm::InputTag("hltL3MuonCandidates"));
+  desc.add<edm::InputTag>("EcalPFClusterIsoMap",
+edm::InputTag("hltMuonEcalPFClusterIsoForMuons"));
+  desc.add<edm::InputTag>("HcalPFClusterIsoMap",
+edm::InputTag("hltMuonHcalPFClusterIsoForMuons"));
   desc.add<edm::InputTag>("TrackIsoMap",
-                          edm::InputTag("hltMuonTkRelIsolationCut0p09Map", "combinedRelativeIsoDeposits"));
+                          edm::InputTag("hltMuonTkRelIsolationCut0p09Map",
+"combinedRelativeIsoDeposits"));
 
   // Model JSON (must be in CMSSW search path, e.g. in your package under data/)
-  desc.add<std::string>("modelPath", "L1Trigger/TopoML/data/Jan26_HLT_conif_model_HH2b2W1L_1mu_L1MuTOPOMuHT_Mu_pt-iso.json");
+  desc.add<std::string>("modelPath",
+"L1Trigger/TopoML/data/Jan26_HLT_conif_model_HH2b2W1L_1mu_L1MuTOPOMuHT_Mu_pt-iso.json");
 */
 
-/* 
+/*
 PF HT from this producer:
 
 hltPFHTJet30 = cms.EDProducer("HLTHtMhtProducer",
@@ -45,15 +52,16 @@ hltPFHTJet30 = cms.EDProducer("HLTHtMhtProducer",
 )
 */
 
-/* 
+/*
 PNet B tag score from this producer:
 
-hltParticleNetDiscriminatorsJetTags = cms.EDProducer("BTagProbabilityToDiscriminator",
-    discriminators = cms.VPSet(
+hltParticleNetDiscriminatorsJetTags =
+cms.EDProducer("BTagProbabilityToDiscriminator", discriminators = cms.VPSet(
         cms.PSet(
-            denominator = cms.VInputTag("hltParticleNetONNXJetTags:probb", "hltParticleNetONNXJetTags:probc", "hltParticleNetONNXJetTags:probuds", "hltParticleNetONNXJetTags:probg"),
-            name = cms.string('BvsAll'),
-            numerator = cms.VInputTag("hltParticleNetONNXJetTags:probb")
+            denominator = cms.VInputTag("hltParticleNetONNXJetTags:probb",
+"hltParticleNetONNXJetTags:probc", "hltParticleNetONNXJetTags:probuds",
+"hltParticleNetONNXJetTags:probg"), name = cms.string('BvsAll'), numerator =
+cms.VInputTag("hltParticleNetONNXJetTags:probb")
         ),
         ...
 
@@ -83,42 +91,29 @@ hltBTagPFPNet0p53Single = cms.EDFilter("HLTPFJetTag",
 #include <memory>
 #include <vector>
 
-#include "FWCore/Framework/interface/global/EDProducer.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/EventSetup.h"
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
-#include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
-
-#include "FWCore/Utilities/interface/InputTag.h"
-#include "FWCore/Utilities/interface/EDGetToken.h"
-
+#include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/Common/interface/AssociationMap.h"
 #include "DataFormats/Common/interface/OneToValue.h"
 #include "DataFormats/Common/interface/ValueMap.h"
-
-#include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
-#include "DataFormats/RecoCandidate/interface/RecoChargedCandidateFwd.h"
-
 #include "DataFormats/METReco/interface/MET.h"
 #include "DataFormats/METReco/interface/METCollection.h"
-
-#include "DataFormats/BTauReco/interface/JetTag.h"
-
+#include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
+#include "DataFormats/RecoCandidate/interface/RecoChargedCandidateFwd.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/global/EDProducer.h"
+#include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
+#include "FWCore/Utilities/interface/EDGetToken.h"
+#include "FWCore/Utilities/interface/InputTag.h"
 #include "conifer.h"
 
-class HLTTopoMuonHTPNetBConiferBDTProducer
-    : public edm::global::EDProducer<> {
-public:
-
-  using RecoChargedCandMap =
-      edm::AssociationMap<
-        edm::OneToValue<
-          std::vector<reco::RecoChargedCandidate>,
-          float,
-          unsigned int>>;
+class HLTTopoMuonHTPNetBConiferBDTProducer : public edm::global::EDProducer<> {
+ public:
+  using RecoChargedCandMap = edm::AssociationMap<edm::OneToValue<
+      std::vector<reco::RecoChargedCandidate>, float, unsigned int>>;
 
   using BDT_t = conifer::BDT<float, float, true>;
 
@@ -127,10 +122,8 @@ public:
 
   static void fillDescriptions(edm::ConfigurationDescriptions&);
 
-private:
-
-  void produce(edm::StreamID,
-               edm::Event&,
+ private:
+  void produce(edm::StreamID, edm::Event&,
                edm::EventSetup const&) const override;
 
   /* Tokens */
@@ -161,43 +154,37 @@ private:
 
 // MAIN SOURCE
 
-#include "HLTTopoMuonHTPNetBConiferBDTProducer.h"
-
 #include <cmath>
 #include <iostream>
 
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
-
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/getRef.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+// #include "HLTTopoMuonHTPNetBConiferBDTProducer.h"
 
-
-HLTTopoMuonHTPNetBConiferBDTProducer::
-HLTTopoMuonHTPNetBConiferBDTProducer(edm::ParameterSet const& iConfig)
+HLTTopoMuonHTPNetBConiferBDTProducer::HLTTopoMuonHTPNetBConiferBDTProducer(
+    edm::ParameterSet const& iConfig)
 
     : chargedCandidatesToken_(
-        consumes(iConfig.getParameter<edm::InputTag>("ChargedCandidates"))),
+          consumes(iConfig.getParameter<edm::InputTag>("ChargedCandidates"))),
 
       ecalIsoMapToken_(
-        consumes(iConfig.getParameter<edm::InputTag>("EcalPFClusterIsoMap"))),
+          consumes(iConfig.getParameter<edm::InputTag>("EcalPFClusterIsoMap"))),
 
       hcalIsoMapToken_(
-        consumes(iConfig.getParameter<edm::InputTag>("HcalPFClusterIsoMap"))),
+          consumes(iConfig.getParameter<edm::InputTag>("HcalPFClusterIsoMap"))),
 
       trackIsoMapToken_(
-        consumes(iConfig.getParameter<edm::InputTag>("TrackIsoMap"))),
+          consumes(iConfig.getParameter<edm::InputTag>("TrackIsoMap"))),
 
-      pfhtToken_(
-        consumes(iConfig.getParameter<edm::InputTag>("PFHT"))),
+      pfhtToken_(consumes(iConfig.getParameter<edm::InputTag>("PFHT"))),
 
-      pnetToken_(
-        consumes(iConfig.getParameter<edm::InputTag>("PNetBscore"))),
+      pnetToken_(consumes(iConfig.getParameter<edm::InputTag>("PNetBscore"))),
 
       muonPtCut_(iConfig.getParameter<double>("muonPtCut")),
       muonEtaCut_(iConfig.getParameter<double>("muonEtaCut")),
 
       debug_(iConfig.getParameter<bool>("debug")) {
-
   produces<float>("score");
 
   /* Load model */
@@ -207,31 +194,23 @@ HLTTopoMuonHTPNetBConiferBDTProducer(edm::ParameterSet const& iConfig)
 
   if (debug_) {
     edm::LogInfo("HLTTopoMuonHTPNetBConiferBDTProducer")
-        << "Loading model from "
-        << modelPath.fullPath();
+        << "Loading model from " << modelPath.fullPath();
   }
 
   bdt_ = std::make_unique<BDT_t>(modelPath.fullPath());
 }
 
-
 /* ------------------------------------------------------------ */
 
-
 void HLTTopoMuonHTPNetBConiferBDTProducer::produce(
-    edm::StreamID,
-    edm::Event& iEvent,
-    edm::EventSetup const&) const {
-
+    edm::StreamID, edm::Event& iEvent, edm::EventSetup const&) const {
   float outScore = -999.f;
-
 
   /* ---------------- PFHT ---------------- */
 
   float pfht = 0.f;
 
   if (auto h = iEvent.getHandle(pfhtToken_); h.isValid()) {
-
     if (!h->empty()) {
       pfht = h->front().sumEt();
     }
@@ -241,13 +220,11 @@ void HLTTopoMuonHTPNetBConiferBDTProducer::produce(
         << "Missing PFHT collection";
   }
 
-
   /* ---------------- PNetB ---------------- */
 
   float maxPNetB = -1.f;
 
   if (auto h = iEvent.getHandle(pnetToken_); h.isValid()) {
-
     for (auto const& tag : *h) {
       maxPNetB = std::max(maxPNetB, tag.second);
     }
@@ -257,13 +234,11 @@ void HLTTopoMuonHTPNetBConiferBDTProducer::produce(
         << "Missing PNetB JetTags";
   }
 
-
   /* ---------------- Muons ---------------- */
 
   const auto muonsH = iEvent.getHandle(chargedCandidatesToken_);
 
   if (!muonsH.isValid()) {
-
     edm::LogError("HLTTopoMuonHTPNetBConiferBDTProducer")
         << "Missing ChargedCandidates";
 
@@ -271,13 +246,10 @@ void HLTTopoMuonHTPNetBConiferBDTProducer::produce(
     return;
   }
 
-
   int bestIdx = -1;
   float bestPt = -1.f;
 
-
   for (size_t i = 0; i < muonsH->size(); ++i) {
-
     const auto& mu = (*muonsH)[i];
 
     if (mu.pt() < muonPtCut_) continue;
@@ -289,33 +261,24 @@ void HLTTopoMuonHTPNetBConiferBDTProducer::produce(
     }
   }
 
-
   if (bestIdx < 0) {
-
     iEvent.put(std::make_unique<float>(outScore), "score");
     return;
   }
 
-
   const auto muRef = edm::getRef(muonsH, bestIdx);
-
 
   /* ---------------- Isolations ---------------- */
 
-  const auto ecalH  = iEvent.getHandle(ecalIsoMapToken_);
-  const auto hcalH  = iEvent.getHandle(hcalIsoMapToken_);
-  const auto trkH   = iEvent.getHandle(trackIsoMapToken_);
+  const auto ecalH = iEvent.getHandle(ecalIsoMapToken_);
+  const auto hcalH = iEvent.getHandle(hcalIsoMapToken_);
+  const auto trkH = iEvent.getHandle(trackIsoMapToken_);
 
+  const float ecalIso = ecalH.isValid() ? (*ecalH)[muRef] : 10.f;
 
-  const float ecalIso =
-      ecalH.isValid() ? (*ecalH)[muRef] : 10.f;
+  const float hcalIso = hcalH.isValid() ? (*hcalH)[muRef] : 10.f;
 
-  const float hcalIso =
-      hcalH.isValid() ? (*hcalH)[muRef] : 10.f;
-
-  const float trkIso =
-      trkH.isValid() ? (*trkH)[muRef] : 10.f;
-
+  const float trkIso = trkH.isValid() ? (*trkH)[muRef] : 10.f;
 
   /* ---------------- Features ---------------- */
 
@@ -332,82 +295,65 @@ void HLTTopoMuonHTPNetBConiferBDTProducer::produce(
   features.push_back(10.f - ecalIso / bestPt);
   features.push_back(10.f - hcalIso / bestPt);
 
-
   /* ---------------- BDT ---------------- */
 
   if (bdt_) {
-
     const auto out = bdt_->decision_function(features);
 
-    if (!out.empty())
-      outScore = out[0];
+    if (!out.empty()) outScore = out[0];
   }
-
 
   /* ---------------- Debug ---------------- */
 
   if (debug_) {
-
     std::ostringstream ss;
 
     ss << "Features: ";
 
-    for (float f : features)
-      ss << f << " ";
+    for (float f : features) ss << f << " ";
 
     ss << " --> score=" << outScore;
 
-    edm::LogInfo("HLTTopoMuonHTPNetBConiferBDTProducer") << ss.str();
+    // edm::LogInfo("HLTTopoMuonHTPNetBConiferBDTProducer") << ss.str();
+    std::cout << ss.str() << std::endl;
   }
-
 
   iEvent.put(std::make_unique<float>(outScore), "score");
 }
 
-
 /* ------------------------------------------------------------ */
-
 
 void HLTTopoMuonHTPNetBConiferBDTProducer::fillDescriptions(
     edm::ConfigurationDescriptions& descriptions) {
-
   edm::ParameterSetDescription desc;
-
 
   /* Inputs */
 
-  desc.add<edm::InputTag>(
-      "PFHT",
-      edm::InputTag("hltPFHTJet30"));
+  desc.add<edm::InputTag>("PFHT", edm::InputTag("hltPFHTJet30"));
 
   desc.add<edm::InputTag>(
       "PNetBscore",
       edm::InputTag("hltParticleNetDiscriminatorsJetTags", "BvsAll"));
 
-  desc.add<edm::InputTag>(
-      "ChargedCandidates",
-      edm::InputTag("hltL3MuonCandidates"));
+  desc.add<edm::InputTag>("ChargedCandidates",
+                          edm::InputTag("hltL3MuonCandidates"));
 
-  desc.add<edm::InputTag>(
-      "EcalPFClusterIsoMap",
-      edm::InputTag("hltMuonEcalPFClusterIsoForMuons"));
+  desc.add<edm::InputTag>("EcalPFClusterIsoMap",
+                          edm::InputTag("hltMuonEcalPFClusterIsoForMuons"));
 
-  desc.add<edm::InputTag>(
-      "HcalPFClusterIsoMap",
-      edm::InputTag("hltMuonHcalPFClusterIsoForMuons"));
+  desc.add<edm::InputTag>("HcalPFClusterIsoMap",
+                          edm::InputTag("hltMuonHcalPFClusterIsoForMuons"));
 
-  desc.add<edm::InputTag>(
-      "TrackIsoMap",
-      edm::InputTag("hltMuonTkRelIsolationCut0p09Map",
-                    "combinedRelativeIsoDeposits"));
-
+  desc.add<edm::InputTag>("TrackIsoMap",
+                          edm::InputTag("hltMuonTkRelIsolationCut0p09Map",
+                                        "combinedRelativeIsoDeposits"));
 
   /* Model */
 
   desc.add<std::string>(
       "modelPath",
-      "L1Trigger/TopoML/data/HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mu_pt-iso_PNetB.json");
-
+      "L1Trigger/TopoML/data/"
+      "HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mu_pt-iso_PNetB.json");
 
   /* Cuts */
 
@@ -416,12 +362,8 @@ void HLTTopoMuonHTPNetBConiferBDTProducer::fillDescriptions(
 
   desc.add<bool>("debug", false);
 
-
-  descriptions.add(
-      "HLTTopoMuonHTPNetBConiferBDTProducer",
-      desc);
+  descriptions.add("HLTTopoMuonHTPNetBConiferBDTProducer", desc);
 }
-
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(HLTTopoMuonHTPNetBConiferBDTProducer);

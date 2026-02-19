@@ -2,9 +2,10 @@
 <use name="FWCore/ParameterSet"/>
 <use name="FWCore/PluginManager"/>
 <use name="DataFormats/L1Trigger"/>
-<use name="DataFormats/NanoAOD"/>
-<use name="L1Trigger/DemonstratorTools"/>
+<!-- <use name="DataFormats/NanoAOD"/> -->
+<use name="DataFormats/JetReco"/>
 <use name="hls"/>
-<use name="hls4mlEmulatorExtras"/>
+<!-- <use name="hls4mlEmulatorExtras"/> -->
 <use name="conifer"/>
+<use name="xgboost"/>
 <flags EDM_PLUGIN="1"/>
