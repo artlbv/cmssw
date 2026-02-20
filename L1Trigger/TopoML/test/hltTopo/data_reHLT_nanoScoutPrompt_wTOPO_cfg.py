@@ -92,9 +92,9 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
     fileName = cms.untracked.string('file:nanoScout_reHLT_data.root'),
     outputCommands = process.NANOAODEventContent.outputCommands,
 
-    SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring("hltMu12HT1501bFilter")
-    ),
+    # SelectEvents = cms.untracked.PSet(
+    #     SelectEvents = cms.vstring("hltMu12HT1501bFilter")
+    # ),
 )
 
 # Additional output definition
@@ -261,7 +261,7 @@ process.hltTopoBDTHH1MuProb0p9 = cms.EDFilter("HLTFloatThresholdFilter",
 from L1Trigger.TopoML.hltTopoBDTProducer_cff import hltTopoMuonHTPNetBXGBProducer
 
 process.hltTopoMuonHTPNetBXGBProducer = hltTopoMuonHTPNetBXGBProducer.clone(
-    modelPath = cms.string("L1Trigger/TopoML/data/HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mu_pt-iso_PNetB.json"),
+    modelPath = cms.string("L1Trigger/TopoML/data/Feb19_HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mupt-absiso_PNetB.json"),
     # l1tTopoScore = cms.InputTag("l1tTopoBDTProducerHH1muMuHT", "score"),
     TrackIsoMap = cms.InputTag("hltMuonTkRelIsolationCut0p3Map", "combinedRelativeIsoDeposits"), # from Mu12Isolation sequence
     #TrackIsoMap = cms.InputTag("hltMuonTkRelIsolationCut0p14Map", "combinedRelativeIsoDeposits"), # from scouting MuonIsolation sequence
@@ -274,9 +274,27 @@ process.hltTopoBDTHH1MuHTBProb0p5 = cms.EDFilter("HLTFloatThresholdFilter",
     greaterThan = cms.bool(True),
 )
 
+## model with 1+2 muons
+process.hltTopoMuonHTPNetBXGBProducerMu12 = hltTopoMuonHTPNetBXGBProducer.clone(
+    modelPath = cms.string("L1Trigger/TopoML/data/Feb19_HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mu1-2pt-absiso_PNetB.json"),
+    TrackIsoMap = cms.InputTag("hltMuonTkRelIsolationCut0p3Map", "combinedRelativeIsoDeposits"), # from Mu12Isolation sequence
+    #TrackIsoMap = cms.InputTag("hltMuonTkRelIsolationCut0p14Map", "combinedRelativeIsoDeposits"), # from scouting MuonIsolation sequence
+    nMuons = cms.uint32(2),
+    debug = cms.bool(True),
+)
+
+## model with 1 muon but sorted by tkIso
+process.hltTopoMuonHTPNetBXGBProducerMuSortIso = hltTopoMuonHTPNetBXGBProducer.clone(
+    modelPath = cms.string("L1Trigger/TopoML/data/Feb19_HLT_xgb_model_HH2b2W1L_1mu_HLTHT_sorttkisoMupt-absiso_PNetB.json"),
+    TrackIsoMap = cms.InputTag("hltMuonTkRelIsolationCut0p3Map", "combinedRelativeIsoDeposits"), # from Mu12Isolation sequence
+    #TrackIsoMap = cms.InputTag("hltMuonTkRelIsolationCut0p14Map", "combinedRelativeIsoDeposits"), # from scouting MuonIsolation sequence
+    muonSortByTkIso = cms.bool(True),
+    debug = cms.bool(True),
+)
+
 ## change hltPFJetForBtagSelector to not filter events
 
-# process.hltPFJetForBtagSelector.MinN = cms.int32(0)
+process.hltPFJetForBtagSelector.MinN = cms.int32(0)
 
 ## TOPO path with producer only
 process.HLT_TopoHH1Mu_NoFilter = cms.Path(
@@ -300,6 +318,9 @@ process.HLT_TopoHH1Mu_NoFilter = cms.Path(
 	process.HLTJetFlavourTagParticleNetSequencePF +
     ## run HLT TOPO with Mu+HT+1b
     process.hltTopoMuonHTPNetBXGBProducer +
+    process.hltTopoMuonHTPNetBXGBProducerMuSortIso +
+    process.hltTopoMuonHTPNetBXGBProducerMu12 +
+
 	process.HLTEndSequence
 )
 
@@ -378,9 +399,9 @@ process.l1tTopoBDTNanotable.variables = cms.PSet(
     # process.l1tTopoBDTNanotable.variables,
     l1tBdtScore_HH1mu_MuHT = ExtVar( cms.InputTag("l1tTopoBDTProducerHH1muMuHT","score"),"float", doc="L1 Topo BDT score (model: HH 1mu, Mu+HT)" ),
     # l1tBdtScore_HH1mu_AllFeat = ExtVar( cms.InputTag("l1tTopoBDTProducerHH1muAllFeat","score"),"float", doc="L1 Topo BDT score (model: HH 1mu, Mu+HT+EG+JET+Tau)" ),
-    hltBdtScore_HH1mu_MuHT = ExtVar( cms.InputTag("hltTopoMuonHTBDTProducer","score"),"float", doc="HLT Topo BDT score (model: HH 1mu, Mu+HT)" ),
     hltBdtScore_HH1mu_MuHTPNetB = ExtVar( cms.InputTag("hltTopoMuonHTPNetBXGBProducer","score"),"float", doc="HLT Topo BDT score (model: HH 1mu, Mu+HT+PNetB)" ),
-)
+    hltBdtScore_HH1mu_MuHTPNetBMuSortIso = ExtVar( cms.InputTag("hltTopoMuonHTPNetBXGBProducerMuSortIso","score"),"float", doc="HLT Topo BDT score (model: HH 1mu, Mu+HT+PNetB, muon sorted by tkIso)" ),
+    hltBdtScore_HH1mu_MuHTPNetBMu12 = ExtVar( cms.InputTag("hltTopoMuonHTPNetBXGBProducerMu12","score"),"float", doc="HLT Topo BDT score (model: HH 1mu, Mu+HT+PNetB, sorted by tkIso with up to 2 muons)" ),)
 
 # add l1tTopoBDTNanotable to the scouting nano sequence and event content
 process.scoutingNanoSequence.insert(-1, process.l1tTopoBDTNanotable)
@@ -402,8 +423,9 @@ process.skimHLTFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone
 process.skimHLTFilter.TriggerResultsTag = cms.InputTag("TriggerResults", "", "HLT") # explicity specify the process name
 process.skimHLTFilter.throw=cms.bool(False) # otherwise will throw if it cant match to a hlt path, depends on whether you want to silently ignore unmatched paths
 
-process.skimHLTFilter.HLTPaths = cms.vstring("HLT_Mu12_IsoVVL_PFHT150_PNetBTag0p53*")  # the * allows us to match all version, you could also other wild card expressions
+#process.skimHLTFilter.HLTPaths = cms.vstring("HLT_Mu12_IsoVVL_PFHT150_PNetBTag0p53*")  # the * allows us to match all version, you could also other wild card expressions
 # process.skimHLTFilter.HLTPaths = cms.vstring("HLT_IsoMu24*")  # the * allows us to match all version, you could also other wild card expressions
+process.skimHLTFilter.HLTPaths = cms.vstring("HLT_TriggersForScoutingPFMonitor_PS1000*")  # the * allows us to match all version, you could also other wild card expressions
 process.HLTskim_step = cms.Path(process.skimHLTFilter)
 process.NANOAODoutput.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring("HLTskim_step"))
 
@@ -414,8 +436,6 @@ process.nanoAOD_step = cms.Path(process.skimHLTFilter*process.scoutingNanoSequen
 
 # insert the skim filter at the beginning of the HLT begin sequence so that it runs before any other HLT module, this way we can skip all the HLT processing for events that don't pass the skim
 process.HLTBeginSequence.insert(0, process.skimHLTFilter)
-
-
 
 ### add hltJets with btagging to nano
 

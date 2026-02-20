@@ -275,6 +275,7 @@ void HLTTopoMuonHTPNetBXGBProducer::produce(edm::Event& iEvent,
     ss << " Features: ";
     for (float f : buffer_) ss << f << " ";
     ss << " --> score=" << outScore;
+    // edm::LogInfo("HLTTopoMuonHTPNetBXGBProducer")
     std::cout << ss.str() << std::endl;
   }
 
@@ -302,11 +303,10 @@ void HLTTopoMuonHTPNetBXGBProducer::fillDescriptions(
                                         "combinedRelativeIsoDeposits"));
   desc.add<std::string>(
       "modelPath",
-      "L1Trigger/TopoML/data/"
-      "HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mu_pt-iso_PNetB.json");
+      "L1Trigger/TopoML/data/HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mu_pt-iso_PNetB.json");
 
   desc.add<unsigned int>("nMuons", 1);
-  desc.add<double>("muonPtCut", 4.0);
+  desc.add<double>("muonPtCut", 10.0);
   desc.add<double>("muonEtaCut", 2.4);
   desc.add<bool>("muonSortByTkIso", false);  // false: sort by descending pt
                                              // true:  sort by ascending tkiso

@@ -63,7 +63,7 @@ process.options = cms.untracked.PSet(
     printDependencies = cms.untracked.bool(False),
     sizeOfStackForThreadsInKB = cms.optional.untracked.uint32,
     throwIfIllegalParameter = cms.untracked.bool(True),
-    wantSummary = cms.untracked.bool(False)
+    wantSummary = cms.untracked.bool(True)
 )
 
 # Production Info
@@ -256,7 +256,7 @@ process.hltTopoBDTHH1MuProb0p9 = cms.EDFilter("HLTFloatThresholdFilter",
 from L1Trigger.TopoML.hltTopoBDTProducer_cff import hltTopoMuonHTPNetBXGBProducer
 
 process.hltTopoMuonHTPNetBXGBProducer = hltTopoMuonHTPNetBXGBProducer.clone(
-    modelPath = cms.string("L1Trigger/TopoML/data/HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mu_pt-iso_PNetB.json"),
+    modelPath = cms.string("L1Trigger/TopoML/data/Feb19_HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mupt-absiso_PNetB.json"),
     # l1tTopoScore = cms.InputTag("l1tTopoBDTProducerHH1muMuHT", "score"),
     TrackIsoMap = cms.InputTag("hltMuonTkRelIsolationCut0p3Map", "combinedRelativeIsoDeposits"), # from Mu12Isolation sequence
     #TrackIsoMap = cms.InputTag("hltMuonTkRelIsolationCut0p14Map", "combinedRelativeIsoDeposits"), # from scouting MuonIsolation sequence
@@ -289,7 +289,7 @@ process.hltTopoMuonHTPNetBXGBProducerMuSortIso = hltTopoMuonHTPNetBXGBProducer.c
 
 ## change hltPFJetForBtagSelector to not filter events
 
-# process.hltPFJetForBtagSelector.MinN = cms.int32(0)
+process.hltPFJetForBtagSelector.MinN = cms.int32(0)
 
 ## TOPO path with producer only
 process.HLT_TopoHH1Mu_NoFilter = cms.Path(

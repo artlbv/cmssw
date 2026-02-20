@@ -66,7 +66,7 @@ hltTopoMuonHTPNetBXGBProducer = cms.EDProducer('HLTTopoMuonHTPNetBXGBProducer',
     modelPath = cms.string("L1Trigger/TopoML/data/HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mu_pt-iso_PNetB.json"),
 
     # selection cuts for the leading muon used as input to the BDT
-    muonPtCut  = cms.double(8.0),
+    muonPtCut  = cms.double(10.0),
     muonEtaCut = cms.double(2.4),
 
     debug = cms.bool(False),
