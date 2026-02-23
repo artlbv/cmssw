@@ -98,10 +98,7 @@ HLTTopoMuonHtPNetBXGBProducer::HLTTopoMuonHtPNetBXGBProducer(edm::ParameterSet c
       nFeatures(kGlobalFeatures + kFeaturesPerMuon * nMuons_),
       muonSortByTkIso_(iConfig.getParameter<bool>("muonSortByTkIso")),
       debug_(iConfig.getParameter<bool>("debug")) {
-  // scoreToken_(produces<float>("score")) {
-  // produces<float>("score");
   scoreToken_ = produces<float>("score");
-  // produces<float>;
 
   /* Load model */
   const edm::FileInPath modelPath(iConfig.getParameter<std::string>("modelPath"));
@@ -124,8 +121,6 @@ HLTTopoMuonHtPNetBXGBProducer::HLTTopoMuonHtPNetBXGBProducer(edm::ParameterSet c
     booster_->addFeature("muon" + std::to_string(imu) + "_ecalIso");
     booster_->addFeature("muon" + std::to_string(imu) + "_hcalIso");
   }
-
-  // // best_ntree_limit_ = best_ntree_limit; // TBC if needed?
 }
 
 /* ------------------------------------------------------------ */
@@ -270,18 +265,17 @@ void HLTTopoMuonHtPNetBXGBProducer::fillDescriptions(edm::ConfigurationDescripti
   desc.add<edm::InputTag>("PFHT", edm::InputTag("hltPFHTJet30"));
   desc.add<edm::InputTag>("PNetBscore", edm::InputTag("hltParticleNetDiscriminatorsJetTags", "BvsAll"));
   desc.add<edm::InputTag>("ChargedCandidates", edm::InputTag("hltL3MuonCandidates"));
-  desc.add<edm::InputTag>("EcalPFClusterIsoMap", edm::InputTag("hltMuonEcalPFClusterIsoForMuons"));
-  desc.add<edm::InputTag>("HcalPFClusterIsoMap", edm::InputTag("hltMuonHcalPFClusterIsoForMuons"));
+  desc.add<edm::InputTag>("EcalPFClusterIsoMap", edm::InputTag("hltMuonEcalMFPFClusterIsoForMuons"));
+  desc.add<edm::InputTag>("HcalPFClusterIsoMap", edm::InputTag("hltMuonHcalRegPFClusterIsoForMuons"));
   desc.add<edm::InputTag>("TrackIsoMap",
-                          edm::InputTag("hltMuonTkRelIsolationCut0p09Map", "combinedRelativeIsoDeposits"));
+                          edm::InputTag("hltMuonTkRelIsolationCut0p3Map", "combinedRelativeIsoDeposits"));
   desc.add<std::string>("modelPath",
                         "HLTrigger/HLTfilters/data/HLT_xgb_model_HH2b2W1L_1mu_HLTHT_sorttkisoMupt-absiso_PNetB.json");
 
   desc.add<unsigned int>("nMuons", 1);
   desc.add<double>("muonPtCut", 10.0);
   desc.add<double>("muonEtaCut", 2.4);
-  desc.add<bool>("muonSortByTkIso", true);  // false: sort by descending pt
-                                            // true:  sort by ascending tkiso
+  desc.add<bool>("muonSortByTkIso", true)->setComment("false: sort by descending pt, true:  sort by ascending tkiso");
   desc.add<bool>("debug", false);
 
   descriptions.addWithDefaultLabel(desc);
