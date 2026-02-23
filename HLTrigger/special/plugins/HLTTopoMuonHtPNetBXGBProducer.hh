@@ -55,13 +55,13 @@ class HLTTopoMuonHtPNetBXGBProducer : public edm::stream::EDProducer<> {
   void produce(edm::Event&, edm::EventSetup const&) override;
 
   /* Tokens */
-  edm::EDGetTokenT<reco::RecoChargedCandidateCollection>
+  const edm::EDGetTokenT<reco::RecoChargedCandidateCollection>
       chargedCandidatesToken_;
-  edm::EDGetTokenT<RecoChargedCandMap> ecalIsoMapToken_;
-  edm::EDGetTokenT<RecoChargedCandMap> hcalIsoMapToken_;
-  edm::EDGetTokenT<edm::ValueMap<double>> trackIsoMapToken_;
-  edm::EDGetTokenT<reco::METCollection> pfhtToken_;
-  edm::EDGetTokenT<reco::JetTagCollection> pnetToken_;
+  const edm::EDGetTokenT<RecoChargedCandMap> ecalIsoMapToken_;
+  const edm::EDGetTokenT<RecoChargedCandMap> hcalIsoMapToken_;
+  const edm::EDGetTokenT<edm::ValueMap<double>> trackIsoMapToken_;
+  const edm::EDGetTokenT<reco::METCollection> pfhtToken_;
+  const edm::EDGetTokenT<reco::JetTagCollection> pnetToken_;
 
   /* Cuts */
   double muonPtCut_;
