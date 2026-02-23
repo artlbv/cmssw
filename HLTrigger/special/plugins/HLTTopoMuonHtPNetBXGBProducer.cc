@@ -271,8 +271,8 @@ void HLTTopoMuonHtPNetBXGBProducer::produce(edm::StreamID, edm::Event& iEvent, e
     ss << " Features: ";
     for (float f : features) ss << f << " ";
     ss << " --> score=" << outScore;
-    LogInfo("HLTTopoMuonHtPNetBXGBProducer")
-    // std::cout 
+    // LogInfo("HLTTopoMuonHtPNetBXGBProducer")
+    std::cout 
       << ss.str() << std::endl;
   }
 
@@ -305,7 +305,7 @@ void HLTTopoMuonHtPNetBXGBProducer::fillDescriptions(
   desc.add<unsigned int>("nMuons", 1);
   desc.add<double>("muonPtCut", 10.0);
   desc.add<double>("muonEtaCut", 2.4);
-  desc.add<bool>("muonSortByTkIso", false);  // false: sort by descending pt
+  desc.add<bool>("muonSortByTkIso", true);  // false: sort by descending pt
                                              // true:  sort by ascending tkiso
   desc.add<bool>("debug", false);
 
