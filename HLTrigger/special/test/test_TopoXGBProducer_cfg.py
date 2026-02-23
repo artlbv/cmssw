@@ -106,7 +106,7 @@ from HLTrigger.Configuration.CustomConfigs import ProcessName
 process = ProcessName(process)
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '160X_dataRun3_HLT_v1', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run3_hlt_GRun', '')
 
 # Path and EndPath definitions
 process.path = cms.Path(
