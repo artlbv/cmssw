@@ -84,7 +84,7 @@ void HLTTopoMuonHtPNetBXGBProducer::produce(edm::Event& iEvent,
 
   /* ---------------- Muons: collect passing cuts ---------------- */
 
-  const auto muonsH = iEvent.getHandle(chargedCandidatesToken_);
+  const auto& muonsH = iEvent.getHandle(chargedCandidatesToken_);
 
   if (!muonsH.isValid()) {
     LogError("HLTTopoMuonHtPNetBXGBProducer")
