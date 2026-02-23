@@ -23,12 +23,6 @@ process.load('PhysicsTools.NanoAOD.custom_run3scouting_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-# set the L1 menu
-from HLTrigger.Configuration.CustomConfigs import L1XML 
-# to be placed in L1Trigger/L1TGlobal/data/Luminosity/startup 
-# from https://raw.githubusercontent.com/cms-l1-dpg/L1MenuRun3/refs/heads/master/development/L1Menu_Collisions2026_v1_0_0/L1Menu_Collisions2026_v1_0_0.xml
-process = L1XML(process,'L1Menu_Collisions2026_v1_0_0.xml') 
-# process.hltGtStage2ObjectMap.RequireMenuToMatchAlgoBlkInput=False
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1),
