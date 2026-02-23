@@ -245,7 +245,7 @@ void HLTTopoMuonHtPNetBXGBProducer::fillDescriptions(
                                         "combinedRelativeIsoDeposits"));
   desc.add<std::string>(
       "modelPath",
-      "L1Trigger/TopoML/data/HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mu_pt-iso_PNetB.json");
+      "HLTrigger/HLTfilters/data/HLT_xgb_model_HH2b2W1L_1mu_HLTHT_sorttkisoMupt-absiso_PNetB.json");
 
   desc.add<unsigned int>("nMuons", 1);
   desc.add<double>("muonPtCut", 10.0);
