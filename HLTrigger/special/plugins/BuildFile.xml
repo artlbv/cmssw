@@ -65,6 +65,6 @@
   <flags EDM_PLUGIN="1"/>
 </library>
 <library file="HLTTopoMuonHtPNetBXGBProducer.cc" name="HLTriggerSpecialXGBPlugins">
-  <use name="xgboost"/>
+  <use name="PhysicsTools/XGBoost"/>
   <flags EDM_PLUGIN="1"/>
 </library>

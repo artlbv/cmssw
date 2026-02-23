@@ -9,6 +9,14 @@
  *  \author Artur Lobanov – University of Hamburg
  */
 
+#ifndef HLTrigger_Muon_HLTTopoMuonHtPNetBXGBProducer_h
+#define HLTrigger_Muon_HLTTopoMuonHtPNetBXGBProducer_h
+
+#include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -17,9 +25,69 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/getRef.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "DataFormats/BTauReco/interface/JetTag.h"
+#include "DataFormats/Common/interface/AssociationMap.h"
+#include "DataFormats/Common/interface/OneToValue.h"
+#include "DataFormats/Common/interface/ValueMap.h"
+#include "DataFormats/METReco/interface/MET.h"
+#include "DataFormats/METReco/interface/METCollection.h"
+#include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
+#include "DataFormats/RecoCandidate/interface/RecoChargedCandidateFwd.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/global/EDProducer.h"
+#include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
+#include "FWCore/Utilities/interface/EDGetToken.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "PhysicsTools/XGBoost/interface/XGBooster.h"
 
-// this class header
-#include "HLTTopoMuonHtPNetBXGBProducer.hh"
+
+class HLTTopoMuonHtPNetBXGBProducer : public edm::global::EDProducer<> {
+ public:
+  using RecoChargedCandMap = edm::AssociationMap<edm::OneToValue<
+      std::vector<reco::RecoChargedCandidate>, float, unsigned int>>;
+
+  // 2 global features (PFHT, MaxPNetB) + 4 features per muon
+  static constexpr unsigned int kGlobalFeatures = 2;
+  static constexpr unsigned int kFeaturesPerMuon = 4;
+
+  explicit HLTTopoMuonHtPNetBXGBProducer(edm::ParameterSet const&);
+  ~HLTTopoMuonHtPNetBXGBProducer() override = default;
+
+  static void fillDescriptions(edm::ConfigurationDescriptions&);
+
+ private:
+  void produce(edm::StreamID, edm::Event&, edm::EventSetup const&) const override;
+
+  /* Tokens */
+  const edm::EDGetTokenT<reco::RecoChargedCandidateCollection>
+      chargedCandidatesToken_;
+  const edm::EDGetTokenT<RecoChargedCandMap> ecalIsoMapToken_;
+  const edm::EDGetTokenT<RecoChargedCandMap> hcalIsoMapToken_;
+  const edm::EDGetTokenT<edm::ValueMap<double>> trackIsoMapToken_;
+  const edm::EDGetTokenT<reco::METCollection> pfhtToken_;
+  const edm::EDGetTokenT<reco::JetTagCollection> pnetToken_;
+
+  /* Cuts */
+  const double muonPtCut_;
+  const double muonEtaCut_;
+
+  /* Config */
+  const unsigned int nMuons_;     // number of muons used as input features
+  const unsigned int nFeatures;  // kGlobalFeatures + kFeaturesPerMuon * nMuons_
+  const bool muonSortByTkIso_;    // if true: ascending tkiso; if false: descending pt
+
+  /* XGBoost */
+  std::unique_ptr<pat::XGBooster> booster_;
+  edm::EDPutTokenT<float> scoreToken_;
+
+  const bool debug_;
+};
+
+#endif
 
 using namespace edm;
 
@@ -39,11 +107,13 @@ HLTTopoMuonHtPNetBXGBProducer::HLTTopoMuonHtPNetBXGBProducer(
       muonPtCut_(iConfig.getParameter<double>("muonPtCut")),
       muonEtaCut_(iConfig.getParameter<double>("muonEtaCut")),
       nMuons_(iConfig.getParameter<unsigned int>("nMuons")),
-      nFeatures_(kGlobalFeatures + kFeaturesPerMuon * nMuons_),
+      nFeatures(kGlobalFeatures + kFeaturesPerMuon * nMuons_),
       muonSortByTkIso_(iConfig.getParameter<bool>("muonSortByTkIso")),
-      buffer_(nFeatures_, 0.f),
       debug_(iConfig.getParameter<bool>("debug")) {
-  produces<float>("score");
+      // scoreToken_(produces<float>("score")) {
+  // produces<float>("score");
+  scoreToken_ = produces<float>("score");
+  // produces<float>;
 
   /* Load model */
   const edm::FileInPath modelPath(
@@ -54,33 +124,31 @@ HLTTopoMuonHtPNetBXGBProducer::HLTTopoMuonHtPNetBXGBProducer(
     // std::cout 
               << "Loading XGBoost model from " << modelPath.fullPath()
               << std::endl
-              << " nMuons=" << nMuons_ << " nFeatures=" << nFeatures_
+              << " nMuons=" << nMuons_ << " nFeatures=" << nFeatures
               << " muonSortByTkIso=" << muonSortByTkIso_ << std::endl;
   }
 
-  XGBoosterCreate(nullptr, 0, &booster_);
-  XGBoosterLoadModel(booster_, modelPath.fullPath().c_str());
+  booster_ = std::make_unique<pat::XGBooster>(modelPath.fullPath());
 
-  XGDMatrixCreateFromMat(buffer_.data(), 1, nFeatures_, -999.f, &dmat_);
+  booster_->addFeature("pfht");
+  booster_->addFeature("maxPNetB");
+  // add muon featured in the order defined in the buffer: pt, tkIso, ecalIso, hcalIso for each muon
+  for(unsigned int imu = 0; imu < nMuons_; ++imu) {
+    booster_->addFeature("muon" + std::to_string(imu) + "_pt");
+    booster_->addFeature("muon" + std::to_string(imu) + "_tkIso");
+    booster_->addFeature("muon" + std::to_string(imu) + "_ecalIso");
+    booster_->addFeature("muon" + std::to_string(imu) + "_hcalIso");
+  }
 
-  xgbConfig_ =
-      "{\"training\": false, \"type\": 0, "
-      "\"iteration_begin\": 0, \"iteration_end\": 0, "
-      "\"strict_shape\": false}";
+  // // best_ntree_limit_ = best_ntree_limit; // TBC if needed?
 }
 
 /* ------------------------------------------------------------ */
 
-HLTTopoMuonHtPNetBXGBProducer::~HLTTopoMuonHtPNetBXGBProducer() {
-  if (dmat_) XGDMatrixFree(dmat_);
-  if (booster_) XGBoosterFree(booster_);
-}
+void HLTTopoMuonHtPNetBXGBProducer::produce(edm::StreamID, edm::Event& iEvent, edm::EventSetup const& setup) const {
 
-/* ------------------------------------------------------------ */
-
-void HLTTopoMuonHtPNetBXGBProducer::produce(edm::Event& iEvent,
-                                            edm::EventSetup const&) {
   float outScore = -1.f;
+  std::vector<float> features(nFeatures, 0.f);  // buffer for features to be fed to XGBoost; zero-padding for missing/empty features
 
   /* ---------------- Muons: collect passing cuts ---------------- */
 
@@ -89,7 +157,7 @@ void HLTTopoMuonHtPNetBXGBProducer::produce(edm::Event& iEvent,
   if (!muonsH.isValid()) {
     LogError("HLTTopoMuonHtPNetBXGBProducer")
         << "Missing ChargedCandidates";
-    iEvent.put(std::make_unique<float>(outScore), "score");
+    iEvent.emplace(scoreToken_, outScore);
     return;
   }
 
@@ -107,7 +175,7 @@ void HLTTopoMuonHtPNetBXGBProducer::produce(edm::Event& iEvent,
   }
 
   if (muonIndices.empty()) {
-    iEvent.put(std::make_unique<float>(outScore), "score");
+    iEvent.emplace(scoreToken_, outScore);
     return;
   }
 
@@ -166,11 +234,8 @@ void HLTTopoMuonHtPNetBXGBProducer::produce(edm::Event& iEvent,
 
   /* ---------------- Fill buffer ---------------- */
 
-  // Reset to zero so padding slots for missing muons are well-defined
-  std::fill(buffer_.begin(), buffer_.end(), 0.f);
-
-  buffer_[0] = pfht;
-  buffer_[1] = maxPNetB;
+  features[0] = pfht;
+  features[1] = maxPNetB;
 
   const unsigned int nFill =
       std::min(muonIndices.size(), static_cast<size_t>(nMuons_));
@@ -187,25 +252,15 @@ void HLTTopoMuonHtPNetBXGBProducer::produce(edm::Event& iEvent,
         trkH.isValid() ? static_cast<float>((*trkH)[muRef]) : 10.f;
 
     const unsigned int base = kGlobalFeatures + m * kFeaturesPerMuon;
-    buffer_[base + 0] = pt;
-    buffer_[base + 1] = trkIso;
-    buffer_[base + 2] = ecalIso;
-    buffer_[base + 3] = hcalIso;
+    features[base + 0] = pt;
+    features[base + 1] = trkIso;
+    features[base + 2] = ecalIso;
+    features[base + 3] = hcalIso;
   }
 
   /* ---------------- XGBoost inference ---------------- */
 
-  XGDMatrixFree(dmat_);
-  XGDMatrixCreateFromMat(buffer_.data(), 1, nFeatures_, -999.f, &dmat_);
-
-  uint64_t const* outShape = nullptr;
-  uint64_t outDim = 0;
-  const float* outResult = nullptr;
-
-  XGBoosterPredictFromDMatrix(booster_, dmat_, xgbConfig_.c_str(), &outShape,
-                              &outDim, &outResult);
-
-  if (outResult != nullptr) outScore = outResult[0];
+  outScore = booster_->predict(features, 0);  // best_ntree_limit_ can be added as a second argument if needed
 
   /* ---------------- Debug ---------------- */
 
@@ -214,14 +269,14 @@ void HLTTopoMuonHtPNetBXGBProducer::produce(edm::Event& iEvent,
     ss << "HLTTopoMuonHtPNetBXGBProducer: nMuons(found)=" << muonIndices.size()
        << std::endl;
     ss << " Features: ";
-    for (float f : buffer_) ss << f << " ";
+    for (float f : features) ss << f << " ";
     ss << " --> score=" << outScore;
     LogInfo("HLTTopoMuonHtPNetBXGBProducer")
     // std::cout 
       << ss.str() << std::endl;
   }
 
-  iEvent.put(std::make_unique<float>(outScore), "score");
+  iEvent.emplace(scoreToken_, outScore);
 }
 
 /* ------------------------------------------------------------ */
