@@ -78,7 +78,7 @@ class HLTTopoMuonHtPNetBXGBProducer : public edm::stream::EDProducer<> {
   std::vector<float> buffer_;
   std::string xgbConfig_;
 
-  bool debug_;
+  const bool debug_;
 };
 
 #endif
