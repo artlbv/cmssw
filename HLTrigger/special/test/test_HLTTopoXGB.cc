@@ -49,11 +49,8 @@ std::unique_ptr<pat::XGBooster> makeBooster(const std::string& modelPath) {
 }
 
 TEST_CASE("HLTTopoMuonHtPNetBXGBProducer BDT score", "[HLTTopoMuonBDT]") {
-
   const std::string modelPath =
-      edm::FileInPath(
-          "HLTrigger/HLTfilters/data/HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mupt-absiso_PNetB.json")
-          .fullPath();
+      edm::FileInPath("HLTrigger/HLTfilters/data/HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mupt-absiso_PNetB.json").fullPath();
 
   SECTION("Scores match expected values") {
     auto booster = makeBooster(modelPath);
@@ -61,8 +58,7 @@ TEST_CASE("HLTTopoMuonHtPNetBXGBProducer BDT score", "[HLTTopoMuonBDT]") {
     for (unsigned int i = 0; i < INPUT_LEN; ++i) {
       std::vector<float> features(vars_in[i], vars_in[i] + N_FEATURES);
       const float score = booster->predict(features, 0);
-      INFO("Input index " << i << ": score=" << score
-                          << " expected=" << expected_scores[i]);
+      INFO("Input index " << i << ": score=" << score << " expected=" << expected_scores[i]);
       CHECK_THAT(score, Catch::Matchers::WithinAbs(expected_scores[i], kScoreTolerance));
     }
   }
