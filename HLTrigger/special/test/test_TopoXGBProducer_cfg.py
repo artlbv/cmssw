@@ -191,13 +191,12 @@ process.hltTopoMuonHtPNetBXGBProducerMuSortIso = hltTopoMuonHtPNetBXGBProducer.c
 process.hltTopoBDTHH1MuHTBProb0p8 = cms.EDFilter("HLTFloatThresholdFilter",
     src = cms.InputTag("hltTopoMuonHtPNetBXGBProducer","score"),
     threshold = cms.double(0.8 ),  # XGB gives probability directly, 
-    greaterThan = cms.bool(True),
+
 )
 
 # process.hltTopoBDTHH1MuHTBMu12Prob0p8 = cms.EDFilter("HLTFloatThresholdFilter",
 #     src = cms.InputTag("hltTopoMuonHtPNetBXGBProducerMu12","score"),
 #     threshold = cms.double(0.8 ),  # XGB gives probability directly, 
-#     greaterThan = cms.bool(True),
 # )
 
 ## change hltPFJetForBtagSelector to not filter events with <1 jets, 
@@ -317,24 +316,24 @@ process.NANOAODoutput.outputCommands.append("keep nanoaodFlatTable_hltTopoBDTNan
 # HLT Trigger Filter
 # -------------------------------------------------------------------
 ## HLT FILTER
-import HLTrigger.HLTfilters.hltHighLevel_cfi
-process.skimHLTFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
-process.skimHLTFilter.TriggerResultsTag = cms.InputTag("TriggerResults", "", "HLT") # explicity specify the process name
-process.skimHLTFilter.throw=cms.bool(False) # otherwise will throw if it cant match to a hlt path, depends on whether you want to silently ignore unmatched paths
+# import HLTrigger.HLTfilters.hltHighLevel_cfi
+# process.skimHLTFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
+# process.skimHLTFilter.TriggerResultsTag = cms.InputTag("TriggerResults", "", "HLT") # explicity specify the process name
+# process.skimHLTFilter.throw=cms.bool(False) # otherwise will throw if it cant match to a hlt path, depends on whether you want to silently ignore unmatched paths
 
-#process.skimHLTFilter.HLTPaths = cms.vstring("HLT_Mu12_IsoVVL_PFHT150_PNetBTag0p53*")  # the * allows us to match all version, you could also other wild card expressions
-process.skimHLTFilter.HLTPaths = cms.vstring("HLT_IsoMu24*")  # the * allows us to match all version, you could also other wild card expressions
-# process.skimHLTFilter.HLTPaths = cms.vstring("HLT_TriggersForScoutingPFMonitor_PS1000*")  # the * allows us to match all version, you could also other wild card expressions
-process.HLTskim_step = cms.Path(process.skimHLTFilter)
-process.NANOAODoutput.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring("HLTskim_step"))
+# #process.skimHLTFilter.HLTPaths = cms.vstring("HLT_Mu12_IsoVVL_PFHT150_PNetBTag0p53*")  # the * allows us to match all version, you could also other wild card expressions
+# process.skimHLTFilter.HLTPaths = cms.vstring("HLT_IsoMu24*")  # the * allows us to match all version, you could also other wild card expressions
+# # process.skimHLTFilter.HLTPaths = cms.vstring("HLT_TriggersForScoutingPFMonitor_PS1000*")  # the * allows us to match all version, you could also other wild card expressions
+# process.HLTskim_step = cms.Path(process.skimHLTFilter)
+# process.NANOAODoutput.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring("HLTskim_step"))
 
-# Schedule definition
-process.schedule.insert(0, process.HLTskim_step)  # insert the skim step at the beginning of the schedule so it runs first
+# # Schedule definition
+# process.schedule.insert(0, process.HLTskim_step)  # insert the skim step at the beginning of the schedule so it runs first
 
-process.nanoAOD_step = cms.Path(process.skimHLTFilter*process.scoutingNanoSequence)
+# process.nanoAOD_step = cms.Path(process.skimHLTFilter*process.scoutingNanoSequence)
 
-# insert the skim filter at the beginning of the HLT begin sequence so that it runs before any other HLT module, this way we can skip all the HLT processing for events that don't pass the skim
-process.HLTBeginSequence.insert(0, process.skimHLTFilter)
+# # insert the skim filter at the beginning of the HLT begin sequence so that it runs before any other HLT module, this way we can skip all the HLT processing for events that don't pass the skim
+# process.HLTBeginSequence.insert(0, process.skimHLTFilter)
 
 ### add hltJets with btagging to nanoAOD, since the BDT uses jets with btagging info as input, 
 ### complements the standard scouting nano
