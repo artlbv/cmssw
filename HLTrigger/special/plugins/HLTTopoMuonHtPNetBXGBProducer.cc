@@ -254,7 +254,7 @@ void HLTTopoMuonHtPNetBXGBProducer::fillDescriptions(
                                              // true:  sort by ascending tkiso
   desc.add<bool>("debug", false);
 
-  descriptions.add("HLTTopoMuonHtPNetBXGBProducer", desc);
+  descriptions.addWithDefaultLabel(desc);
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
