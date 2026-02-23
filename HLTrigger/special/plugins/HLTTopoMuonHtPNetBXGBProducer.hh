@@ -68,9 +68,9 @@ class HLTTopoMuonHtPNetBXGBProducer : public edm::stream::EDProducer<> {
   const double muonEtaCut_;
 
   /* Config */
-  unsigned int nMuons_;     // number of muons used as input features
-  unsigned int nFeatures_;  // kGlobalFeatures + kFeaturesPerMuon * nMuons_
-  bool muonSortByTkIso_;    // if true: ascending tkiso; if false: descending pt
+  const unsigned int nMuons_;     // number of muons used as input features
+  const unsigned int nFeatures_;  // kGlobalFeatures + kFeaturesPerMuon * nMuons_
+  const bool muonSortByTkIso_;    // if true: ascending tkiso; if false: descending pt
 
   /* XGBoost */
   BoosterHandle booster_ = nullptr;
