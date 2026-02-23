@@ -9,9 +9,6 @@
  *  \author Artur Lobanov – University of Hamburg
  */
 
-#ifndef HLTrigger_Muon_HLTTopoMuonHtPNetBXGBProducer_h
-#define HLTrigger_Muon_HLTTopoMuonHtPNetBXGBProducer_h
-
 #include <memory>
 #include <sstream>
 #include <string>
@@ -84,8 +81,6 @@ private:
 
   const bool debug_;
 };
-
-#endif
 
 using namespace edm;
 
