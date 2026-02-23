@@ -12,7 +12,7 @@ public:
         threshold_(config.getParameter<double>("threshold")),
         token_(consumes<float>(src_)) {}
 
-  bool filter(edm::StreamID, edm::Event& event, edm::EventSetup const&) const {
+  bool filter(edm::StreamID, edm::Event& event, edm::EventSetup const&) const override {
     const auto& handle = event.getHandle(token_);
     return (handle.isValid() && *handle > threshold_);
   }
