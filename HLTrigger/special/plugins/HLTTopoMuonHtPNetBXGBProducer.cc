@@ -262,7 +262,7 @@ void HLTTopoMuonHtPNetBXGBProducer::fillDescriptions(edm::ConfigurationDescripti
 
   desc.add<edm::InputTag>("PFHT", edm::InputTag("hltPFHTJet30"));
   desc.add<edm::InputTag>("PNetBscore", edm::InputTag("hltParticleNetDiscriminatorsJetTags", "BvsAll"));
-  desc.add<edm::InputTag>("ChargedCandidates", edm::InputTag("hltL3MuonCandidates"));
+  desc.add<edm::InputTag>("ChargedCandidates", edm::InputTag("hltIterL3MuonCandidates"));
   desc.add<edm::InputTag>("EcalPFClusterIsoMap", edm::InputTag("hltMuonEcalMFPFClusterIsoForMuons"));
   desc.add<edm::InputTag>("HcalPFClusterIsoMap", edm::InputTag("hltMuonHcalRegPFClusterIsoForMuons"));
   desc.add<edm::InputTag>("TrackIsoMap",
