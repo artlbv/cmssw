@@ -104,10 +104,9 @@ HLTTopoMuonHtPNetBXGBProducer::HLTTopoMuonHtPNetBXGBProducer(edm::ParameterSet c
   const edm::FileInPath modelPath(iConfig.getParameter<std::string>("modelPath"));
 
   if (debug_) {
-    LogInfo("HLTTopoMuonHtPNetBXGBProducer")
-        // std::cout
-        << "Loading XGBoost model from " << modelPath.fullPath() << std::endl
-        << " nMuons=" << nMuons_ << " nFeatures=" << nFeatures << " muonSortByTkIso=" << muonSortByTkIso_ << std::endl;
+    std::cout << "Loading XGBoost model from " << modelPath.fullPath() << std::endl
+              << " nMuons=" << nMuons_ << " nFeatures=" << nFeatures << " muonSortByTkIso=" << muonSortByTkIso_
+              << std::endl;
   }
 
   booster_ = std::make_unique<pat::XGBooster>(modelPath.fullPath());
@@ -250,7 +249,6 @@ void HLTTopoMuonHtPNetBXGBProducer::produce(edm::StreamID, edm::Event& iEvent, e
     for (float f : features)
       ss << f << " ";
     ss << " --> score=" << outScore;
-    // LogInfo("HLTTopoMuonHtPNetBXGBProducer")
     std::cout << ss.str() << std::endl;
   }
 
