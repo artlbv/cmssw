@@ -94,7 +94,7 @@ void HLTTopoMuonHtPNetBXGBProducer::produce(edm::Event& iEvent,
   }
 
   // Fetch track iso map once — needed for sorting and feature filling
-  const auto trkH = iEvent.getHandle(trackIsoMapToken_);
+  const auto& trkH = iEvent.getHandle(trackIsoMapToken_);
 
   std::vector<size_t> muonIndices;
   muonIndices.reserve(muonsH->size());
@@ -140,14 +140,14 @@ void HLTTopoMuonHtPNetBXGBProducer::produce(edm::Event& iEvent,
 
   /* ---------------- Isolations (ECAL/HCAL) ---------------- */
 
-  const auto ecalH = iEvent.getHandle(ecalIsoMapToken_);
-  const auto hcalH = iEvent.getHandle(hcalIsoMapToken_);
+  const auto& ecalH = iEvent.getHandle(ecalIsoMapToken_);
+  const auto& hcalH = iEvent.getHandle(hcalIsoMapToken_);
 
   /* ---------------- PFHT ---------------- */
 
   float pfht = 0.f;
 
-  if (auto h = iEvent.getHandle(pfhtToken_); h.isValid()) {
+  if (const auto& h = iEvent.getHandle(pfhtToken_); h.isValid()) {
     if (!h->empty()) pfht = h->front().sumEt();
   } else {
     LogWarning("HLTTopoMuonHtPNetBXGBProducer")
@@ -158,7 +158,7 @@ void HLTTopoMuonHtPNetBXGBProducer::produce(edm::Event& iEvent,
 
   float maxPNetB = -1.f;
 
-  if (auto h = iEvent.getHandle(pnetToken_); h.isValid()) {
+  if (const auto& h = iEvent.getHandle(pnetToken_); h.isValid()) {
     for (auto const& tag : *h) maxPNetB = std::max(maxPNetB, tag.second);
   } else {
     LogWarning("HLTTopoMuonHtPNetBXGBProducer") << "Missing PNetB JetTags";
