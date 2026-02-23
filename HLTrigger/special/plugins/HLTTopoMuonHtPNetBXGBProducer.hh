@@ -64,8 +64,8 @@ class HLTTopoMuonHtPNetBXGBProducer : public edm::stream::EDProducer<> {
   const edm::EDGetTokenT<reco::JetTagCollection> pnetToken_;
 
   /* Cuts */
-  double muonPtCut_;
-  double muonEtaCut_;
+  const double muonPtCut_;
+  const double muonEtaCut_;
 
   /* Config */
   unsigned int nMuons_;     // number of muons used as input features
