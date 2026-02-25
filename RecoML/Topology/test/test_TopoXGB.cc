@@ -9,7 +9,8 @@
 
 #define INPUT_LEN 5
 #define N_MUONS 1
-#define N_FEATURES (2 + 4 * N_MUONS)  // PFHT, MaxPNetB, mu_pt, mu_tkIso, mu_ecalIso, mu_hcalIso
+#define N_FEATURES \
+  (2 + 4 * N_MUONS)  // PFHT, MaxPNetB, mu_pt, mu_tkIso, mu_ecalIso, mu_hcalIso
 
 // Each row: [pfht, maxPNetB, mu0_pt, mu0_tkIso, mu0_ecalIso, mu0_hcalIso]
 // These are representative HLT-like values
@@ -48,10 +49,11 @@ std::unique_ptr<pat::XGBooster> makeBooster(const std::string& modelPath) {
 }
 
 TEST_CASE("TopoMuonHtPNetBXGBProducer BDT score", "[TopoMuonBDT]") {
-  const std::string modelPath = edm::FileInPath(
-                                    "HLTrigger/HLTfilters/data/"
-                                    "HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mupt-absiso_PNetB.json")
-                                    .fullPath();
+  const std::string modelPath =
+      edm::FileInPath(
+          "HLTrigger/HLTfilters/data/"
+          "HLT_xgb_model_HH2b2W1L_1mu_HLTHT_Mupt-absiso_PNetB.json")
+          .fullPath();
 
   SECTION("Scores match expected values") {
     auto booster = makeBooster(modelPath);
@@ -59,8 +61,10 @@ TEST_CASE("TopoMuonHtPNetBXGBProducer BDT score", "[TopoMuonBDT]") {
     for (unsigned int i = 0; i < INPUT_LEN; ++i) {
       std::vector<float> features(vars_in[i], vars_in[i] + N_FEATURES);
       const float score = booster->predict(features, 0);
-      INFO("Input index " << i << ": score=" << score << " expected=" << expected_scores[i]);
-      CHECK_THAT(score, Catch::Matchers::WithinAbs(expected_scores[i], kScoreTolerance));
+      INFO("Input index " << i << ": score=" << score
+                          << " expected=" << expected_scores[i]);
+      CHECK_THAT(score, Catch::Matchers::WithinAbs(expected_scores[i],
+                                                   kScoreTolerance));
     }
   }
 
