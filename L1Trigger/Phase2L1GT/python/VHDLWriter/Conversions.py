@@ -1,5 +1,6 @@
 import L1Trigger.Phase2L1GT.VHDLWriter.Conditions as cond
 import L1Trigger.Phase2L1GT.VHDLWriter.Writer as writer
+import os
 
 
 
@@ -58,19 +59,9 @@ def checkFilter(filt):
         Condit._setInputObject(idx + 1, tag.productInstanceLabel)
     return Condit
 
-def assignAlgoBits(obj):
-    Algobitlist = obj.channelConfig.value().pop().getParameter('algoBits')
-    algos = cond.defineAlgoBits()
-    for Bititem in Algobitlist:
-        name = Bititem.bitPos.value()
-        value = Bititem.path.value()
-        algos.SetBit(value,name)
-    return algos
-
-
 def getConditionsfromConfig(obj):
     filterdict = {}
-    for key,value in obj.filters.items():
+    for key,value in sorted(obj.filters.items()):
         x = checkFilter(value)
         if x != 0:
             filterdict[key] = x 
@@ -100,10 +91,10 @@ def checkiflogicalcombination(filterlist,algobits):
             combinatorialpath.append(algopath)
     return combinatorialpath
 
-def sortAlgodictWithIndices(menu):
+def sortAlgodictWithIndices(algorithms):
     algo_dict = {}
     # Extract names and expressions
-    for algo in menu.algorithms:
+    for algo in algorithms:
         if hasattr(algo, "name") and algo.name.value():
             algo_str = algo.name.value()
         else:
@@ -119,10 +110,10 @@ def sortAlgodictWithIndices(menu):
 
 
 # Adjust this for the cases of more filters per expression (and/or/xor)
-def getLogicalFilters(menu,knownfilters):
+def getLogicalFilters(menu,algorithms,knownfilters):
     combinatorialfilters = {} 
-    for algo in menu.algorithms:
-        for path in menu.paths:
+    for algo in algorithms:
+        for path in sorted(menu.paths):
             pathmodules = menu.paths[path].moduleNames()
             for module in pathmodules:
                 if path in algo.expression.value():
@@ -146,7 +137,7 @@ def getModules(obj,expression):
         if moduleset != set():
             modulelist.append(moduleset.pop())
         if moduleset != set():
-            print("warning %s is part of a combinatorial logic and its path contains more than 1 modules, this will lead to undefined behaviour".format(word))
+            print("warning {} is part of a combinatorial logic and its path contains more than 1 modules, this will lead to undefined behaviour".format(word))
     return modulelist
 
 
@@ -163,7 +154,7 @@ def associatePathAndModules(menu,knownfilters):
 
 
 def addPathsToModule(menu,filtername,filtervalue):    
-    for path in menu.paths:
+    for path in sorted(menu.paths):
            modules = menu.paths[path].moduleNames()
            for module in modules:
                 if filtername == module:
@@ -251,12 +242,7 @@ def distributeAlgosAtRandom(algodict,numslrs,seed = 2):
         addalgo = algodict.algoblocks.pop()
     return algounits
 
-def assignAlgostoSlrs(knownfilters,logicalcombinations,numslrs):
-    algoblocks = WriteAlgoDict(knownfilters,logicalcombinations)
-    distributedAlgos = distributealgos(algoblocks,numslrs)
-    return distributedAlgos
-
-def writeAlgounits(distributedAlgos,algomap,knownfilters,logcomb):
+def writeAlgounits(distributedAlgos,algomap,knownfilters,logcomb,outdir="."):
     for index,value in enumerate(distributedAlgos):
         modules = dict()
         paths = dict()
@@ -265,14 +251,14 @@ def writeAlgounits(distributedAlgos,algomap,knownfilters,logcomb):
         bits = {}
         tdistributedAlgos = {}
         logicalcombinations = dict()
-        for mod in value.Modules:
+        for mod in sorted(value.Modules):
             condtext += writer.conditionwriter(mod,knownfilters[mod])
             tdistributedAlgos[mod] = knownfilters[mod]
         if(value.LogicalPath != set()):
-            for log in value.LogicalPath:
+            for log in sorted(value.LogicalPath):
                 logicalcombinations[log] = logcomb[log]
         algounittext = writer.algounitWriter(algomap,condtext,tdistributedAlgos,logicalcombinations,index)
-        writer.writeAlgounitToFile("p2gt_algos_slr{}.vhd".format(index),algounittext)
+        writer.writeAlgounitToFile(os.path.join(outdir,"p2gt_algos_slr{}.vhd".format(index)),algounittext)
 
 
 def getAlgobits(algomap,distributedalgos,Outputchans):

@@ -37,7 +37,7 @@ def conditionwriter(name,attributes):
     elif(attributes.Label == 'L1GTQuadObjectCond' ):
         outputText = template.render(condition_name = name, cuts = attributes.Cuts, objects_first = attributes.InputObjects.get(1),objects_second = attributes.InputObjects.get(2),objects_third = attributes.InputObjects.get(3),objects_fourth = attributes.InputObjects.get(4), algo_bit_name = name) 
     else:
-        print("Warning Condition not know to algounit writer, condition is of type{}".format(attributes.Label))
+        raise ValueError("Condition not known to the algounit writer, condition is of type {}".format(attributes.Label))
     return outputText
 
 def algounitWriter(algobits,conditions,filts,logicalcomb,slrnumber):
@@ -48,9 +48,8 @@ def algounitWriter(algobits,conditions,filts,logicalcomb,slrnumber):
     return outputText
 
 def writeAlgounitToFile(filename,contents):
-    f = open(filename,"w")
-    f.write(contents)
-    f.close()
+    with open(filename,"w") as f:
+        f.write(contents)
 
 def pad_lists(input_list, max_length):
     """ Ensures all sublists in input_list have the same length by padding with zeros, but skips 'others => 0'. """

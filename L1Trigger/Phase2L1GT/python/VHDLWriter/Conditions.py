@@ -1,6 +1,3 @@
-from ast import Mod
-from modulefinder import Module
-from queue import Empty
 from L1Trigger.Phase2L1GT.l1tGTScales import scale_parameter
 from libL1TriggerPhase2L1GT import L1GTScales as CppScales
 l1tGTScales = CppScales(*[param.value() for param in scale_parameter.parameters_().values()])
@@ -97,11 +94,7 @@ class Condition:
             'maxTransMass' : l1tGTScales.to_hw_TransMassSqrDiv2,
             'minInvMassOverDR'     : l1tGTScales.to_hw_InvMassSqrOver2DR,
             'maxInvMassOverDR'     : l1tGTScales.to_hw_InvMassSqrOver2DR,
-            # 3BodyCuts
-            'minInvMass'    : l1tGTScales.to_hw_InvMassSqrDiv2,
-            'maxInvMass'    : l1tGTScales.to_hw_InvMassSqrDiv2,
-            'minTransMass'  : l1tGTScales.to_hw_TransMassSqrDiv2,
-            'maxTransMass'  : l1tGTScales.to_hw_TransMassSqrDiv2,
+            # 3BodyCuts: minInvMass, maxInvMass, minTransMass, maxTransMass use the conversions above
 
             # the following are included here as a confirmation of inclusion to the VHDL Writter
             # 'primVertex'          :   # returned as is
