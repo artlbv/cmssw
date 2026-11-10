@@ -1,0 +1,32 @@
+
+{{condition_name}} : entity work.p2gt_tripleObjCond
+generic map(
+  collections         => ({{objects_first}}, {{objects_second}}, {{objects_third}})
+  {%- set cut_items = cuts.items() | list %}
+  {%- if cut_items %}, {# Add comma only if there are cuts #}
+  {%- endif %}
+  {%- for key, value in cuts.items() +%}
+  {% if value.hwcut[0] is sameas true or value.hwcut[0] is sameas false %}
+  {{key}}         => {{value.hwcut | replace("[","(") | replace("]",")")| lower }}{% if not loop.last %},{% endif %} --Physical value: {{value.physcut}}
+  {%- elif key == "regionsAbsEtaLowerBounds" %}
+  NUM_ETA_REGIONS           => ({{ value.num_eta_regions | join(", ") }}),
+  {{key}}  => {{value.hwcut | replace("[","(") | replace("]",")") | replace("'others => (others => 0)'", "others => (others => 0)") | replace("'(others => 0)'", "(others => 0)")}}{% if not loop.last %},{% endif %} -- Physical value: {{value.physcut}}
+  {%- elif key == "primVertIdcs" %}
+  {{key}}  => {{value.hwcut | replace("[","(") | replace("]",")") | replace("'others => (others => 0)'", "others => (others => 0)") | replace("'(others => 0)'", "(others => 0)")}}{% if not loop.last %},{% endif %} -- Physical value: {{value.physcut}}
+  {%- elif key == "minPtMultiplicity_cuts" or key == "minPtMultiplicityNs"  %}
+  {{key}}  => {{value.hwcut | replace("[","(") | replace("]",")") | replace("'others => (others => 0)'", "others => (others => 0)") | replace("'(others => 0)'", "(others => 0)")}}{% if not loop.last %},{% endif %} -- Physical value: {{value.physcut}}
+  {%- else %}
+  {{key}}         => {{value.hwcut | replace("[","(") | replace("]",")")| replace("'others => (others => 0)'", "others => (others => 0)") | replace("'(others => 0)'", "(others => 0)")}}, -- Physical value: {{value.physcut}}
+  {{key}}_enabled => {{value.enablecut | replace("[","(") | replace("]",")")| lower }}{% if not loop.last %},{% endif %}
+  {%- endif %}
+  {%- endfor +%}
+)
+port map(
+  clk_algo         => clk_algo,
+  rst_algo         => rst_algo,
+  objects_valid_bx => objects_valid_bx,
+  objects_bx       => objects_bx,
+  algo_bit_out     => {{algo_bit_name}}_result 
+);
+
+
