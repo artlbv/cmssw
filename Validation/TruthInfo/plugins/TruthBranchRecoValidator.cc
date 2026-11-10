@@ -307,6 +307,12 @@ TruthBranchRecoValidator<RECO>::TruthBranchRecoValidator(edm::ParameterSet const
   if (workingPoints.empty()) {
     throw cms::Exception("Configuration") << "TruthBranchRecoValidator: workingPoints is empty";
   }
+  // The dominance measure and the truth-side loose score read the first point's map as
+  // the complete one, and only the plain per-root match keeps every candidate.
+  if (workingPoints.front() != "Fixed") {
+    throw cms::Exception("Configuration") << "TruthBranchRecoValidator: workingPoints starts with '"
+                                          << workingPoints.front() << "', it must start with 'Fixed'";
+  }
   nWorkingPoints_ = workingPoints.size();
 
   // The truth-driven folder suffixes and the denominator instance each consumes. A
@@ -334,7 +340,8 @@ TruthBranchRecoValidator<RECO>::TruthBranchRecoValidator(edm::ParameterSet const
       truthTargets.emplace_back("signal", "signalSeeds");
       // The same seed objects with NO selector cut, so the efficiency is quoted against
       // every seed in the event rather than against the ones the kinematic selection
-      // kept. The gap to the signal folder is what the selection removed.
+      // kept. The gap to the signal folder is what the selection removed, the invisible
+      // seeds included.
       truthTargets.emplace_back("signalNoSelection", "signalSeedsNoSelection");
     }
     // Every denominator above is an ANTICHAIN. A set of all selected roots is not one,
