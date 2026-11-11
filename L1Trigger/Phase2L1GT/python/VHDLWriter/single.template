@@ -1,0 +1,29 @@
+
+{{condition_name}} : entity work.p2gt_singleObjCond
+generic map(
+  collection          => ({{object}})
+  {%- set cut_items = cuts.items() | list %}
+  {%- if cut_items %}, {# Add comma only if there are cuts #}
+  {%- endif %}
+  {%- for key, value in cuts.items() +%}
+  {% if key == "regionsAbsEtaLowerBounds" %}
+  NUM_ETA_REGIONS           => ({{ value.num_eta_regions | join(", ") }}),
+  {{key}}  => {{value.hwcut | replace("[","(") | replace("]",")") | replace("'others => (others => 0)'", "others => (others => 0)") | replace("'(others => 0)'", "(others => 0)")}}{% if not loop.last %},{% endif %} -- Physical value: {{value.physcut}}
+  {%- elif key == "primVertIdx" %}
+  {{key}}  => {{value.hwcut | replace("[","(") | replace("]",")") | replace("'others => (others => 0)'", "others => (others => 0)") | replace("'(others => 0)'", "(others => 0)")}}{% if not loop.last %},{% endif %} -- Physical value: {{value.physcut}}
+  {%- elif key == "minPtMultiplicity_cut" or key == "minPtMultiplicityN"  %}
+  {{key}}  => {{value.hwcut | replace("[","(") | replace("]",")") | replace("'others => (others => 0)'", "others => (others => 0)") | replace("'(others => 0)'", "(others => 0)")}}{% if not loop.last %},{% endif %} -- Physical value: {{value.physcut}}
+  {%- else %}
+  {{key}}            => {{value.hwcut| replace("[","(") | replace("]",")")}}, -- Physical value: {{value.physcut}}
+  {{key}}_enabled    => true{% if not loop.last %},{% endif %}
+  {% endif %}
+  {%+ endfor +%}
+)
+port map(
+  clk_algo         => clk_algo,
+  rst_algo         => rst_algo,
+  objects_valid_bx => objects_valid_bx,
+  objects_bx       => objects_bx,
+  algo_bit_out     => {{algo_bit_name}}_result --this is a temporary solution, name is taken from patternfilewriter in config file
+);
+

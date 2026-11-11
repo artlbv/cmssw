@@ -381,3 +381,14 @@ process.pBoardDataInputVU13P = cms.EndPath(process.BoardDataInputVU13P)
 process.pBoardDataOutputObjectsVU13P = cms.EndPath(process.BoardDataOutputObjectsVU13P)
 process.pAlgoBitBoardDataVU13P = cms.EndPath(process.AlgoBitBoardDataVU13P)
 ```
+
+## VHDL writer
+
+The algorithm units of the GT firmware can be generated from a menu with the VHDL writer in `python/VHDLWriter` (originally developed by O. Zormpa in [ozormpa/VHDLWriter_CMSSW_15_0_0_pre3](https://github.com/ozormpa/VHDLWriter_CMSSW_15_0_0_pre3/tree/add_cuts)). It converts the cuts of every `L1GT{Single,Double,Triple,Quad}ObjectCond` to hardware values with the GT scales, distributes the conditions over the SLRs according to their estimated resource usage and writes one `p2gt_algos_slr{N}.vhd` per SLR:
+
+```bash
+python3 L1Trigger/Phase2L1GT/test/test_algounitwriter.py -n 4 -o <output dir> \
+  -i L1Trigger.Configuration.Phase2GTMenus.SeedDefinitions.step1_2024.l1tGTMenu_cff
+```
+
+`-i` takes menu files or python modules: a GT menu cff, or a configuration fragment that contains the menu (the algorithms are then taken from `l1tGTAlgoBlockProducer`). `-n` is the number of SLRs (3 or 4). The output does not depend on how the menu was loaded.
