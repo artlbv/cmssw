@@ -12,7 +12,7 @@ function die {
   exit $2
 }
 
-rm -f test_triggerMenuGraph*.html test_triggerMenuGraph*.json test_triggerMenuGraph*.log
+rm -f test_triggerMenuGraph*.html test_triggerMenuGraph*.json test_triggerMenuGraph*.log test_triggerMenuGraph*.txt test_triggerMenuGraph*_cfg.py
 
 triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff \
   --era Phase2C26I13M9 --procModifiers alpaka \
@@ -65,3 +65,42 @@ decisions = [e for e in data["edges"] if e["kind"] == "pathDecision" and e["targ
 print("%d path decisions read by l1tGTAlgoBlockProducer" % len(decisions))
 sys.exit(0 if len(decisions) >= 10 else 1)
 @EOF
+
+###
+### --diff, lint and --strict on a small configuration
+###
+cat > test_triggerMenuGraph_base_cfg.py <<'@EOF'
+import FWCore.ParameterSet.Config as cms
+process = cms.Process("TEST")
+process.hltPixelClustersA = cms.EDProducer("SiPixelClusterProducer", src = cms.InputTag("rawDataCollector"))
+process.hltPixelTracksA = cms.EDProducer("PixelTrackProducer", clusters = cms.InputTag("hltPixelClustersA"))
+process.hltPixelTrackFilterA = cms.EDFilter("HLTPixelTrackFilter", pixelTracks = cms.InputTag("hltPixelTracksA"))
+process.p = cms.Path(process.hltPixelClustersA + process.hltPixelTracksA + process.hltPixelTrackFilterA)
+@EOF
+# the same configuration with a typo in an input label
+sed -e 's/InputTag("hltPixelClustersA")/InputTag("hltPixelClusterA")/' \
+  test_triggerMenuGraph_base_cfg.py > test_triggerMenuGraph_typo_cfg.py
+
+triggerMenuGraph test_triggerMenuGraph_base_cfg.py -o test_triggerMenuGraph_base.html \
+  --json test_triggerMenuGraph_base.json &> test_triggerMenuGraph_base.log \
+  || die 'Failure running triggerMenuGraph on the small configuration' $? test_triggerMenuGraph_base.log
+
+# no differences with itself, and --strict passes
+triggerMenuGraph test_triggerMenuGraph_base_cfg.py -o test_triggerMenuGraph_self.html \
+  --diff test_triggerMenuGraph_base.json --strict &> test_triggerMenuGraph_self.log \
+  || die 'Failure running triggerMenuGraph --diff --strict on an unchanged configuration' $? test_triggerMenuGraph_self.log
+grep -q "0 modules added, 0 removed, 0 changed, 0 dependencies added, 0 removed" test_triggerMenuGraph_self.log \
+  || die 'Unexpected differences between a configuration and itself' 1 test_triggerMenuGraph_self.log
+
+# the typo is a new lint warning: --strict must fail with status 2
+triggerMenuGraph test_triggerMenuGraph_typo_cfg.py -o test_triggerMenuGraph_typo.html \
+  --diff test_triggerMenuGraph_base.json --strict --report test_triggerMenuGraph_typo.txt &> test_triggerMenuGraph_typo.log
+STATUS=$?
+[ $STATUS -eq 2 ] || die "triggerMenuGraph --strict should exit with status 2 on a new lint warning (got $STATUS)" 1 test_triggerMenuGraph_typo.log
+grep -q "\\[new\\] hltPixelClusterA is read by hltPixelTracksA" test_triggerMenuGraph_typo.txt \
+  || die 'The typo is not reported as a new lint warning' 1 test_triggerMenuGraph_typo.txt
+grep -q "+ hltPixelClusterA -> hltPixelTracksA" test_triggerMenuGraph_typo.txt \
+  || die 'The changed dependency is not in the --diff report' 1 test_triggerMenuGraph_typo.txt
+grep -q '"diff"' test_triggerMenuGraph_typo.html \
+  || die 'The --diff data is not embedded in the page' 1 test_triggerMenuGraph_typo.log
+echo "diff, lint and --strict checks passed"

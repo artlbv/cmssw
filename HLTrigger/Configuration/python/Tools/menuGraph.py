@@ -329,6 +329,15 @@ def extract(process, packages=None, rules_module=None):
 
     used = {m["subsystem"] for m in modules} | ({"ext"} if ext else set())
     subsystems = [s for s in rules_module.SUBSYSTEMS if s["id"] in used or s["id"] == "ext"]
+    # module-label patterns of the products kept by the scheduled output modules
+    keeps = set()
+    for obj in state.mod_obj.values():
+        if isinstance(obj, cms.OutputModule) and hasattr(obj, "outputCommands"):
+            for cmd in obj.outputCommands:
+                words = cmd.split()
+                if len(words) == 2 and words[0] in ("keep", "keepNotUnique"):
+                    fields = words[1].split("_")
+                    keeps.add("*" if words[1] == "*" or len(fields) < 2 else fields[1])
     children = collections.defaultdict(list)
     for child, parent in seq_parent.items():
         children[parent].append(child)
@@ -343,9 +352,154 @@ def extract(process, packages=None, rules_module=None):
         taskChildren=dict(children),
         chips=[c for c in getattr(rules_module, "CHIPS", []) if c["sub"] in used],
         flag=dict(short=flag.get("short", "flagged"), label=flag.get("label", "")),
+        outputKeeps=sorted(keeps),
         es=[dict(id=k, type=v.type_(), kind=type(v).__name__)
             for k, v in list(process.es_producers_().items()) + list(process.es_sources_().items())],
     )
+
+
+# ---------------------------------------------------------------- lint
+def lint(data, rules_module=None):
+    """Checks on the extracted graph; returns {"warnings": [...], "info": [...]}.
+
+    Warnings: external inputs that look like they should come from this configuration,
+    i.e. labels with the profile's own prefix (LINT["own_labels"]) or near-identical to a
+    module label (a likely typo). Info: producers on a path whose products nothing in the
+    configuration reads, nor any output module keeps (minus LINT["ignore_unread"])."""
+    import difflib
+    import fnmatch
+    rules_module = rules_module or profile_rules("hlt")
+    cfg = getattr(rules_module, "LINT", {}) or {}
+    own = re.compile(cfg["own_labels"]) if cfg.get("own_labels") else None
+    expected = re.compile(cfg["expected_inputs"]) if cfg.get("expected_inputs") else None
+    ignore = re.compile(cfg["ignore_unread"]) if cfg.get("ignore_unread") else None
+    live = [m for m in data["modules"] if m.get("diff") != "removed"]
+    lower = {m["id"].lower(): m["id"] for m in live}
+    warnings, info = [], []
+    for e in data["external"]:
+        if e.get("diff") == "removed" or e["id"].endswith("(earlier process)"):
+            continue
+        close = difflib.get_close_matches(e["id"].lower(), list(lower), n=1, cutoff=0.9)
+        suggestion = lower[close[0]] if close else None
+        reasons = []
+        if own and own.search(e["id"]):
+            reasons.append("uses this configuration's label prefix")
+        if suggestion and not (expected and expected.search(e["id"])):
+            reasons.append("close to %s" % suggestion)
+        if reasons:
+            warnings.append(dict(check="suspicious-input", id=e["id"], consumers=e["consumers"], suggestion=suggestion,
+                                 message="%s is read by %s but no module produces it (%s)"
+                                         % (e["id"], ", ".join(e["consumers"]), "; ".join(reasons))))
+    read = {e["source"] for e in data["edges"] if not e["external"] and e.get("diff") != "removed"}
+    keeps = data.get("outputKeeps", [])
+    for m in live:
+        if m["kind"] not in ("EDProducer", "SwitchProducer") or not m["paths"] or m["id"] in read:
+            continue
+        if ignore and ignore.search(m["id"]):
+            continue
+        if any(fnmatch.fnmatchcase(m["id"], k) for k in keeps):
+            continue
+        info.append(dict(check="unread-product", id=m["id"], paths=m["paths"],
+                         message="%s (%s) runs in %d path(s) but nothing in this configuration reads its products"
+                                 % (m["id"], m["type"], len(m["paths"]))))
+    return dict(warnings=warnings, info=info)
+
+
+def _lint_key(item):
+    return (item["check"], item["id"])
+
+
+# ---------------------------------------------------------------- diff
+def diff(old, new):
+    """Annotate `new` (page data) with the differences from `old`; return the diff summary.
+
+    Modules, edges and external inputs get diff="added"/"removed"/"changed"; removed ones
+    are appended from `old` so the page can draw them as ghosts."""
+    mo = {m["id"]: m for m in old["modules"]}
+    mn = {m["id"]: m for m in new["modules"]}
+    ekey = lambda e: (e["source"], e["target"], e["instance"], e["param"], e.get("kind", "InputTag"))
+    eo = {ekey(e): e for e in old["edges"]}
+    en = {ekey(e): e for e in new["edges"]}
+    xo = {e["id"]: e for e in old["external"]}
+    xn = {e["id"]: e for e in new["external"]}
+    summary = dict(added=sorted(set(mn) - set(mo)), removed=sorted(set(mo) - set(mn)),
+                   changed=[dict(id=k, old=mo[k]["type"], new=mn[k]["type"])
+                            for k in sorted(set(mo) & set(mn)) if mo[k]["type"] != mn[k]["type"]],
+                   edgesAdded=len(set(en) - set(eo)), edgesRemoved=len(set(eo) - set(en)),
+                   externalAdded=sorted(set(xn) - set(xo)), externalRemoved=sorted(set(xo) - set(xn)))
+    for k, m in mn.items():
+        if k not in mo:
+            m["diff"] = "added"
+        elif mo[k]["type"] != m["type"]:
+            m["diff"], m["oldType"] = "changed", mo[k]["type"]
+    for k in summary["removed"]:
+        new["modules"].append(dict(mo[k], diff="removed"))
+    for k, e in en.items():
+        if k not in eo:
+            e["diff"] = "added"
+    for k in set(eo) - set(en):
+        new["edges"].append(dict(eo[k], diff="removed"))
+    for k, e in xn.items():
+        if k not in xo:
+            e["diff"] = "added"
+    for k in summary["externalRemoved"]:
+        new["external"].append(dict(xo[k], diff="removed"))
+    po, pn = old["paths"], new["paths"]
+    summary["paths"] = [dict(path=p, status="added" if p not in po else "removed" if p not in pn else "changed",
+                             added=sorted(set(pn.get(p, [])) - set(po.get(p, []))),
+                             removed=sorted(set(po.get(p, [])) - set(pn.get(p, []))))
+                        for p in list(pn) + [p for p in po if p not in pn]
+                        if p not in po or p not in pn or set(po[p]) != set(pn[p])]
+    summary["edges"] = [dict(e, diff=e.get("diff")) for e in new["edges"] if e.get("diff")]
+    new["diff"] = summary
+    return summary
+
+
+def mark_new_lint(lint_new, lint_old):
+    """Flag the findings of lint_new that lint_old does not have; return the number of new warnings."""
+    old = {_lint_key(i) for i in lint_old["warnings"] + lint_old["info"]}
+    current = {_lint_key(i) for i in lint_new["warnings"] + lint_new["info"]}
+    for item in lint_new["warnings"] + lint_new["info"]:
+        item["new"] = _lint_key(item) not in old
+    lint_new["resolved"] = [dict(i, resolved=True) for i in lint_old["warnings"] + lint_old["info"]
+                            if _lint_key(i) not in current]
+    return sum(1 for i in lint_new["warnings"] if i["new"])
+
+
+# ---------------------------------------------------------------- text reports
+def format_lint(result, only_new=False):
+    lines = []
+    for title, items in (("Warnings", result["warnings"]), ("Info", result["info"]),
+                         ("Resolved since the compared version", result.get("resolved", []))):
+        items = [i for i in items if i.get("new", True) or not only_new]
+        if items:
+            lines.append("%s (%d)" % (title, len(items)))
+            lines += ["  %s%s" % ("[new] " if i.get("new") else "", i["message"]) for i in items]
+    return "\n".join(lines) or "no findings"
+
+
+def format_diff(summary, label_old="old", label_new="new"):
+    def edge(e):
+        src = e["source"] + (":" + e["instance"] if e["instance"] else "")
+        note = " [external]" if e["external"] else (" [path decision]" if e.get("kind") == "pathDecision" else "")
+        return "%s -> %s  (%s)%s" % (src, e["target"], e["param"], note)
+    out = []
+    def section(title, rows):
+        if rows:
+            out.append("%s (%d)" % (title, len(rows)))
+            out.extend("  " + r for r in rows)
+    section("Modules added", ["+ " + k for k in summary["added"]])
+    section("Modules removed", ["- " + k for k in summary["removed"]])
+    section("Plugin type changed", ["~ %s  %s -> %s" % (c["id"], c["old"], c["new"]) for c in summary["changed"]])
+    section("Dependencies added", ["+ " + edge(e) for e in summary["edges"] if e["diff"] == "added"])
+    section("Dependencies removed", ["- " + edge(e) for e in summary["edges"] if e["diff"] == "removed"])
+    section("External inputs added", ["+ " + k for k in summary["externalAdded"]])
+    section("External inputs removed", ["- " + k for k in summary["externalRemoved"]])
+    section("Paths", ["%s %s%s%s" % ({"added": "+", "removed": "-", "changed": "~"}[p["status"]], p["path"],
+                                     (": " if p["added"] or p["removed"] else ""),
+                                     " ".join(["+" + x for x in p["added"]] + ["-" + x for x in p["removed"]]))
+                      for p in summary["paths"]])
+    return ("%s -> %s\n" % (label_old, label_new)) + ("\n".join(out) if out else "no differences")
 
 
 # ---------------------------------------------------------------- rendering

@@ -63,3 +63,10 @@ FLAG = dict(short="legacy", label="Module of the legacy Run-3 emulation",
 
 # default title and process name
 TITLE = "L1T Phase-2 Dataflow"
+
+# lint settings (triggerMenuGraph --lint), see menuGraphRules.py
+LINT = dict(
+    own_labels=r"^l1t",
+    expected_inputs=r"^(sim\w+|mix|g4SimHits|rpcRecHits|gtStage2Digis|ak4GenJets\w*|genParticles\w*|generator\w*)$",
+    ignore_unread=r"^l1tGTAlgoBlockProducer$",
+)

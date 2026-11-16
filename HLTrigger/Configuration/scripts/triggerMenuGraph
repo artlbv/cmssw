@@ -32,6 +32,11 @@ Examples.
  # Phase-2 L1T emulation (L1TrackTrigger, L1 and L1P2GT steps, default P2GT menu)
  triggerMenuGraph --profile l1 --era Phase2C26I13M9 -o L1T_Phase2.html
 
+ # lint, and compare a menu change with the previous version
+ triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff --era Phase2C26I13M9 --json before.json -o before.html
+ # ... edit the menu ...
+ triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff --era Phase2C26I13M9 --diff before.json --lint -o after.html
+
  # Run-3 menu from ConfDB
  hltGetConfiguration /dev/CMSSW_X_Y_0/GRun --full --offline --unprescale | triggerMenuGraph - -o GRun.html
 
@@ -142,7 +147,17 @@ def main():
                         help="P2GT menu of the built-in L1 process (L1Trigger.Configuration.Phase2GTMenus.<name>; "
                              "default step1_2024, 'none' for no menu)")
     parser.add_argument("-o", "--output", default=None, help="output HTML file (default: <menu>_graph.html)")
-    parser.add_argument("--json", default=None, help="also write the extracted data to this JSON file")
+    parser.add_argument("--json", default=None, help="also write the extracted data to this JSON file "
+                                                    "(usable later as --diff input)")
+    parser.add_argument("--diff", default=None, metavar="OLD.json",
+                        help="compare with an earlier --json output: the page highlights added, removed and changed "
+                             "modules and dependencies, and a text report goes to stderr (or --report)")
+    parser.add_argument("--lint", action="store_true",
+                        help="print all lint findings to stderr (by default only their number)")
+    parser.add_argument("--report", default=None, metavar="FILE",
+                        help="write the lint findings and the --diff report to this text file")
+    parser.add_argument("--strict", action="store_true",
+                        help="exit with status 2 if there are lint warnings (with --diff: new warnings only)")
     parser.add_argument("--era", default=None, help="era(s) for a menu fragment, comma separated (e.g. Phase2C26I13M9)")
     parser.add_argument("--procModifiers", default="", help="process modifiers for a menu fragment, comma separated")
     parser.add_argument("--process-name", default=None, help="name of the process built around a menu fragment (default HLTX, L1X)")
@@ -207,19 +222,57 @@ def main():
     if stubbed:
         print("triggerMenuGraph: stubbed generated cfi modules: %s" % " ".join(stubbed), file=sys.stderr)
 
+    # lint and diff
+    import copy
+    import json
+    data["meta"] = dict(menu=menu_name, profile=args.profile, era=args.era, modifiers=modifiers,
+                        commit=menuGraph.git_commit(src_dirs[0]) if src_dirs else None,
+                        release=os.environ.get("CMSSW_VERSION"))
+    data["lint"] = menuGraph.lint(data, rules)
+    if args.json:
+        with open(args.json, "w") as f:
+            json.dump(data, f, indent=1)
+    page_data, summary, new_warnings, report = data, None, None, []
+    if args.diff:
+        old = json.load(open(args.diff))
+        old_meta = old.get("meta", {})
+        old_label = "%s%s" % (old_meta.get("menu", args.diff), " @ " + old_meta["commit"] if old_meta.get("commit") else "")
+        page_data = copy.deepcopy(data)
+        summary = menuGraph.diff(old, page_data)
+        page_data["diff"]["against"] = old_label
+        new_warnings = menuGraph.mark_new_lint(page_data["lint"], old.get("lint") or menuGraph.lint(old, rules))
+        report.append("=== Differences\n" + menuGraph.format_diff(summary, old_label, "%s%s" % (
+            menu_name, " @ " + data["meta"]["commit"] if data["meta"]["commit"] else "")))
+        print("triggerMenuGraph: compared with %s: %d modules added, %d removed, %d changed, %d dependencies added, "
+              "%d removed" % (old_label, len(summary["added"]), len(summary["removed"]), len(summary["changed"]),
+                              summary["edgesAdded"], summary["edgesRemoved"]), file=sys.stderr)
+    lint_result = page_data["lint"]
+    report.append("=== Lint\n" + menuGraph.format_lint(lint_result))
+    n_new = "" if new_warnings is None else " (%d new)" % new_warnings
+    print("triggerMenuGraph: lint: %d warnings%s, %d info" % (len(lint_result["warnings"]), n_new,
+                                                             len(lint_result["info"])), file=sys.stderr)
+    if args.diff:
+        print(report[0], file=sys.stderr)
+    if args.lint:
+        print(menuGraph.format_lint(lint_result), file=sys.stderr)
+    if args.report:
+        with open(args.report, "w") as f:
+            f.write("\n\n".join(report) + "\n")
+
     notes = ["generated cfi replaced by stubs: %s" % ", ".join(s.rsplit(".", 1)[1] for s in stubbed)] if stubbed else []
-    commit = menuGraph.git_commit(src_dirs[0]) if src_dirs else None
+    commit = data["meta"]["commit"]
     template = open(args.template or menuGraph.find_template()).read()
-    page = menuGraph.render(data, template, title=args.title or getattr(rules, "TITLE", None) or "%s Dataflow" % short, menu=menu_name,
+    page = menuGraph.render(page_data, template, title=args.title or getattr(rules, "TITLE", None) or "%s Dataflow" % short, menu=menu_name,
                             era=args.era, modifiers=modifiers, commit=commit, notes=notes)
     output = args.output or "%s_graph.html" % short
     with open(output, "w") as f:
         f.write(page)
-    if args.json:
-        import json
-        with open(args.json, "w") as f:
-            json.dump(data, f, indent=1)
     print("triggerMenuGraph: wrote %s" % output, file=sys.stderr)
+    if args.strict:
+        failing = len(lint_result["warnings"]) if new_warnings is None else new_warnings
+        if failing:
+            print("triggerMenuGraph: --strict: %d lint warning(s)" % failing, file=sys.stderr)
+            sys.exit(2)
 
 
 if __name__ == "__main__":

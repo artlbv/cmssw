@@ -93,3 +93,15 @@ FLAG = dict(short="Alpaka", label="Alpaka module (portable CPU/GPU backend)", ty
 
 # default title
 TITLE = None   # "<menu> Dataflow"
+
+# lint settings (triggerMenuGraph --lint):
+#  own_labels: an external input matching this is expected to be produced by the menu itself
+#  expected_inputs: external inputs that are never reported as near-identical to a module label
+#  ignore_unread: producers whose products are meant for the output, not for other modules
+LINT = dict(
+    own_labels=r"^hlt",
+    expected_inputs=r"^(rawDataCollector|rawDataRepacker|mix|g4SimHits|sim\w+|l1t\w+|gtStage2Digis|TriggerResults"
+                    r"|generator\w*|genParticles\w*)$",
+    ignore_unread=r"^hltTriggerSummary|Packer\w*$|^hltFEDSelector|CalibrationRaw$|^hltPSetMap$|RechitsToDigis$"
+                  r"|SerialSync$",
+)

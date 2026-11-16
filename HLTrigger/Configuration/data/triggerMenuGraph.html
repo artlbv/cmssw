@@ -26,6 +26,7 @@
   --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
   --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
   --neutral: #8a929e;
+  --add: #1a8f4c; --del: #cf3438; --chg: #b77a00;
   --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
@@ -37,6 +38,7 @@
     --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
     --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
     --neutral: #7c8592;
+    --add: #3fbf6e; --del: #ef6b6b; --chg: #e0a32e;
   }
 }
 :root[data-theme="dark"] {
@@ -46,6 +48,7 @@
   --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
   --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
   --neutral: #7c8592;
+  --add: #3fbf6e; --del: #ef6b6b; --chg: #e0a32e;
 }
 html, body { height: 100%; }
 body {
@@ -149,6 +152,15 @@ aside h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; c
 .key svg { display: block; }
 
 #detail { flex: 1; }
+.badge { display: inline-block; font-size: 10.5px; line-height: 1; padding: 2px 5px; border-radius: 4px; margin-left: 4px;
+  border: 1px solid currentColor; vertical-align: 1px; }
+.badge.add { color: var(--add); } .badge.del { color: var(--del); } .badge.chg { color: var(--chg); } .badge.new { color: var(--del); }
+details.sec { font-size: 12px; }
+details.sec > summary { cursor: pointer; color: var(--ink-2); padding: 2px 0; }
+details.sec > summary b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.lintmsg { color: var(--muted); font-size: 11px; display: block; }
+.dsum { font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+.dsum code { font-family: var(--font-mono); font-size: 11.5px; }
 .dname { font-family: var(--font-mono); font-size: 13.5px; font-weight: 500; word-break: break-all; }
 .dsub { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-2); }
 dl { display: grid; grid-template-columns: 80px 1fr; gap: 4px 10px; margin: 0; font-size: 12px; }
@@ -218,6 +230,7 @@ h3 { font-size: 12px; font-weight: 600; margin: 6px 0 0; color: var(--ink-2); }
       <select id="pathSel"><option value="">All paths</option></select>
     </label>
     <div class="chips">
+      <label class="chip mv-only" id="changesChip" hidden><input type="checkbox" id="show-changes"> Changes only</label>
       <span id="subChips" style="display: contents"></span>
       <label class="chip mv-only"><input type="checkbox" id="show-filters" checked> Path filters</label>
       <label class="chip pv-only" hidden><input type="checkbox" id="show-common"> Blocks common to most paths</label>
@@ -239,6 +252,10 @@ h3 { font-size: 12px; font-weight: 600; margin: 6px 0 0; color: var(--ink-2); }
     <div id="matrix" hidden></div>
   </div>
   <aside>
+    <section id="diffSec" hidden>
+      <h2>Changes</h2>
+      <div id="diffBody"></div>
+    </section>
     <section>
       <h2>Subsystems</h2>
       <div class="legend" id="legend"></div>
@@ -256,7 +273,14 @@ h3 { font-size: 12px; font-weight: 600; margin: 6px 0 0; color: var(--ink-2); }
         <svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--edge)" stroke-width="1.5"/><path d="M27 1 L33 5 L27 9 Z" fill="var(--edge)"/></svg><span>Product consumed via an <code>InputTag</code></span>
         <svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--edge)" stroke-width="1.5" stroke-dasharray="1.5 2.5"/><path d="M27 1 L33 5 L27 9 Z" fill="var(--edge)"/></svg><span>Label passed as a plain string (e.g. <code>HitProducer</code>)</span>
         <svg width="34" height="14" aria-hidden="true"><rect x="2" y="2" width="30" height="10" rx="3" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 2"/></svg><span id="flagLabel"></span>
+        <svg class="kdiff" hidden width="34" height="14" aria-hidden="true"><rect x="2" y="2" width="30" height="10" rx="3" fill="none" stroke="var(--add)" stroke-width="2"/></svg><span class="kdiff" hidden>Added since the compared version (edges in the same colour)</span>
+        <svg class="kdiff" hidden width="34" height="14" aria-hidden="true"><rect x="2" y="2" width="30" height="10" rx="3" fill="none" stroke="var(--del)" stroke-width="2" stroke-dasharray="4 2"/></svg><span class="kdiff" hidden>Removed since the compared version (edges in the same colour)</span>
+        <svg class="kdiff" hidden width="34" height="14" aria-hidden="true"><rect x="2" y="2" width="30" height="10" rx="3" fill="none" stroke="var(--chg)" stroke-width="2"/></svg><span class="kdiff" hidden>Plugin type changed</span>
       </div>
+    </section>
+    <section id="lintSec">
+      <h2>Checks</h2>
+      <div id="lintBody"></div>
     </section>
     <section id="detail">
       <h2>Selection</h2>
@@ -276,7 +300,7 @@ const MOD = {};
 D.modules.forEach(m => { MOD[m.id] = m; });
 D.external.forEach(e => {
   MOD[e.id] = { id: e.id, type: "not produced here", kind: "External input", package: "—",
-                subsystem: "ext", containers: [], paths: [], inputs: [], external: true };
+                subsystem: "ext", containers: [], paths: [], inputs: [], external: true, diff: e.diff };
 });
 D.edges.forEach((e, i) => { e.i = i; });
 const OUT = {}, IN = {};
@@ -296,7 +320,7 @@ function readTheme() {
   const cs = getComputedStyle(document.documentElement);
   const v = n => cs.getPropertyValue(n).trim();
   T = { bg: v("--bg"), panel: v("--panel"), ink: v("--ink"), ink2: v("--ink-2"), muted: v("--muted"),
-        line: v("--line"), edge: v("--edge"), neutral: v("--neutral"),
+        line: v("--line"), edge: v("--edge"), neutral: v("--neutral"), add: v("--add"), del: v("--del"), chg: v("--chg"),
         s: [null, 1, 2, 3, 4, 5, 6, 7, 8].map(i => i && v("--s" + i)) };
 }
 function hex2rgb(h) { h = h.replace("#", ""); if (h.length === 3) h = h.split("").map(c => c + c).join(""); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); }
@@ -356,7 +380,7 @@ function buildElements() {
     nodes.push({ data: {
       id, label: id, parent: parent || undefined, w: Math.ceil(measure(id, MONO)) + 22, h: 26,
       color, fill: ext ? T.panel : mix(color, T.panel, 0.2), sub: m.subsystem,
-    }, classes: [ext ? "ext" : "", m.flag ? "legacy" : ""].join(" ") });
+    }, classes: [ext ? "ext" : "", m.flag ? "legacy" : "", m.diff ? "d-" + m.diff : ""].join(" ") });
   });
   // remove groups that are inside a collapsed ancestor
   Object.keys(groups).forEach(g => { if (chain(g).slice(1).some(a => state.collapsed.has(a))) delete groups[g]; });
@@ -391,9 +415,14 @@ function buildElements() {
     const insts = [...new Set(a.items.map(i => D.edges[i].instance).filter(Boolean))];
     const label = single ? (single.instance || "") : (insts.length === 1 && a.items.length === insts.length ? insts[0] : "×" + a.items.length);
     return { data: { id: "e:" + k, source: a.s, target: a.t, items: a.items, n: a.items.length, label },
-             classes: a.kind === "pathDecision" ? "path" : a.kind === "inferredString" ? "inferred" : "" };
+             classes: [a.kind === "pathDecision" ? "path" : a.kind === "inferredString" ? "inferred" : "", edgeDiff(a.items)].join(" ") };
   });
   return { nodes, edges };
+}
+
+function edgeDiff(items) {
+  const ds = new Set(items.map(i => D.edges[i].diff || ""));
+  return ds.size === 1 && !ds.has("") ? "d-" + [...ds][0] : "";
 }
 
 // ---------- cytoscape ----------
@@ -440,6 +469,11 @@ function style() {
     { selector: "node.pathnode", style: { shape: "tag", "border-width": 2, "font-size": 13, "min-zoomed-font-size": 3 } },
     { selector: "node.block", style: { "min-zoomed-font-size": 3 } },
     { selector: "edge.flow", style: { "line-style": "dashed", "line-dash-pattern": [6, 4], opacity: 0.55, width: "mapData(n, 1, 60, 1, 4)" } },
+    { selector: "node.d-added", style: { "border-color": T.add, "border-width": 3 } },
+    { selector: "node.d-changed", style: { "border-color": T.chg, "border-width": 3 } },
+    { selector: "node.d-removed", style: { "border-color": T.del, "border-width": 2.5, "border-style": "dashed", opacity: 0.6 } },
+    { selector: "edge.d-added", style: { "line-color": T.add, "target-arrow-color": T.add, width: 2.2, opacity: 1 } },
+    { selector: "edge.d-removed", style: { "line-color": T.del, "target-arrow-color": T.del, width: 2.2, "line-style": "dashed", opacity: 0.8 } },
     { selector: "node.sel", style: { "border-width": 3, "border-color": T.ink, "z-index": 10 } },
     { selector: "node.hover", style: { "border-width": 2.5 } },
   ];
@@ -457,7 +491,7 @@ async function render(keepView) {
   cy.elements().remove();
   cy.add(nodes); cy.add(edges);
   applyLabels();
-  if (state.view === "paths") { pvLayout(); if (!keepView) cy.fit(undefined, 30); }
+  if (state.view === "paths") { pvLayout(); if (!keepView) fitView(); }
   else if (state.layout === "force") {
     await new Promise(res => {
       const l = cy.layout({ name: "cose", animate: false, nodeRepulsion: () => 9000, idealEdgeLength: () => 70,
@@ -506,7 +540,11 @@ async function elkLayout(nodes, edges, keepView) {
     });
   })(res, 0, 0);
   cy.nodes().filter(n => !n.isParent()).forEach(n => { if (pos[n.id()]) n.position(pos[n.id()]); });
-  if (!keepView) cy.fit(undefined, 30);
+  if (!keepView) fitView();
+}
+function fitView() {
+  cy.fit(undefined, 30);
+  if (cy.zoom() > 1.25) { cy.zoom(1.25); cy.center(); }
 }
 
 function applyLabels() {
@@ -563,7 +601,8 @@ function showModule(id, chainIds) {
   const { up, down } = lineage(id);
   document.getElementById("detailBody").innerHTML = `
     <div class="dname">${esc(id)}</div>
-    <div class="dsub">${dot(m.subsystem)}${esc(s.name)}${m.flag ? " · " + esc(D.flag.short) : ""}</div>
+    <div class="dsub">${dot(m.subsystem)}${esc(s.name)}${m.flag ? " · " + esc(D.flag.short) : ""}${diffBadge(m)}</div>
+    ${m.diff === "changed" ? `<div class="dsum">Plugin type was <code>${esc(m.oldType)}</code></div>` : ""}
     <dl>
       <dt>Plugin</dt><dd><code>${esc(m.type)}</code> <span style="color:var(--muted)">${esc(m.kind)}</span></dd>
       <dt>Package</dt><dd><code>${esc(m.package)}</code></dd>
@@ -614,7 +653,7 @@ function goTo(id) {
 // ---------- legend & controls ----------
 function renderLegend() {
   const counts = {};
-  Object.values(MOD).forEach(m => { counts[m.subsystem] = (counts[m.subsystem] || 0) + 1; });
+  Object.values(MOD).forEach(m => { if (m.diff !== "removed") counts[m.subsystem] = (counts[m.subsystem] || 0) + 1; });
   const el = document.getElementById("legend");
   el.innerHTML = D.subsystems.map(s => {
     const gid = "g:" + s.id, c = subColor(s.id);
@@ -688,7 +727,7 @@ document.getElementById("collapseAll").addEventListener("click", () => {
   // collapse only top-level groups so the overview shows one box per group
   state.collapsed = new Set(ids.filter(g => !groupParent(g))); render(false);
 });
-document.getElementById("fit").addEventListener("click", () => cy.fit(undefined, 30));
+document.getElementById("fit").addEventListener("click", () => fitView());
 const q = document.getElementById("q");
 q.addEventListener("change", () => { if (MOD[q.value.trim()]) goTo(q.value.trim()); });
 q.addEventListener("keydown", ev => {
@@ -713,6 +752,7 @@ function dominant(ids) {
 const PV = (() => {
   const raw = {}, rawOf = {};
   D.modules.forEach(m => {
+    if (m.diff === "removed") return;
     if (m.kind === "EDFilter" && !m.containers.length) return;      // path filter: belongs to its path
     const b = m.containers.length ? topSeq(m.containers[0]) : SUB[m.subsystem].name + ": standalone producers";
     (raw[b] ||= []).push(m.id); rawOf[m.id] = b;
@@ -883,6 +923,7 @@ function syncControls() {
   document.querySelectorAll(".mv-only").forEach(el => { el.hidden = v !== "modules"; });
   document.querySelectorAll(".pv-only").forEach(el => { el.hidden = v !== "paths"; });
   document.querySelectorAll(".g-only").forEach(el => { el.hidden = v === "matrix"; });
+  document.getElementById("changesChip").hidden = v !== "modules" || !D.diff;
   document.getElementById("matrix").hidden = v !== "matrix";
   document.getElementById("hint").textContent = v === "paths"
     ? "Shared blocks on the left feed the paths on the right · click a path or block to trace it · scroll to zoom"
@@ -956,15 +997,83 @@ function pvLayout() {
   });
 }
 
+// ---------- diff & lint panels ----------
+function diffBadge(m) {
+  return m && m.diff ? ` <span class="badge ${{ added: "add", removed: "del", changed: "chg" }[m.diff]}">${m.diff}</span>` : "";
+}
+function changeSet() {
+  const ids = new Set();
+  Object.values(MOD).forEach(m => { if (m.diff) ids.add(m.id); });
+  D.edges.forEach(e => { if (e.diff) { ids.add(e.source); ids.add(e.target); } });
+  return ids;
+}
+function goList(ids, sub) {
+  return `<div class="io">${ids.map(id => ioLink(id, esc(id) + diffBadge(MOD[id]), sub ? sub(id) : "")).join("")}</div>`;
+}
+function renderDiff() {
+  if (!D.diff) return;
+  const d = D.diff, sec = document.getElementById("diffSec");
+  sec.hidden = false;
+  document.getElementById("changesChip").hidden = state.view !== "modules";
+  document.querySelectorAll(".kdiff").forEach(el => el.toggleAttribute("hidden", false));
+  const edges = D.edges.filter(e => e.diff);
+  const edgeRow = e => ioLink(e.target, `${esc(e.source)}${e.instance ? ":" + esc(e.instance) : ""} → ${esc(e.target)}` +
+    ` <span class="badge ${e.diff === "added" ? "add" : "del"}">${e.diff}</span>`, esc(e.param));
+  const part = (title, n, body) => n ? `<details class="sec"><summary><b>${n}</b> ${title}</summary>${body}</details>` : "";
+  const nChanges = d.added.length + d.removed.length + d.changed.length + edges.length + d.paths.length;
+  document.getElementById("diffBody").innerHTML =
+    `<p class="dsum">Compared with <code>${esc(d.against || "the previous version")}</code>.` +
+    (nChanges ? "" : " No differences.") + `</p>` +
+    part("modules added", d.added.length, goList(d.added, id => esc(MOD[id].type))) +
+    part("modules removed", d.removed.length, goList(d.removed, id => esc(MOD[id].type))) +
+    part("plugin types changed", d.changed.length, goList(d.changed.map(c => c.id), id => esc(MOD[id].oldType) + " → " + esc(MOD[id].type))) +
+    part("dependencies changed", edges.length, `<div class="io">${edges.map(edgeRow).join("")}</div>`) +
+    part("external inputs added", d.externalAdded.length, goList(d.externalAdded)) +
+    part("external inputs removed", d.externalRemoved.length, goList(d.externalRemoved)) +
+    part("paths changed", d.paths.length, `<div class="io">${d.paths.map(p => `<a data-pathpick="${esc(p.path)}"><span></span><span><code>${esc(p.path)}</code> <span class="badge ${p.status === "added" ? "add" : p.status === "removed" ? "del" : "chg"}">${p.status}</span><span class="p">${p.added.length} modules added, ${p.removed.length} removed</span></span></a>`).join("")}</div>`);
+}
+function renderLint() {
+  const L = D.lint || { warnings: [], info: [] };
+  const row = i => ioLink(i.id, esc(i.id) + (i.new ? ' <span class="badge new">new</span>' : ""),
+    i.check === "suspicious-input"
+      ? "read by " + i.consumers.map(esc).join(", ") + (i.suggestion ? " · did you mean <b>" + esc(i.suggestion) + "</b>?" : "")
+      : "nothing reads its products · " + i.paths.length + " path(s)");
+  const nNew = l => l.filter(i => i.new).length;
+  const part = (title, list, open, help) => `<details class="sec"${open ? " open" : ""}><summary><b>${list.length}</b> ${title}` +
+    (nNew(list) ? ` <span class="badge new">${nNew(list)} new</span>` : "") + `</summary><span class="lintmsg">${help}</span>` +
+    `<div class="io">${list.map(row).join("") || '<p class="empty">None.</p>'}</div></details>`;
+  document.getElementById("lintBody").innerHTML =
+    part("suspicious inputs", L.warnings, L.warnings.length > 0 && L.warnings.length <= 10,
+      "Read by a module but produced by none, and named like a product of this configuration (or almost identical to an existing label).") +
+    part("unread products", L.info, false,
+      "Producers on a path whose products no module reads and no output module keeps.") +
+    (L.resolved && L.resolved.length ? `<details class="sec"><summary><b>${L.resolved.length}</b> resolved since the compared version</summary>` +
+      `<div class="io">${L.resolved.map(i => `<a data-go="${esc(i.id)}"><span></span><span><code>${esc(i.id)}</code> <span class="badge add">resolved</span><span class="p">${esc(i.message)}</span></span></a>`).join("")}</div></details>` : "");
+}
+document.addEventListener("click", ev => {
+  const t = ev.target.closest("[data-pathpick]");
+  if (!t) return;
+  const p = t.dataset.pathpick;
+  if (!D.paths[p]) return;
+  document.getElementById("show-changes").checked = false;
+  openModules(p);
+});
+document.getElementById("show-changes").addEventListener("change", ev => {
+  state.isolate = ev.target.checked ? changeSet() : null;
+  document.getElementById("pathSel").value = "";
+  state.collapsed.clear(); render(false);
+});
+
 // ---------- boot ----------
 function stats() {
-  const prods = new Set(D.edges.filter(e => e.kind !== "pathDecision").map(e => e.source + ":" + e.instance));
-  const nf = D.modules.filter(m => m.kind === "EDFilter").length;
+  const liveMods = D.modules.filter(m => m.diff !== "removed"), liveEdges = D.edges.filter(e => e.diff !== "removed");
+  const prods = new Set(liveEdges.filter(e => e.kind !== "pathDecision").map(e => e.source + ":" + e.instance));
+  const nf = liveMods.filter(m => m.kind === "EDFilter").length;
   document.getElementById("stats").innerHTML =
-    `<span><b>${D.modules.length - nf}</b> producers</span><span><b>${nf}</b> path filters</span>` +
-    `<span><b>${prods.size}</b> products consumed</span><span><b>${D.edges.length}</b> dependencies</span>` +
-    `<span><b>${D.external.length}</b> external inputs</span><span><b>${Object.keys(D.paths).length}</b> paths</span>` +
-    (D.flag && D.flag.label ? `<span><b>${D.modules.filter(m => m.flag).length}</b> ${esc(D.flag.short)}</span>` : "");
+    `<span><b>${liveMods.length - nf}</b> producers</span><span><b>${nf}</b> path filters</span>` +
+    `<span><b>${prods.size}</b> products consumed</span><span><b>${liveEdges.length}</b> dependencies</span>` +
+    `<span><b>${D.external.filter(e => e.diff !== "removed").length}</b> external inputs</span><span><b>${Object.keys(D.paths).length}</b> paths</span>` +
+    (D.flag && D.flag.label ? `<span><b>${liveMods.filter(m => m.flag).length}</b> ${esc(D.flag.short)}</span>` : "");
   document.getElementById("flagLabel").textContent = (D.flag && D.flag.label) || "";
   const hasPD = D.edges.some(e => e.kind === "pathDecision");
   document.querySelectorAll(".kpd").forEach(el => el.toggleAttribute("hidden", !hasPD));
@@ -983,6 +1092,12 @@ function tipAt(ev, html) {
 async function boot() {
   readTheme();
   stats();
+  renderLint();
+  renderDiff();
+  if (D.diff && changeSet().size) {
+    state.isolate = changeSet(); state.collapsed.clear();
+    document.getElementById("show-changes").checked = true;
+  }
   try { await document.fonts.ready; } catch (e) {}
   cy = cytoscape({ container: document.getElementById("cy"), style: style(), wheelSensitivity: 0.25,
                    minZoom: 0.05, maxZoom: 4, boxSelectionEnabled: false, autoungrabify: false });

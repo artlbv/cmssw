@@ -87,7 +87,11 @@ Run-3 menus `GRun`, `HIon`, `PRef` and `Special` in this release.
 | `--profile` | `hlt` (default), `l1`, or a python module with rules |
 | `--gt-menu` | P2GT menu of the built-in L1 process (default `step1_2024`, `none` for no menu) |
 | `-o, --output` | Output HTML file (default `<menu>_graph.html`) |
-| `--json FILE` | Also write the extracted data as JSON |
+| `--json FILE` | Also write the extracted data as JSON (the input of a later `--diff`) |
+| `--diff OLD.json` | Compare with an earlier `--json` output; see [Comparing two versions](#comparing-two-versions) |
+| `--lint` | Print all lint findings to stderr (by default only their number) |
+| `--report FILE` | Write the lint findings and the `--diff` report to a text file |
+| `--strict` | Exit with status 2 if there are lint warnings; with `--diff`, only new warnings count |
 | `--era` | Era(s) applied when building the process around a menu fragment, comma separated |
 | `--procModifiers` | Process modifiers for a menu fragment, comma separated |
 | `--process-name` | Name of the process built around a menu fragment (default `HLTX`, or `L1X` for the built-in L1 process) |
@@ -121,6 +125,51 @@ when the menu only uses them as templates for `clone()`. Parameters set through
 `clone()` or era modifiers on a stub are kept when they can be converted to CMS types.
 The stubbed modules are listed on stderr and in the page header. Their own inputs
 are mostly missing, so some edges are absent in this mode.
+
+## Lint
+
+Every run checks the graph and prints the number of findings. `--lint` prints them
+all, `--report FILE` writes them to a file, and the page lists them under *Checks*.
+
+- **Suspicious inputs (warnings).** An input that a module reads but no module
+  produces, and that either uses the profile's own label prefix (`hlt…` for `hlt`,
+  `l1t…` for `l1`) or is nearly identical to an existing module label. These are
+  usually typos, leftovers of renamed or removed modules, or parameters the C++ no
+  longer reads. Examples found this way: `hltEalRecHit` (for `hltEcalRecHit`) in
+  `HLT_75e33`, and `("L1CaloJet", "CaloJets")` in `l1tCaloJetHTT`, which no module
+  produced.
+- **Unread products (info).** A producer on a path whose products no module of the
+  configuration reads and no output module keeps. Often these are kept for the output
+  defined elsewhere, but they can also be work done for nothing, e.g. a CPU module left
+  in a path after a process modifier switched its consumers to another producer.
+
+Each profile tunes the checks in its `LINT` dictionary (see
+[Subsystem rules](#subsystem-rules)).
+
+## Comparing two versions
+
+Write the graph of the reference version with `--json`, change the configuration (or
+check out another branch), and run again with `--diff`:
+
+```bash
+triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff --era Phase2C26I13M9 --json before.json -o before.html
+# ... change the menu, or switch to the branch to review ...
+triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff --era Phase2C26I13M9 --diff before.json --report diff.txt -o after.html
+```
+
+- stderr shows the modules, plugin types, dependencies, external inputs and path
+  contents that changed, as does the `--report` file.
+- The page opens on *Changes only*: the changed modules and the ends of the changed
+  dependencies. Added modules and edges are drawn in green, removed ones in red as
+  dashed ghosts, and modules whose plugin type changed in amber. The *Changes* panel
+  lists everything with links. Untick *Changes only* to see the whole graph.
+- Lint findings that the reference version did not have are marked *new*, and those
+  that disappeared are listed as *resolved*. With `--strict`, only new warnings make
+  the run fail, so a menu with old findings can still be checked for regressions,
+  e.g. in a pull-request check.
+
+The JSON file stores the menu name, profile, era, modifiers, release and git commit,
+which the page shows as the compared version.
 
 ## What the graph shows, and its limits
 
@@ -157,6 +206,10 @@ Each profile module defines:
 - `FLAG`: which modules get a dashed border, by plugin type (`types`), label
   (`labels`) or the name of a path or sequence/task they are in (`containers`).
 - `TITLE`: default page title, or `None` for `<menu> Dataflow`.
+- `LINT`: `own_labels`, a regex of labels the configuration itself is expected to
+  produce; `expected_inputs`, a regex of event inputs never reported as near-identical
+  to a module label (e.g. `sim…` digis); `ignore_unread`, a regex of producers meant
+  only for the output (trigger summaries, scouting packers, FED selectors).
 
 Modules that match no rule go to *Unclassified* and are listed on stderr. The unit
 test fails if any module of the tested configurations is unclassified, so new menus or
@@ -171,7 +224,7 @@ new modules show up there and the rules can be extended.
 | `python/Tools/menuGraphRules.py` | Subsystem rules of the `hlt` profile |
 | `python/Tools/menuGraphRulesL1.py` | Subsystem rules of the `l1` profile |
 | `data/triggerMenuGraph.html` | Page template; the script fills the title, header, and data placeholders |
-| `test/test_triggerMenuGraph.sh` | Unit test: builds the pages of `HLT_75e33` and of the Phase-2 L1T emulation and checks their content |
+| `test/test_triggerMenuGraph.sh` | Unit test: builds the pages of `HLT_75e33` and of the Phase-2 L1T emulation and checks their content; checks `--diff`, lint and `--strict` on a small configuration |
 
 Run the unit test with:
 
