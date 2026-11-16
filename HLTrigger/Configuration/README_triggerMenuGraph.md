@@ -165,8 +165,9 @@ triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff --era Phase2C26I13M9 --di
   lists everything with links. Untick *Changes only* to see the whole graph.
 - Lint findings that the reference version did not have are marked *new*, and those
   that disappeared are listed as *resolved*. With `--strict`, only new warnings make
-  the run fail, so a menu with old findings can still be checked for regressions,
-  e.g. in a pull-request check.
+  the run fail, so a menu with old findings can still be checked for regressions:
+  run it once on the base version with `--json`, then on the changed version with
+  `--diff --strict`.
 
 The JSON file stores the menu name, profile, era, modifiers, release and git commit,
 which the page shows as the compared version.
@@ -220,7 +221,7 @@ new modules show up there and the rules can be extended.
 | File | Content |
 | --- | --- |
 | `scripts/triggerMenuGraph` | Command-line tool |
-| `python/Tools/menuGraph.py` | Menu loading, graph extraction, package lookup, rendering |
+| `python/Tools/menuGraph.py` | Menu loading, graph extraction, package lookup, lint, diff, rendering |
 | `python/Tools/menuGraphRules.py` | Subsystem rules of the `hlt` profile |
 | `python/Tools/menuGraphRulesL1.py` | Subsystem rules of the `l1` profile |
 | `data/triggerMenuGraph.html` | Page template; the script fills the title, header, and data placeholders |
