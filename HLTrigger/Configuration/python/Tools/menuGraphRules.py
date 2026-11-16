@@ -1,15 +1,16 @@
 """Subsystem definitions and label rules used by hltMenuGraph.
 
 Each module of the menu is assigned to the first subsystem whose rule matches.
-A rule is a list of regular expressions tested against the module label; the
-module kind (EDProducer, EDFilter, OutputModule, ...) is available to the
-optional `kinds` entry. Modules that match no rule end up in "other", and
+A rule is (subsystem id, label regexes, module kinds, plugin-type regexes): it
+matches when a label regex matches the module label, the module kind
+(EDProducer, EDFilter, OutputModule, ...) is listed, or a type regex matches the
+C++ plugin name. Modules that match no rule end up in "other", and
 hltMenuGraph lists them on stderr so the rules can be extended.
 
 `slot` picks one of the eight categorical colours of the page (1-8);
 `None` draws the subsystem with a neutral, dashed style.
-The "ext" and "infra" ids are used by the page itself (toolbar chips) and
-must be kept.
+The "ext" id (external inputs) and "other" (unclassified) are used by the
+extraction and must be kept.
 """
 
 SUBSYSTEMS = [
@@ -33,30 +34,62 @@ SUBSYSTEMS = [
          desc="Muon local reco, L2 standalone, L3 tracking, isolation"),
     dict(id="tau", name="Taus", slot=6,
          desc="Tau reconstruction (HPS, pi0s) and tau discriminators"),
+    dict(id="alca", name="AlCa, calibration & special", slot=None,
+         desc="AlCa streams, calibration and random triggers, PPS, beam halo, cosmics"),
     dict(id="other", name="Unclassified", slot=None,
          desc="Modules no rule in menuGraphRules.py matched"),
 ]
 
-# (subsystem id, label regexes, optional module kinds); first match wins
+# (subsystem id, label regexes, module kinds, plugin-type regexes); first match wins
 RULES = [
     ("infra", [r"^hltTriggerType$", r"^hltBool", r"^hltBackend$", r"^hltStatusOnGPU", r"^hltPre[A-Z]",
                r"^hltTrigReport$", r"^hltTriggerSummary", r"^hltBunchSpacing", r"^hltOutput", r"^hltDQM",
-               r"^hltFEDSelector", r"Scouting", r"^hltScalers", r"^hltPSet"], ["OutputModule"]),
+               r"^hltFEDSelector", r"Scouting", r"^hltScalers", r"^hltPSet", r"^hltDataset", r"^hltMonitorL1TPureRate",
+               r"^hltTriggerResultFilter", r"^rawData", r"^rawPrimeData", r"Packer$", r"^hltOnlineMetaData", r"^hltGetRaw"],
+     ["OutputModule"],
+     [r"^TriggerResultsFilter$", r"^HLTGetRaw$", r"^RawDataCollectorByLabel$", r"^EvFFED", r"^HLTScouting",
+      r"^OnlineMetaDataRawToDigi$", r"^HLTPrescaler$", r"^HLTBool"]),
+    ("alca", [r"^hltAlCa", r"PPS", r"CTPPS", r"Halo", r"[Cc]osmic", r"^hltCalibrationEvents", r"^hltRandomEvents",
+              r"StoppedHSCP", r"^hltPhiSym", r"^hltEcalCalibration", r"^hltHcalCalibration", r"^hltLaser"], [],
+     [r"^EcalRecalib", r"^HLTRechitsToDigis$", r"^HLTRegionalEcalResonanceFilter$", r"^HLTPPS", r"^CTPPS", r"^Totem"]),
     ("l1", [r"^hltL1(?!Tk)", r"L1TkMuonFilter$", r"L1TkFilter$", r"^hltEGL1Seeds", r"^hltL1TEGamma",
-            r"^hltL1P2GT", r"^hltGtStage2", r"^hltGmtStage2", r"^hltCaloStage2"], []),
-    ("tau", [r"Tau", r"^hltHps", r"PiZeros"], []),
+            r"^hltL1P2GT", r"^hltGtStage2", r"^hltGmtStage2", r"^hltCaloStage2", r"(Omtf|Bmtf|Emtf)Digis$"], [],
+     [r"^HLTL1TSeed$", r"^HLTP2GT", r"^L1TRawToDigi$", r"^(Omtf|Bmtf|Emtf)Unpacker$"]),
+    ("tau", [r"Tau", r"^hltHps", r"PiZeros"], [], []),
     ("muon", [r"Mu(?!lti)", r"Phase2L3", r"^hltCsc", r"^hltDt\d", r"^hltGem", r"^hltRpc", r"^hltMe0",
-              r"^hltTripleMuon", r"^hltDoubleMuon", r"^hltL[23]"], []),
+              r"^hltTripleMuon", r"^hltDoubleMuon", r"^hltL[23]", r"[Dd]imuon", r"mumu", r"3mu", r"^hltDTCluster",
+              r"[Rr]echitCluster", r"^hltCSC", r"^hltDT"], [],
+     [r"^HLTMuon", r"^HLTDisplacedmumu", r"^HLTMuonTrkFilter$"]),
     ("egamma", [r"^hltEgamma", r"^hltDiEG", r"^hltEG\d", r"^hltEle", r"^hltDiEle", r"^hltPhoton", r"^hltDiPhoton",
                 r"^hltPixelLayerPairs(L1Seeded|Unseeded)", r"EGamma", r"[Ss]uperclustering",
                 r"^hltParticleFlowSuperCluster", r"ForEGamma", r"^hltRechitInRegions", r"^hltHybridSuperCluster",
-                r"^hltMulti5x5", r"^hltCorrected"], []),
+                r"^hltMulti5x5", r"^hltCorrected", r"^hltDoubleEG", r"^hltDoubleEle", r"^hltSingleEle", r"^hltEGL1",
+                r"EG\d+", r"Ele\d", r"^hltHighEtaSC", r"3x3Clusters", r"^hltDoublePhoton", r"^hltSinglePhoton"], [],
+     [r"^HLTEgamma", r"^EgammaHLT", r"^HLTPMMassFilter$", r"^HLT2PhotonPhoton", r"^HLTElectron", r"^HLTPMDoca"]),
     ("jetmet", [r"BTag", r"^hltDeep", r"ParticleTransformer", r"DeepFlavour", r"ForBtag", r"PrimaryVertexAssociation",
-                r"Jet", r"MET", r"HT", r"MHT", r"^hltFixedGridRho", r"RefsForJets", r"JME$", r"^hltAK\d", r"^hltAk\d"], []),
+                r"Jet", r"MET", r"HT", r"MHT", r"^hltFixedGridRho", r"RefsForJets", r"JME$", r"^hltAK\d", r"^hltAk\d",
+                r"^hltMet", r"^hltMht", r"^hltHtMht", r"PNet", r"Corrector", r"^hltHiFJRho", r"GlobalSums", r"^hltCsAK"], [],
+     [r"^HLT1PFJet", r"^HLTPFJet", r"^HLTHtMht", r"^HLTMht", r"^CaloMETProducer$", r"JetCorrector", r"^HLTGlobalSums",
+      r"^HLT\w*Jet"]),
     ("pf", [r"^hltParticleFlow", r"^hltPFPuppi(NoLep)?$", r"^hltPfTICL$", r"^hltPfTrack$", r"^hltPFMuonMerging",
-            r"^hltLightPFTracks", r"^hltPFlow"], []),
+            r"^hltLightPFTracks", r"^hltPFlow", r"^hltPFCandidate$"], [], []),
     ("calo", [r"Ecal", r"Hcal", r"^hltHbhe", r"^hltHf", r"^hltHo", r"Hgcal", r"HGCal", r"Ticl", r"LayerClusters",
-              r"TowerMaker", r"^hltEs", r"Preshower", r"^hltTowerMaker"], []),
+              r"TowerMaker", r"^hltEs", r"Preshower", r"^hltTowerMaker"], [], [r"^HLTHPDFilter$"]),
     ("trk", [r"Pixel", r"SiPhase2", r"Strip", r"Track", r"Vert", r"BeamSpot", r"LST", r"MkFit", r"InitialStep",
-             r"OtRecHits", r"ClusterCheck", r"Seed", r"Triplet", r"Iter\d", r"MeasurementTracker", r"^hltSiStrip"], []),
+             r"OtRecHits", r"ClusterCheck", r"Seed", r"Triplet", r"Iter\d", r"MeasurementTracker", r"^hltSiStrip",
+             r"Seeding", r"[Ss]eedfinder", r"ClustersRefRemoval", r"LayerPairs", r"DeDx", r"^hltTrk\d"], [],
+     [r"^TrackClusterRemover", r"^SeedingLayersEDProducer$", r"DeDx"]),
 ]
+
+# subsystems the page can hide with a toolbar chip
+CHIPS = [
+    dict(sub="ext", label="External inputs"),
+    dict(sub="infra", label="Bookkeeping"),
+    dict(sub="alca", label="AlCa & special"),
+]
+
+# modules drawn with a dashed border: plugin type matching `types`
+FLAG = dict(short="Alpaka", label="Alpaka module (portable CPU/GPU backend)", types=r"@alpaka$|^alpaka_")
+
+# default title
+TITLE = None   # "<menu> Dataflow"

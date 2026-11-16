@@ -20,7 +20,15 @@ import types
 
 import FWCore.ParameterSet.Config as cms
 
-from HLTrigger.Configuration.Tools import menuGraphRules
+PROFILES = {
+    "hlt": "HLTrigger.Configuration.Tools.menuGraphRules",
+    "l1": "HLTrigger.Configuration.Tools.menuGraphRulesL1",
+}
+
+
+def profile_rules(profile):
+    """Return the rules module of a profile name ("hlt", "l1") or of a python module name."""
+    return importlib.import_module(PROFILES.get(profile, profile))
 
 TEMPLATE_NAME = "HLTrigger/Configuration/data/hltMenuGraph.html"
 PLACEHOLDER_LABEL = re.compile(r"(?i)^(not ?used|default|none|dummy|unused)$")
@@ -66,6 +74,30 @@ def load_process(config, era=None, modifiers=(), process_name="HLTX"):
         return process
     process = cms.Process(process_name, *_era_objects(era, modifiers))
     process.load(config.replace("/", ".").removesuffix(".py"))
+    return process
+
+
+def load_l1_process(era, modifiers=(), gt_menu="step1_2024", process_name="L1X"):
+    """Build the Phase-2 L1T emulation as cmsDriver does for `-s L1TrackTrigger,L1,L1P2GT:<gt_menu>`."""
+    process = cms.Process(process_name, *_era_objects(era, modifiers))
+    process.load("Configuration.StandardSequences.L1TrackTrigger_cff")
+    process.load("Configuration.StandardSequences.SimL1Emulator_cff")
+    process.load("Configuration.StandardSequences.SimPhase2L1GlobalTriggerEmulator_cff")
+    process.L1TrackTrigger_step = cms.Path(process.L1TrackTrigger)
+    process.L1simulation_step = cms.Path(process.SimL1Emulator)
+    process.Phase2L1GTProducer = cms.Path(process.l1tGTProducerSequence)
+    process.Phase2L1GTAlgoBlockProducer = cms.Path(process.l1tGTAlgoBlockProducerSequence)
+    schedule = [process.L1TrackTrigger_step, process.L1simulation_step,
+                process.Phase2L1GTProducer, process.Phase2L1GTAlgoBlockProducer]
+    menu_paths = []
+    if gt_menu:
+        menu = importlib.import_module("L1Trigger.Configuration.Phase2GTMenus.%s" % gt_menu).menu
+        for path_file in menu:
+            process.load(path_file)
+            module = importlib.import_module(path_file)
+            menu_paths += [n for n in dir(module) if type(getattr(module, n)) is cms.Path]
+    schedule += [getattr(process, n) for n in sorted(set(menu_paths))]
+    process.schedule = cms.Schedule(*schedule)
     return process
 
 
@@ -165,21 +197,28 @@ def plugin_packages(source_dirs):
 
 
 # ---------------------------------------------------------------- classification
-def _compile_rules():
-    return [(sid, re.compile("|".join(rx)) if rx else None, set(kinds)) for sid, rx, kinds in menuGraphRules.RULES]
+def _compile_rules(rules_module):
+    out = []
+    for rule in rules_module.RULES:
+        sid, labels, kinds = rule[0], rule[1], rule[2]
+        types = rule[3] if len(rule) > 3 else []
+        out.append((sid, re.compile("|".join(labels)) if labels else None, set(kinds),
+                    re.compile("|".join(types)) if types else None))
+    return out
 
 
-def classify(label, kind, rules):
-    for sid, rx, kinds in rules:
-        if kind in kinds or (rx is not None and rx.search(label)):
+def classify(label, kind, mtype, rules):
+    for sid, rx, kinds, trx in rules:
+        if kind in kinds or (rx is not None and rx.search(label)) or (trx is not None and trx.search(mtype)):
             return sid
     return "other"
 
 
 # ---------------------------------------------------------------- extraction
-def extract(process, packages=None):
+def extract(process, packages=None, rules_module=None):
     """Return the page data (a JSON-serialisable dict) for a cms.Process."""
     packages = packages or {}
+    rules_module = rules_module or profile_rules("hlt")
     state = _State()
     sched, sched_tasks = _scheduled(process)
     all_paths = dict(process.paths_())
@@ -192,6 +231,7 @@ def extract(process, packages=None):
     for task in sched_tasks:
         task.visit(_Visitor(state, None))
     labels = set(state.mod_obj)
+    path_names = set(sched)
     seq_parent = {k: next(iter(v)) for k, v in state.seq_occ.items() if len(v) == 1 and None not in v}
 
     # EDAliases: alias label -> aliased module labels
@@ -218,6 +258,9 @@ def extract(process, packages=None):
         elif isinstance(value, cms.string):
             if value.value() in labels:
                 out.append((name, value.value(), "", "", True))
+            else:
+                for tok in set(re.findall(r"[A-Za-z_]\w*", value.value())) & path_names:
+                    out.append((name, tok, "", "", "path"))
         elif isinstance(value, cms.vstring):
             for i, x in enumerate(value):
                 if x in labels:
@@ -227,7 +270,11 @@ def extract(process, packages=None):
         for n in pset.parameterNames_():
             tags_of(getattr(pset, n), prefix + n, out)
 
-    rules = _compile_rules()
+    rules = _compile_rules(rules_module)
+    flag = getattr(rules_module, "FLAG", {}) or {}
+    flag_types = re.compile(flag["types"]) if flag.get("types") else None
+    flag_cont = re.compile(flag["containers"]) if flag.get("containers") else None
+    flag_labels = re.compile(flag["labels"]) if flag.get("labels") else None
     modules, edges, ext = [], [], collections.OrderedDict()
     seen = set()
     for label, obj in state.mod_obj.items():
@@ -242,6 +289,17 @@ def extract(process, packages=None):
             walk(obj, "", found)
             mtype, kind = obj.type_(), type(obj).__name__
         for param, src, inst, proc, inferred in found:
+            if inferred == "path":
+                # path decision: the filters of path `src` feed this module
+                members = state.path_mods.get(src, [])
+                filters = [x for x in members if type(state.mod_obj[x]).__name__ == "EDFilter"] or members[-1:]
+                for s in filters:
+                    k = (s, label, "", param)
+                    if s != label and k not in seen:
+                        seen.add(k)
+                        edges.append(dict(source=s, target=label, instance="", param=param, inferred=False,
+                                          external=False, kind="pathDecision", path=src))
+                continue
             if not src or src == label or PLACEHOLDER_LABEL.match(src) or src in es_labels:
                 continue
             if proc == "@currentProcess":
@@ -262,14 +320,15 @@ def extract(process, packages=None):
                 edges.append(dict(source=key, target=label, instance=inst, param=param, inferred=inferred,
                                   external=external, kind="inferredString" if inferred else "InputTag"))
         base = mtype.split("@")[0].split("::")[-1]
+        conts, paths = state.mod_cont.get(label, []), state.mod_paths.get(label, [])
+        flagged = bool((flag_types and flag_types.search(mtype)) or (flag_labels and flag_labels.search(label)) or
+                       (flag_cont and any(flag_cont.search(c) for c in conts + paths)))
         modules.append(dict(
             id=label, type=mtype, kind=kind, package=packages.get(base, "(not found)"),
-            containers=state.mod_cont.get(label, []), paths=state.mod_paths.get(label, []),
-            subsystem=classify(label, kind, rules),
-            alpaka=mtype.endswith("@alpaka") or mtype.startswith("alpaka_")))
+            containers=conts, paths=paths, subsystem=classify(label, kind, mtype, rules), flag=flagged))
 
     used = {m["subsystem"] for m in modules} | ({"ext"} if ext else set())
-    subsystems = [s for s in menuGraphRules.SUBSYSTEMS if s["id"] in used or s["id"] in ("ext", "infra")]
+    subsystems = [s for s in rules_module.SUBSYSTEMS if s["id"] in used or s["id"] == "ext"]
     children = collections.defaultdict(list)
     for child, parent in seq_parent.items():
         children[parent].append(child)
@@ -282,6 +341,8 @@ def extract(process, packages=None):
         paths={p: state.path_mods[p] for p in sched},
         endpaths=[p for p in sched if p not in process.paths_()],
         taskChildren=dict(children),
+        chips=[c for c in getattr(rules_module, "CHIPS", []) if c["sub"] in used],
+        flag=dict(short=flag.get("short", "flagged"), label=flag.get("label", "")),
         es=[dict(id=k, type=v.type_(), kind=type(v).__name__)
             for k, v in list(process.es_producers_().items()) + list(process.es_sources_().items())],
     )

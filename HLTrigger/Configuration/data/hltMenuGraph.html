@@ -218,8 +218,7 @@ h3 { font-size: 12px; font-weight: 600; margin: 6px 0 0; color: var(--ink-2); }
       <select id="pathSel"><option value="">All paths</option></select>
     </label>
     <div class="chips">
-      <label class="chip mv-only"><input type="checkbox" id="show-ext" checked> External inputs</label>
-      <label class="chip mv-only"><input type="checkbox" id="show-infra" checked> Bookkeeping</label>
+      <span id="subChips" style="display: contents"></span>
       <label class="chip mv-only"><input type="checkbox" id="show-filters" checked> Path filters</label>
       <label class="chip pv-only" hidden><input type="checkbox" id="show-common"> Blocks common to most paths</label>
       <label class="chip pv-only" hidden><input type="checkbox" id="show-flow" checked> Block-to-block flow</label>
@@ -253,9 +252,10 @@ h3 { font-size: 12px; font-weight: 600; margin: 6px 0 0; color: var(--ink-2); }
         <svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--edge)" stroke-width="1.5" stroke-dasharray="5 3"/><path d="M27 1 L33 5 L27 9 Z" fill="var(--edge)"/></svg><span>One block reads products of another</span>
       </div>
       <div class="key mv-only">
+        <svg class="kpd" hidden width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--edge)" stroke-width="1.5" stroke-dasharray="5 3"/><path d="M27 1 L33 5 L27 9 Z" fill="var(--edge)"/></svg><span class="kpd" hidden>Path decision read by a module (e.g. a menu seed into the algo block)</span>
         <svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--edge)" stroke-width="1.5"/><path d="M27 1 L33 5 L27 9 Z" fill="var(--edge)"/></svg><span>Product consumed via an <code>InputTag</code></span>
         <svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--edge)" stroke-width="1.5" stroke-dasharray="1.5 2.5"/><path d="M27 1 L33 5 L27 9 Z" fill="var(--edge)"/></svg><span>Label passed as a plain string (e.g. <code>HitProducer</code>)</span>
-        <svg width="34" height="14" aria-hidden="true"><rect x="2" y="2" width="30" height="10" rx="3" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 2"/></svg><span>Alpaka module (portable CPU/GPU backend)</span>
+        <svg width="34" height="14" aria-hidden="true"><rect x="2" y="2" width="30" height="10" rx="3" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 2"/></svg><span id="flagLabel"></span>
       </div>
     </section>
     <section id="detail">
@@ -356,7 +356,7 @@ function buildElements() {
     nodes.push({ data: {
       id, label: id, parent: parent || undefined, w: Math.ceil(measure(id, MONO)) + 22, h: 26,
       color, fill: ext ? T.panel : mix(color, T.panel, 0.2), sub: m.subsystem,
-    }, classes: [ext ? "ext" : "", m.alpaka ? "legacy" : ""].join(" ") });
+    }, classes: [ext ? "ext" : "", m.flag ? "legacy" : ""].join(" ") });
   });
   // remove groups that are inside a collapsed ancestor
   Object.keys(groups).forEach(g => { if (chain(g).slice(1).some(a => state.collapsed.has(a))) delete groups[g]; });
@@ -563,7 +563,7 @@ function showModule(id, chainIds) {
   const { up, down } = lineage(id);
   document.getElementById("detailBody").innerHTML = `
     <div class="dname">${esc(id)}</div>
-    <div class="dsub">${dot(m.subsystem)}${esc(s.name)}${m.alpaka ? " · Alpaka" : ""}</div>
+    <div class="dsub">${dot(m.subsystem)}${esc(s.name)}${m.flag ? " · " + esc(D.flag.short) : ""}</div>
     <dl>
       <dt>Plugin</dt><dd><code>${esc(m.type)}</code> <span style="color:var(--muted)">${esc(m.kind)}</span></dd>
       <dt>Package</dt><dd><code>${esc(m.package)}</code></dd>
@@ -635,7 +635,9 @@ function toggleGroup(gid) {
   render(true);
 }
 
-const chipMap = { "show-ext": "ext", "show-infra": "infra" };
+document.getElementById("subChips").innerHTML = (D.chips || []).filter(c => SUB[c.sub]).map(c =>
+  `<label class="chip mv-only"><input type="checkbox" id="show-${esc(c.sub)}" checked> ${esc(c.label)}</label>`).join("");
+const chipMap = Object.fromEntries((D.chips || []).filter(c => SUB[c.sub]).map(c => ["show-" + c.sub, c.sub]));
 function syncChips() { Object.entries(chipMap).forEach(([cid, sid]) => { document.getElementById(cid).checked = !state.hide.has(sid); }); }
 
 document.addEventListener("click", ev => {
@@ -961,7 +963,11 @@ function stats() {
   document.getElementById("stats").innerHTML =
     `<span><b>${D.modules.length - nf}</b> producers</span><span><b>${nf}</b> path filters</span>` +
     `<span><b>${prods.size}</b> products consumed</span><span><b>${D.edges.length}</b> dependencies</span>` +
-    `<span><b>${D.external.length}</b> external inputs</span><span><b>${Object.keys(D.paths).length}</b> paths</span><span><b>${D.modules.filter(m => m.alpaka).length}</b> Alpaka</span>`;
+    `<span><b>${D.external.length}</b> external inputs</span><span><b>${Object.keys(D.paths).length}</b> paths</span>` +
+    (D.flag && D.flag.label ? `<span><b>${D.modules.filter(m => m.flag).length}</b> ${esc(D.flag.short)}</span>` : "");
+  document.getElementById("flagLabel").textContent = (D.flag && D.flag.label) || "";
+  const hasPD = D.edges.some(e => e.kind === "pathDecision");
+  document.querySelectorAll(".kpd").forEach(el => el.toggleAttribute("hidden", !hasPD));
   document.getElementById("labels").innerHTML = Object.keys(MOD).sort().map(k => `<option value="${esc(k)}"></option>`).join("");
 }
 

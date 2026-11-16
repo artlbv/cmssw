@@ -17,9 +17,9 @@ Output.
  Optionally the extracted data as JSON (--json).
 
  Dependencies are read from the configuration only (InputTag/VInputTag parameters and
- strings equal to a module label). Subsystems are assigned from the module labels by the
- rules in HLTrigger/Configuration/python/Tools/menuGraphRules.py; unmatched modules are
- listed on stderr.
+ strings equal to a module label; strings naming a path become path-decision edges).
+ Subsystems are assigned by the rules of the profile (--profile hlt: Tools/menuGraphRules.py,
+ --profile l1: Tools/menuGraphRulesL1.py); unmatched modules are listed on stderr.
 
 Documentation: HLTrigger/Configuration/README_hltMenuGraph.md
 
@@ -28,6 +28,9 @@ Examples.
  # Phase-2 menu, with the era and process modifiers of the Phase-2 HLT workflows
  hltMenuGraph HLTrigger.Configuration.HLT_75e33_cff --era Phase2C22I13M9 \\
    --procModifiers alpaka -o HLT_75e33.html
+
+ # Phase-2 L1T emulation (L1TrackTrigger, L1 and L1P2GT steps, default P2GT menu)
+ hltMenuGraph --profile l1 --era Phase2C22I13M9 -o L1T_Phase2.html
 
  # Run-3 menu from ConfDB
  hltGetConfiguration /dev/CMSSW_X_Y_0/GRun --full --offline --unprescale | hltMenuGraph - -o GRun.html
@@ -68,20 +71,52 @@ def install_cfi_stubs(stubbed):
     """Replace missing fillDescriptions-generated cfi modules with empty EDProducers."""
     import FWCore.ParameterSet.Config as cms
 
+    def to_cms(value):
+        if isinstance(value, bool):
+            return cms.bool(value)
+        if isinstance(value, int):
+            return cms.int32(value)
+        if isinstance(value, float):
+            return cms.double(value)
+        if isinstance(value, str):
+            return cms.string(value)
+        if isinstance(value, (list, tuple)) and all(isinstance(v, str) for v in value):
+            return cms.vstring(*value)
+        return value
+
+    class Stub(cms.EDProducer):
+        """Empty module standing for a generated cfi; clone() accepts plain python values."""
+        def clone(self, *args, **params):
+            return super().clone(*args, **{k: to_cms(v) for k, v in params.items()})
+
+    # era modifiers may set parameters a stub does not have: set what can be converted, skip the rest
+    modifier = cms._ParameterModifier
+    original_call = modifier.__call__
+
+    def lenient_call(self, obj):
+        if not isinstance(obj, Stub):
+            return original_call(self, obj)
+        for key, value in self._ParameterModifier__args.items():
+            try:
+                setattr(obj, key, to_cms(value))
+            except Exception:
+                pass
+    modifier.__call__ = lenient_call
+
     class Loader(importlib.abc.Loader):
         def create_module(self, spec):
             return None
 
         def exec_module(self, module):
             base = module.__name__.rsplit(".", 1)[1][:-len("_cfi")]
-            setattr(module, base, cms.EDProducer(base[0].upper() + base[1:]))
+            setattr(module, base, Stub(base[0].upper() + base[1:]))
             module.__all__ = [base]
             stubbed.append(module.__name__)
 
             def getattr_(name):
                 if name.startswith("__"):
                     raise AttributeError(name)
-                obj = cms.EDProducer(name[0].upper() + name[1:])
+                obj = Stub(name[0].upper() + name[1:])
                 setattr(module, name, obj)
                 return obj
             module.__getattr__ = getattr_
@@ -98,13 +133,20 @@ def install_cfi_stubs(stubbed):
 def main():
     parser = argparse.ArgumentParser(prog="hltMenuGraph", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("menu", help="menu fragment module name or file, full configuration file, or - for stdin")
+    parser.add_argument("menu", nargs="?", default=None,
+                        help="menu fragment module name or file, full configuration file, or - for stdin "
+                             "(optional with --profile l1: the standard Phase-2 L1T emulation is built)")
+    parser.add_argument("--profile", default="hlt",
+                        help="subsystem rules and page settings: hlt (default), l1, or a python module name")
+    parser.add_argument("--gt-menu", default="step1_2024",
+                        help="P2GT menu of the built-in L1 process (L1Trigger.Configuration.Phase2GTMenus.<name>; "
+                             "default step1_2024, 'none' for no menu)")
     parser.add_argument("-o", "--output", default=None, help="output HTML file (default: <menu>_graph.html)")
     parser.add_argument("--json", default=None, help="also write the extracted data to this JSON file")
     parser.add_argument("--era", default=None, help="era(s) for a menu fragment, comma separated (e.g. Phase2C22I13M9)")
     parser.add_argument("--procModifiers", default="", help="process modifiers for a menu fragment, comma separated")
-    parser.add_argument("--process-name", default="HLTX", help="name of the process built around a menu fragment")
-    parser.add_argument("--title", default=None, help="page title (default: '<menu> Dataflow')")
+    parser.add_argument("--process-name", default=None, help="name of the process built around a menu fragment (default HLTX, L1X)")
+    parser.add_argument("--title", default=None, help="page title (default from the profile, or '<menu> Dataflow')")
     parser.add_argument("--template", default=None, help="HTML template (default: HLTrigger/Configuration/data/hltMenuGraph.html)")
     parser.add_argument("--src", action="append", default=None,
                         help="source directory to scan for plugin packages (repeatable; default: "
@@ -114,6 +156,8 @@ def main():
     parser.add_argument("--stub-missing-cfi", action="store_true",
                         help="replace missing generated *_cfi modules by empty EDProducers (for --checkout)")
     args = parser.parse_args()
+    if args.menu is None and args.profile != "l1":
+        parser.error("a menu is required, except with --profile l1")
 
     if args.checkout:
         sys.path.insert(0, make_python_tree(args.checkout))
@@ -126,24 +170,38 @@ def main():
     from HLTrigger.Configuration.Tools import menuGraph
 
     modifiers = [m for m in args.procModifiers.split(",") if m]
-    process = menuGraph.load_process(args.menu, era=args.era, modifiers=modifiers, process_name=args.process_name)
+    rules = menuGraph.profile_rules(args.profile)
+    if args.menu is None:
+        if not args.era:
+            parser.error("the built-in L1 process needs --era (e.g. Phase2C17I13M9)")
+        gt_menu = None if args.gt_menu.lower() == "none" else args.gt_menu
+        process = menuGraph.load_l1_process(args.era, modifiers, gt_menu=gt_menu, process_name=args.process_name or "L1X")
+    else:
+        process = menuGraph.load_process(args.menu, era=args.era, modifiers=modifiers,
+                                         process_name=args.process_name or "HLTX")
 
     src_dirs = args.src or menuGraph.default_source_dirs()
     packages = menuGraph.plugin_packages(src_dirs)
-    data = menuGraph.extract(process, packages)
+    data = menuGraph.extract(process, packages, rules)
 
-    menu_name = "stdin" if args.menu == "-" else os.path.basename(args.menu).removesuffix(".py")
-    if not os.path.isfile(args.menu) and args.menu != "-":
+    if args.menu is None:
+        menu_name = "Phase-2 L1T emulation" + (" + P2GT %s" % args.gt_menu if args.gt_menu.lower() != "none" else "")
+    elif args.menu == "-":
+        menu_name = "stdin"
+    elif os.path.isfile(args.menu):
+        menu_name = os.path.basename(args.menu).removesuffix(".py")
+    else:
         menu_name = args.menu.replace("/", ".").removesuffix(".py").split(".")[-1]
-    short = menu_name.removesuffix("_cff")
+    short = "L1T_Phase2" if args.menu is None else menu_name.removesuffix("_cff")
 
     unclassified = [m["id"] for m in data["modules"] if m["subsystem"] == "other"]
+    rules_name = getattr(rules, "__name__", args.profile).rsplit(".", 1)[-1]
     nopkg = sorted({m["type"] for m in data["modules"] if m["package"] == "(not found)"})
     print("hltMenuGraph: %d modules, %d dependencies, %d external inputs, %d paths"
           % (len(data["modules"]), len(data["edges"]), len(data["external"]), len(data["paths"])), file=sys.stderr)
     if unclassified:
-        print("hltMenuGraph: %d modules match no rule in menuGraphRules.py: %s"
-              % (len(unclassified), " ".join(unclassified)), file=sys.stderr)
+        print("hltMenuGraph: %d modules match no rule in %s: %s"
+              % (len(unclassified), rules_name, " ".join(unclassified)), file=sys.stderr)
     if nopkg:
         print("hltMenuGraph: no package found for %d plugin types: %s" % (len(nopkg), " ".join(nopkg)), file=sys.stderr)
     if stubbed:
@@ -152,7 +210,7 @@ def main():
     notes = ["generated cfi replaced by stubs: %s" % ", ".join(s.rsplit(".", 1)[1] for s in stubbed)] if stubbed else []
     commit = menuGraph.git_commit(src_dirs[0]) if src_dirs else None
     template = open(args.template or menuGraph.find_template()).read()
-    page = menuGraph.render(data, template, title=args.title or "%s Dataflow" % short, menu=menu_name,
+    page = menuGraph.render(data, template, title=args.title or getattr(rules, "TITLE", None) or "%s Dataflow" % short, menu=menu_name,
                             era=args.era, modifiers=modifiers, commit=commit, notes=notes)
     output = args.output or "%s_graph.html" % short
     with open(output, "w") as f:
