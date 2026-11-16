@@ -14,6 +14,11 @@ from ..modules.hltParticleFlowSuperClusterHGCal_cfi import *
 from ..modules.hltTiclLayerTileProducer_cfi import *
 from ..modules.hltTiclSeedingGlobal_cfi import *
 from ..modules.hltTiclTrackstersCLUE3DHigh_cfi import *
+# Heterogeneous HGCAL EE layer clusters
+from ..modules.hltHgcalSoARecHitsProducer_cfi import *
+from ..modules.hltHgcalSoARecHitsLayerClustersProducer_cfi import *
+from ..modules.hltHgcalSoALayerClustersProducer_cfi import *
+from ..modules.hltHgcalLayerClustersFromSoAProducer_cfi import *
 # TICL-barrel
 from ..modules.hltBarrelLayerClustersEB_cfi import *
 from ..modules.hltBarrelLayerClustersHB_cfi import *
@@ -43,6 +48,18 @@ HLTHgcalTiclPFClusteringForEgamma_barrel = cms.Sequence((
   hltTiclTrackstersCLUE3DBarrel
 ))
 
+# with alpaka, the EE layer clusters come from the SoA chain (as in HLTTICLLocalRecoSequence),
+# and hltMergeLayerClusters reads hltHgCalLayerClustersFromSoAProducer instead of hltHgcalLayerClustersEE
+_HLTHgcalTiclPFClusteringForEgamma_heterogeneous = HLTHgcalTiclPFClusteringForEgamma.copy()
+_HLTHgcalTiclPFClusteringForEgamma_heterogeneous.replace(hltHgcalLayerClustersEE,
+    hltHgcalSoARecHitsProducer+hltHgcalSoARecHitsLayerClustersProducer+hltHgcalSoALayerClustersProducer+hltHgCalLayerClustersFromSoAProducer)
+_HLTHgcalTiclPFClusteringForEgamma_heterogeneous_barrel = HLTHgcalTiclPFClusteringForEgamma_barrel.copy()
+_HLTHgcalTiclPFClusteringForEgamma_heterogeneous_barrel.replace(hltHgcalLayerClustersEE,
+    hltHgcalSoARecHitsProducer+hltHgcalSoARecHitsLayerClustersProducer+hltHgcalSoALayerClustersProducer+hltHgCalLayerClustersFromSoAProducer)
+
+from Configuration.ProcessModifiers.alpaka_cff import alpaka
 from Configuration.ProcessModifiers.ticl_barrel_cff import ticl_barrel
-ticl_barrel.toReplaceWith(HLTHgcalTiclPFClusteringForEgamma, HLTHgcalTiclPFClusteringForEgamma_barrel)
+(ticl_barrel & (~alpaka)).toReplaceWith(HLTHgcalTiclPFClusteringForEgamma, HLTHgcalTiclPFClusteringForEgamma_barrel)
+(alpaka & (~ticl_barrel)).toReplaceWith(HLTHgcalTiclPFClusteringForEgamma, _HLTHgcalTiclPFClusteringForEgamma_heterogeneous)
+(alpaka & ticl_barrel).toReplaceWith(HLTHgcalTiclPFClusteringForEgamma, _HLTHgcalTiclPFClusteringForEgamma_heterogeneous_barrel)
 
