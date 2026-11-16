@@ -49,7 +49,8 @@ HLTHgcalTiclPFClusteringForEgammaUnseededSequence = cms.Sequence(_HgcalLocalReco
 
 # Alpaka
 from Configuration.ProcessModifiers.alpaka_cff import alpaka
-alpaka.toReplaceWith(_HgcalLocalRecoUnseededSequence, 
+from Configuration.ProcessModifiers.ticl_barrel_cff import ticl_barrel
+(alpaka & (~ticl_barrel)).toReplaceWith(_HgcalLocalRecoUnseededSequence, 
                      cms.Sequence(
                                   hltHgcalDigis
                                   + hltHGCalUncalibRecHit
@@ -97,6 +98,11 @@ _HgcalTICLPatternRecognitionUnseededSequence_barrel = cms.Sequence(hltFilteredLa
                                                                    hltTiclTrackstersCLUE3DBarrel)
 
 
-from Configuration.ProcessModifiers.ticl_barrel_cff import ticl_barrel
-ticl_barrel.toReplaceWith(_HgcalLocalRecoUnseededSequence, _HgcalLocalRecoUnseededSequence_barrel)
+# with alpaka, the EE layer clusters come from the SoA chain also with the barrel layer clusters
+_HgcalLocalRecoUnseededSequence_heterogeneous_barrel = _HgcalLocalRecoUnseededSequence_barrel.copy()
+_HgcalLocalRecoUnseededSequence_heterogeneous_barrel.replace(hltHgcalLayerClustersEE,
+    hltHgcalSoARecHitsProducer+hltHgcalSoARecHitsLayerClustersProducer+hltHgcalSoALayerClustersProducer+hltHgCalLayerClustersFromSoAProducer)
+
+(ticl_barrel & (~alpaka)).toReplaceWith(_HgcalLocalRecoUnseededSequence, _HgcalLocalRecoUnseededSequence_barrel)
+(ticl_barrel & alpaka).toReplaceWith(_HgcalLocalRecoUnseededSequence, _HgcalLocalRecoUnseededSequence_heterogeneous_barrel)
 ticl_barrel.toReplaceWith(_HgcalTICLPatternRecognitionUnseededSequence, _HgcalTICLPatternRecognitionUnseededSequence_barrel)
