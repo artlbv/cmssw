@@ -21,6 +21,8 @@ Output.
  rules in HLTrigger/Configuration/python/Tools/menuGraphRules.py; unmatched modules are
  listed on stderr.
 
+Documentation: HLTrigger/Configuration/README_hltMenuGraph.md
+
 Examples.
 
  # Phase-2 menu, with the era and process modifiers of the Phase-2 HLT workflows
