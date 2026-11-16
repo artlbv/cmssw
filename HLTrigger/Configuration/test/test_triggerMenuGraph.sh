@@ -15,7 +15,7 @@ function die {
 rm -f test_triggerMenuGraph*.html test_triggerMenuGraph*.json test_triggerMenuGraph*.log
 
 triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff \
-  --era Phase2C22I13M9 --procModifiers alpaka \
+  --era Phase2C26I13M9 --procModifiers alpaka \
   -o test_triggerMenuGraph.html --json test_triggerMenuGraph.json &> test_triggerMenuGraph.log \
   || die 'Failure running triggerMenuGraph' $? test_triggerMenuGraph.log
 
@@ -51,7 +51,7 @@ python3 test_triggerMenuGraph_check.py test_triggerMenuGraph 400 30 \
 ###
 ### L1 profile: Phase-2 L1T emulation with the default P2GT menu
 ###
-triggerMenuGraph --profile l1 --era Phase2C22I13M9 \
+triggerMenuGraph --profile l1 --era Phase2C26I13M9 \
   -o test_triggerMenuGraph_L1.html --json test_triggerMenuGraph_L1.json &> test_triggerMenuGraph_L1.log \
   || die 'Failure running triggerMenuGraph --profile l1' $? test_triggerMenuGraph_L1.log
 

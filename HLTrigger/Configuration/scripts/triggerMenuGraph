@@ -26,11 +26,11 @@ Documentation: HLTrigger/Configuration/README_triggerMenuGraph.md
 Examples.
 
  # Phase-2 menu, with the era and process modifiers of the Phase-2 HLT workflows
- triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff --era Phase2C22I13M9 \\
+ triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff --era Phase2C26I13M9 \\
    --procModifiers alpaka -o HLT_75e33.html
 
  # Phase-2 L1T emulation (L1TrackTrigger, L1 and L1P2GT steps, default P2GT menu)
- triggerMenuGraph --profile l1 --era Phase2C22I13M9 -o L1T_Phase2.html
+ triggerMenuGraph --profile l1 --era Phase2C26I13M9 -o L1T_Phase2.html
 
  # Run-3 menu from ConfDB
  hltGetConfiguration /dev/CMSSW_X_Y_0/GRun --full --offline --unprescale | triggerMenuGraph - -o GRun.html
@@ -143,7 +143,7 @@ def main():
                              "default step1_2024, 'none' for no menu)")
     parser.add_argument("-o", "--output", default=None, help="output HTML file (default: <menu>_graph.html)")
     parser.add_argument("--json", default=None, help="also write the extracted data to this JSON file")
-    parser.add_argument("--era", default=None, help="era(s) for a menu fragment, comma separated (e.g. Phase2C22I13M9)")
+    parser.add_argument("--era", default=None, help="era(s) for a menu fragment, comma separated (e.g. Phase2C26I13M9)")
     parser.add_argument("--procModifiers", default="", help="process modifiers for a menu fragment, comma separated")
     parser.add_argument("--process-name", default=None, help="name of the process built around a menu fragment (default HLTX, L1X)")
     parser.add_argument("--title", default=None, help="page title (default from the profile, or '<menu> Dataflow')")

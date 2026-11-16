@@ -23,10 +23,10 @@ Inside a CMSSW area, after `cmsenv` and `scram b`:
 
 ```bash
 # Phase-2 menu, with the era and process modifiers of the Phase-2 HLT workflows
-triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff --era Phase2C22I13M9 --procModifiers alpaka -o HLT_75e33.html
+triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff --era Phase2C26I13M9 --procModifiers alpaka -o HLT_75e33.html
 
 # a menu fragment given as a file
-triggerMenuGraph HLTrigger/Configuration/python/HLT_75e33_cff.py --era Phase2C22I13M9 -o HLT_75e33.html
+triggerMenuGraph HLTrigger/Configuration/python/HLT_75e33_cff.py --era Phase2C26I13M9 -o HLT_75e33.html
 
 # a full configuration (defining `process`), e.g. a Run-3 menu from ConfDB
 hltGetConfiguration /dev/CMSSW_X_Y_0/GRun --full --offline --unprescale > hlt.py
@@ -42,11 +42,11 @@ Then open the HTML file in a browser.
 
 ```bash
 # the L1 steps of cmsDriver (-s L1TrackTrigger,L1,L1P2GT) with the default P2GT menu
-triggerMenuGraph --profile l1 --era Phase2C22I13M9 -o L1T_Phase2.html
+triggerMenuGraph --profile l1 --era Phase2C26I13M9 -o L1T_Phase2.html
 
 # another P2GT menu from L1Trigger/Configuration/python/Phase2GTMenus, or none
-triggerMenuGraph --profile l1 --era Phase2C22I13M9 --gt-menu step1_2024_explicitSeeds -o L1T_Phase2.html
-triggerMenuGraph --profile l1 --era Phase2C22I13M9 --gt-menu none -o L1T_Phase2_noMenu.html
+triggerMenuGraph --profile l1 --era Phase2C26I13M9 --gt-menu step1_2024_explicitSeeds -o L1T_Phase2.html
+triggerMenuGraph --profile l1 --era Phase2C26I13M9 --gt-menu none -o L1T_Phase2_noMenu.html
 
 # any full L1 configuration, e.g. one written by cmsDriver.py --no_exec
 triggerMenuGraph --profile l1 step1_L1_cfg.py -o L1T_Phase2.html
@@ -99,6 +99,12 @@ Run-3 menus `GRun`, `HIon`, `PRef` and `Special` in this release.
 
 The era and process modifiers only apply to menu fragments. A full configuration
 keeps the era it was written with.
+
+`Phase2C26I13M9` is the era of the newest Phase-2 workflows (geometries `Run4D126`
+and later); older active geometries such as `Run4D121`, `Run4D124` and `Run4D125`
+still use `Phase2C22I13M9`. Either gives exactly the same graph for `HLT_75e33` and
+for the L1 profile, since no module of those configurations is added or reconfigured
+by the difference between the two eras.
 
 ### Without a CMSSW release
 
