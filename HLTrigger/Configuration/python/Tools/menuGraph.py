@@ -1,6 +1,6 @@
-"""Extract the producer/consumer graph of an HLT menu and render it as an HTML page.
+"""Extract the producer/consumer graph of a trigger menu (HLT or L1T configuration) and render it as an HTML page.
 
-Used by the hltMenuGraph script; see `hltMenuGraph --help`.
+Used by the triggerMenuGraph script; see `triggerMenuGraph --help`.
 
 The graph is built from the configuration only: an edge A -> B means that a
 parameter of B (an InputTag, a VInputTag entry, or a plain string equal to a
@@ -30,7 +30,7 @@ def profile_rules(profile):
     """Return the rules module of a profile name ("hlt", "l1") or of a python module name."""
     return importlib.import_module(PROFILES.get(profile, profile))
 
-TEMPLATE_NAME = "HLTrigger/Configuration/data/hltMenuGraph.html"
+TEMPLATE_NAME = "HLTrigger/Configuration/data/triggerMenuGraph.html"
 PLACEHOLDER_LABEL = re.compile(r"(?i)^(not ?used|default|none|dummy|unused)$")
 _SWITCH = getattr(cms, "SwitchProducer", None)   # not available in every CMSSW version
 _MODULE_TYPES = (cms.EDProducer, cms.EDFilter, cms.EDAnalyzer, cms.OutputModule) + ((_SWITCH,) if _SWITCH else ())
@@ -63,11 +63,11 @@ def load_process(config, era=None, modifiers=(), process_name="HLTX"):
         source = sys.stdin.read() if config == "-" else open(config).read()
         filename = "<stdin>" if config == "-" else os.path.abspath(config)
         if re.search(r"^\s*process\s*=\s*cms\.Process\(", source, re.M):
-            namespace = {"__file__": filename, "__name__": "__hltMenuGraph_cfg__"}
+            namespace = {"__file__": filename, "__name__": "__triggerMenuGraph_cfg__"}
             exec(compile(source, filename, "exec"), namespace)
             return namespace["process"]
         process = cms.Process(process_name, *_era_objects(era, modifiers))
-        module = types.ModuleType("__hltMenuGraph_menu__")
+        module = types.ModuleType("__triggerMenuGraph_menu__")
         module.__file__ = filename
         exec(compile(source, filename, "exec"), module.__dict__)
         process.extend(module)
@@ -355,7 +355,7 @@ def find_template():
         if d and os.path.isfile(p):
             return p
     here = os.path.dirname(os.path.realpath(__file__))     # .../HLTrigger/Configuration/python/Tools
-    p = os.path.join(os.path.dirname(os.path.dirname(here)), "data", "hltMenuGraph.html")
+    p = os.path.join(os.path.dirname(os.path.dirname(here)), "data", "triggerMenuGraph.html")
     if os.path.isfile(p):
         return p
     raise IOError("cannot find %s (searched CMSSW_SEARCH_PATH and next to %s); use --template" % (TEMPLATE_NAME, __file__))

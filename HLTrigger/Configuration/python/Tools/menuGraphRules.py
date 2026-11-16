@@ -1,11 +1,11 @@
-"""Subsystem definitions and label rules used by hltMenuGraph.
+"""Subsystem definitions and label rules used by triggerMenuGraph.
 
 Each module of the menu is assigned to the first subsystem whose rule matches.
 A rule is (subsystem id, label regexes, module kinds, plugin-type regexes): it
 matches when a label regex matches the module label, the module kind
 (EDProducer, EDFilter, OutputModule, ...) is listed, or a type regex matches the
 C++ plugin name. Modules that match no rule end up in "other", and
-hltMenuGraph lists them on stderr so the rules can be extended.
+triggerMenuGraph lists them on stderr so the rules can be extended.
 
 `slot` picks one of the eight categorical colours of the page (1-8);
 `None` draws the subsystem with a neutral, dashed style.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""hltMenuGraph: interactive producer/consumer graph of an HLT menu, as one HTML file.
+"""triggerMenuGraph: interactive producer/consumer graph of a trigger menu (HLT, or the Phase-2 L1T emulation), as one HTML file.
 
 Input.
  A python module name of a menu fragment (e.g. HLTrigger.Configuration.HLT_75e33_cff),
@@ -21,23 +21,23 @@ Output.
  Subsystems are assigned by the rules of the profile (--profile hlt: Tools/menuGraphRules.py,
  --profile l1: Tools/menuGraphRulesL1.py); unmatched modules are listed on stderr.
 
-Documentation: HLTrigger/Configuration/README_hltMenuGraph.md
+Documentation: HLTrigger/Configuration/README_triggerMenuGraph.md
 
 Examples.
 
  # Phase-2 menu, with the era and process modifiers of the Phase-2 HLT workflows
- hltMenuGraph HLTrigger.Configuration.HLT_75e33_cff --era Phase2C22I13M9 \\
+ triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff --era Phase2C22I13M9 \\
    --procModifiers alpaka -o HLT_75e33.html
 
  # Phase-2 L1T emulation (L1TrackTrigger, L1 and L1P2GT steps, default P2GT menu)
- hltMenuGraph --profile l1 --era Phase2C22I13M9 -o L1T_Phase2.html
+ triggerMenuGraph --profile l1 --era Phase2C22I13M9 -o L1T_Phase2.html
 
  # Run-3 menu from ConfDB
- hltGetConfiguration /dev/CMSSW_X_Y_0/GRun --full --offline --unprescale | hltMenuGraph - -o GRun.html
+ hltGetConfiguration /dev/CMSSW_X_Y_0/GRun --full --offline --unprescale | triggerMenuGraph - -o GRun.html
 
  # without cmsenv, from a plain CMSSW checkout (generated cfi files are not available
  # there and are replaced by empty modules with --stub-missing-cfi)
- python3 HLTrigger/Configuration/scripts/hltMenuGraph HLTrigger.Configuration.HLT_75e33_cff \\
+ python3 HLTrigger/Configuration/scripts/triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff \\
    --checkout . --stub-missing-cfi -o HLT_75e33.html
 """
 import argparse
@@ -51,7 +51,7 @@ import tempfile
 def make_python_tree(checkout):
     """Build a temporary Package/Subpackage python tree from a CMSSW checkout, as scram does."""
     checkout = os.path.abspath(checkout)
-    tree = tempfile.mkdtemp(prefix="hltMenuGraph_py_")
+    tree = tempfile.mkdtemp(prefix="triggerMenuGraph_py_")
     for pkg in sorted(os.listdir(checkout)):
         pdir = os.path.join(checkout, pkg)
         if pkg.startswith(".") or not os.path.isdir(pdir):
@@ -131,7 +131,7 @@ def install_cfi_stubs(stubbed):
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="hltMenuGraph", description=__doc__,
+    parser = argparse.ArgumentParser(prog="triggerMenuGraph", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("menu", nargs="?", default=None,
                         help="menu fragment module name or file, full configuration file, or - for stdin "
@@ -147,7 +147,7 @@ def main():
     parser.add_argument("--procModifiers", default="", help="process modifiers for a menu fragment, comma separated")
     parser.add_argument("--process-name", default=None, help="name of the process built around a menu fragment (default HLTX, L1X)")
     parser.add_argument("--title", default=None, help="page title (default from the profile, or '<menu> Dataflow')")
-    parser.add_argument("--template", default=None, help="HTML template (default: HLTrigger/Configuration/data/hltMenuGraph.html)")
+    parser.add_argument("--template", default=None, help="HTML template (default: HLTrigger/Configuration/data/triggerMenuGraph.html)")
     parser.add_argument("--src", action="append", default=None,
                         help="source directory to scan for plugin packages (repeatable; default: "
                              "$CMSSW_BASE/src, the release src, or the checkout containing this script)")
@@ -197,15 +197,15 @@ def main():
     unclassified = [m["id"] for m in data["modules"] if m["subsystem"] == "other"]
     rules_name = getattr(rules, "__name__", args.profile).rsplit(".", 1)[-1]
     nopkg = sorted({m["type"] for m in data["modules"] if m["package"] == "(not found)"})
-    print("hltMenuGraph: %d modules, %d dependencies, %d external inputs, %d paths"
+    print("triggerMenuGraph: %d modules, %d dependencies, %d external inputs, %d paths"
           % (len(data["modules"]), len(data["edges"]), len(data["external"]), len(data["paths"])), file=sys.stderr)
     if unclassified:
-        print("hltMenuGraph: %d modules match no rule in %s: %s"
+        print("triggerMenuGraph: %d modules match no rule in %s: %s"
               % (len(unclassified), rules_name, " ".join(unclassified)), file=sys.stderr)
     if nopkg:
-        print("hltMenuGraph: no package found for %d plugin types: %s" % (len(nopkg), " ".join(nopkg)), file=sys.stderr)
+        print("triggerMenuGraph: no package found for %d plugin types: %s" % (len(nopkg), " ".join(nopkg)), file=sys.stderr)
     if stubbed:
-        print("hltMenuGraph: stubbed generated cfi modules: %s" % " ".join(stubbed), file=sys.stderr)
+        print("triggerMenuGraph: stubbed generated cfi modules: %s" % " ".join(stubbed), file=sys.stderr)
 
     notes = ["generated cfi replaced by stubs: %s" % ", ".join(s.rsplit(".", 1)[1] for s in stubbed)] if stubbed else []
     commit = menuGraph.git_commit(src_dirs[0]) if src_dirs else None
@@ -219,7 +219,7 @@ def main():
         import json
         with open(args.json, "w") as f:
             json.dump(data, f, indent=1)
-    print("hltMenuGraph: wrote %s" % output, file=sys.stderr)
+    print("triggerMenuGraph: wrote %s" % output, file=sys.stderr)
 
 
 if __name__ == "__main__":

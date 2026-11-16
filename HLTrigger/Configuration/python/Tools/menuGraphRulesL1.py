@@ -1,6 +1,6 @@
-"""Subsystem definitions and label rules of the hltMenuGraph L1 profile (Phase-2 L1T emulation).
+"""Subsystem definitions and label rules of the triggerMenuGraph L1 profile (Phase-2 L1T emulation).
 
-Same format as menuGraphRules.py; selected with `hltMenuGraph --profile l1`.
+Same format as menuGraphRules.py; selected with `triggerMenuGraph --profile l1`.
 """
 
 SUBSYSTEMS = [

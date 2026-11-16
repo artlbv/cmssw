@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Template for hltMenuGraph (HLTrigger/Configuration/scripts/hltMenuGraph).
+  Template for triggerMenuGraph (HLTrigger/Configuration/scripts/triggerMenuGraph).
   HLTrigger.Configuration.Tools.menuGraph.render fills the TITLE, MENU and META
   placeholders (each written between double @ signs) and the DATA literal assigned to D.
   The page loads cytoscape and elkjs from public CDNs and Google Fonts.
@@ -232,7 +232,7 @@ h3 { font-size: 12px; font-weight: 600; margin: 6px 0 0; color: var(--ink-2); }
 
 <main>
   <div id="stage">
-    <div id="cy" role="img" aria-label="Producer and consumer graph of the HLT menu @@MENU@@"></div>
+    <div id="cy" role="img" aria-label="Producer and consumer graph of @@MENU@@"></div>
     <div id="busy" hidden>Laying out…</div>
     <div id="hint">Start from the subsystem overview: double-click a box to expand it, or pick a path · click a module to trace its inputs and outputs · double-click a group to collapse or expand it · scroll to zoom</div>
     <div id="tip" hidden></div>

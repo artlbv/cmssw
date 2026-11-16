@@ -1,6 +1,6 @@
-# hltMenuGraph
+# triggerMenuGraph
 
-`hltMenuGraph` turns an HLT menu, or the Phase-2 L1T emulation, into a single
+`triggerMenuGraph` turns an HLT menu, or the Phase-2 L1T emulation, into a single
 interactive HTML page showing which module produces what and which module consumes it.
 The page has three views:
 
@@ -23,17 +23,17 @@ Inside a CMSSW area, after `cmsenv` and `scram b`:
 
 ```bash
 # Phase-2 menu, with the era and process modifiers of the Phase-2 HLT workflows
-hltMenuGraph HLTrigger.Configuration.HLT_75e33_cff --era Phase2C22I13M9 --procModifiers alpaka -o HLT_75e33.html
+triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff --era Phase2C22I13M9 --procModifiers alpaka -o HLT_75e33.html
 
 # a menu fragment given as a file
-hltMenuGraph HLTrigger/Configuration/python/HLT_75e33_cff.py --era Phase2C22I13M9 -o HLT_75e33.html
+triggerMenuGraph HLTrigger/Configuration/python/HLT_75e33_cff.py --era Phase2C22I13M9 -o HLT_75e33.html
 
 # a full configuration (defining `process`), e.g. a Run-3 menu from ConfDB
 hltGetConfiguration /dev/CMSSW_X_Y_0/GRun --full --offline --unprescale > hlt.py
-hltMenuGraph hlt.py -o GRun.html
+triggerMenuGraph hlt.py -o GRun.html
 
 # or from stdin
-hltGetConfiguration /dev/CMSSW_X_Y_0/GRun --full --offline --unprescale | hltMenuGraph - -o GRun.html
+hltGetConfiguration /dev/CMSSW_X_Y_0/GRun --full --offline --unprescale | triggerMenuGraph - -o GRun.html
 ```
 
 Then open the HTML file in a browser.
@@ -42,14 +42,14 @@ Then open the HTML file in a browser.
 
 ```bash
 # the L1 steps of cmsDriver (-s L1TrackTrigger,L1,L1P2GT) with the default P2GT menu
-hltMenuGraph --profile l1 --era Phase2C22I13M9 -o L1T_Phase2.html
+triggerMenuGraph --profile l1 --era Phase2C22I13M9 -o L1T_Phase2.html
 
 # another P2GT menu from L1Trigger/Configuration/python/Phase2GTMenus, or none
-hltMenuGraph --profile l1 --era Phase2C22I13M9 --gt-menu step1_2024_explicitSeeds -o L1T_Phase2.html
-hltMenuGraph --profile l1 --era Phase2C22I13M9 --gt-menu none -o L1T_Phase2_noMenu.html
+triggerMenuGraph --profile l1 --era Phase2C22I13M9 --gt-menu step1_2024_explicitSeeds -o L1T_Phase2.html
+triggerMenuGraph --profile l1 --era Phase2C22I13M9 --gt-menu none -o L1T_Phase2_noMenu.html
 
 # any full L1 configuration, e.g. one written by cmsDriver.py --no_exec
-hltMenuGraph --profile l1 step1_L1_cfg.py -o L1T_Phase2.html
+triggerMenuGraph --profile l1 step1_L1_cfg.py -o L1T_Phase2.html
 ```
 
 Without a configuration file, `--profile l1` builds the process itself the way
@@ -105,7 +105,7 @@ keeps the era it was written with.
 For a quick look from a plain checkout, without `cmsenv`:
 
 ```bash
-python3 HLTrigger/Configuration/scripts/hltMenuGraph HLTrigger.Configuration.HLT_75e33_cff \
+python3 HLTrigger/Configuration/scripts/triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff \
   --checkout . --stub-missing-cfi -o HLT_75e33.html
 ```
 
@@ -160,15 +160,15 @@ new modules show up there and the rules can be extended.
 
 | File | Content |
 | --- | --- |
-| `scripts/hltMenuGraph` | Command-line tool |
+| `scripts/triggerMenuGraph` | Command-line tool |
 | `python/Tools/menuGraph.py` | Menu loading, graph extraction, package lookup, rendering |
 | `python/Tools/menuGraphRules.py` | Subsystem rules of the `hlt` profile |
 | `python/Tools/menuGraphRulesL1.py` | Subsystem rules of the `l1` profile |
-| `data/hltMenuGraph.html` | Page template; the script fills the title, header, and data placeholders |
-| `test/test_hltMenuGraph.sh` | Unit test: builds the pages of `HLT_75e33` and of the Phase-2 L1T emulation and checks their content |
+| `data/triggerMenuGraph.html` | Page template; the script fills the title, header, and data placeholders |
+| `test/test_triggerMenuGraph.sh` | Unit test: builds the pages of `HLT_75e33` and of the Phase-2 L1T emulation and checks their content |
 
 Run the unit test with:
 
 ```bash
-scram b runtests_test_hltMenuGraph
+scram b runtests_test_triggerMenuGraph
 ```

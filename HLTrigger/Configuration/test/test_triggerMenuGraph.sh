@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test of hltMenuGraph: build the graph pages of the Phase-2 HLT menu and of the Phase-2 L1T
+# Test of triggerMenuGraph: build the graph pages of the Phase-2 HLT menu and of the Phase-2 L1T
 # emulation (L1 profile), and check their content.
 
 function die {
@@ -12,14 +12,14 @@ function die {
   exit $2
 }
 
-rm -f test_hltMenuGraph*.html test_hltMenuGraph*.json test_hltMenuGraph*.log
+rm -f test_triggerMenuGraph*.html test_triggerMenuGraph*.json test_triggerMenuGraph*.log
 
-hltMenuGraph HLTrigger.Configuration.HLT_75e33_cff \
+triggerMenuGraph HLTrigger.Configuration.HLT_75e33_cff \
   --era Phase2C22I13M9 --procModifiers alpaka \
-  -o test_hltMenuGraph.html --json test_hltMenuGraph.json &> test_hltMenuGraph.log \
-  || die 'Failure running hltMenuGraph' $? test_hltMenuGraph.log
+  -o test_triggerMenuGraph.html --json test_triggerMenuGraph.json &> test_triggerMenuGraph.log \
+  || die 'Failure running triggerMenuGraph' $? test_triggerMenuGraph.log
 
-cat > test_hltMenuGraph_check.py <<'@EOF'
+cat > test_triggerMenuGraph_check.py <<'@EOF'
 import json, sys
 prefix, min_modules, min_paths = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
 data = json.load(open(prefix + ".json"))
@@ -45,22 +45,22 @@ print("%d modules, %d edges, %d paths" % (len(mods), len(data["edges"]), len(dat
 sys.exit(1 if errors else 0)
 @EOF
 
-python3 test_hltMenuGraph_check.py test_hltMenuGraph 400 30 \
-  || die 'Failure checking the output of hltMenuGraph (HLT_75e33)' $? test_hltMenuGraph.log
+python3 test_triggerMenuGraph_check.py test_triggerMenuGraph 400 30 \
+  || die 'Failure checking the output of triggerMenuGraph (HLT_75e33)' $? test_triggerMenuGraph.log
 
 ###
 ### L1 profile: Phase-2 L1T emulation with the default P2GT menu
 ###
-hltMenuGraph --profile l1 --era Phase2C22I13M9 \
-  -o test_hltMenuGraph_L1.html --json test_hltMenuGraph_L1.json &> test_hltMenuGraph_L1.log \
-  || die 'Failure running hltMenuGraph --profile l1' $? test_hltMenuGraph_L1.log
+triggerMenuGraph --profile l1 --era Phase2C22I13M9 \
+  -o test_triggerMenuGraph_L1.html --json test_triggerMenuGraph_L1.json &> test_triggerMenuGraph_L1.log \
+  || die 'Failure running triggerMenuGraph --profile l1' $? test_triggerMenuGraph_L1.log
 
-python3 test_hltMenuGraph_check.py test_hltMenuGraph_L1 150 10 \
-  || die 'Failure checking the output of hltMenuGraph --profile l1' $? test_hltMenuGraph_L1.log
+python3 test_triggerMenuGraph_check.py test_triggerMenuGraph_L1 150 10 \
+  || die 'Failure checking the output of triggerMenuGraph --profile l1' $? test_triggerMenuGraph_L1.log
 
-python3 - <<'@EOF' || die 'Failure checking the P2GT path decisions' $? test_hltMenuGraph_L1.log
+python3 - <<'@EOF' || die 'Failure checking the P2GT path decisions' $? test_triggerMenuGraph_L1.log
 import json, sys
-data = json.load(open("test_hltMenuGraph_L1.json"))
+data = json.load(open("test_triggerMenuGraph_L1.json"))
 decisions = [e for e in data["edges"] if e["kind"] == "pathDecision" and e["target"] == "l1tGTAlgoBlockProducer"]
 print("%d path decisions read by l1tGTAlgoBlockProducer" % len(decisions))
 sys.exit(0 if len(decisions) >= 10 else 1)
