@@ -1043,6 +1043,7 @@ function renderLint() {
     (nNew(list) ? ` <span class="badge new">${nNew(list)} new</span>` : "") + `</summary><span class="lintmsg">${help}</span>` +
     `<div class="io">${list.map(row).join("") || '<p class="empty">None.</p>'}</div></details>`;
   document.getElementById("lintBody").innerHTML =
+    (L.notes || []).map(n => `<span class="lintmsg">${esc(n)}</span>`).join("") +
     part("suspicious inputs", L.warnings, L.warnings.length > 0 && L.warnings.length <= 10,
       "Read by a module but produced by none, and named like a product of this configuration (or almost identical to an existing label).") +
     part("unread products", L.info, false,

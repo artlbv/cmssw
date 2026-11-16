@@ -402,7 +402,15 @@ def lint(data, rules_module=None):
         info.append(dict(check="unread-product", id=m["id"], paths=m["paths"],
                          message="%s (%s) runs in %d path(s) but nothing in this configuration reads its products"
                                  % (m["id"], m["type"], len(m["paths"]))))
-    return dict(warnings=warnings, info=info)
+    notes = []
+    if not any(m["kind"] == "OutputModule" for m in live):
+        notes.append("This configuration has no output module, so products meant only for the output "
+                     "(final objects, ntuple inputs) are also listed as unread products.")
+    stubs = sum(1 for m in live if m["kind"] == "Stub")
+    if stubs:
+        notes.append("%d module(s) are empty stubs for generated cfi files (--stub-missing-cfi): their inputs are "
+                     "unknown and the unread-products check skips them, so it under-reports." % stubs)
+    return dict(warnings=warnings, info=info, notes=notes)
 
 
 def _lint_key(item):
@@ -468,14 +476,14 @@ def mark_new_lint(lint_new, lint_old):
 
 # ---------------------------------------------------------------- text reports
 def format_lint(result, only_new=False):
-    lines = []
+    lines = ["Note: " + n for n in result.get("notes", [])]
     for title, items in (("Warnings", result["warnings"]), ("Info", result["info"]),
                          ("Resolved since the compared version", result.get("resolved", []))):
         items = [i for i in items if i.get("new", True) or not only_new]
         if items:
             lines.append("%s (%d)" % (title, len(items)))
             lines += ["  %s%s" % ("[new] " if i.get("new") else "", i["message"]) for i in items]
-    return "\n".join(lines) or "no findings"
+    return "\n".join(lines) if (result["warnings"] or result["info"] or result.get("resolved")) else "\n".join(lines + ["no findings"])
 
 
 def format_diff(summary, label_old="old", label_new="new"):

@@ -146,6 +146,20 @@ all, `--report FILE` writes them to a file, and the page lists them under *Check
 Each profile tunes the checks in its `LINT` dictionary (see
 [Subsystem rules](#subsystem-rules)).
 
+Limits of the checks, which read the configuration and not the C++:
+
+- A parameter that the C++ reads only when a flag is set (e.g. `useCalo` or `useME0`
+  in the `TrackAssociatorParameters`, `RemoveMuonTracks`, `doBarrel`) is still checked
+  when the flag is off. Its label is then flagged as a suspicious input although the
+  module never reads it. Such parameters are still worth cleaning up, but they do not
+  break the job.
+- A menu fragment such as `HLT_75e33` has no output module, so every product meant
+  for the output (final jets, MET, E/gamma variables; in the L1 profile, the L1 objects
+  written for NanoAOD) is listed as an unread product. The lint output says so.
+- With `--stub-missing-cfi`, stubbed modules have no known inputs and are skipped by
+  the unread-products check, so the two modes give different counts. The lint output
+  gives the number of stubs.
+
 ## Comparing two versions
 
 Write the graph of the reference version with `--json`, change the configuration (or
