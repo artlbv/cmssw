@@ -1,0 +1,1013 @@
+<!doctype html>
+<!--
+  Template for hltMenuGraph (HLTrigger/Configuration/scripts/hltMenuGraph).
+  HLTrigger.Configuration.Tools.menuGraph.render fills the TITLE, MENU and META
+  placeholders (each written between double @ signs) and the DATA literal assigned to D.
+  The page loads cytoscape and elkjs from public CDNs and Google Fonts.
+-->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>@@TITLE@@</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one-screen tool. Toolbar on top, graph canvas fills the rest, side panel (legend + inspector) on the right; stacks under the canvas on phones. */
+:root {
+  --bg: #f4f6f8;
+  --panel: #ffffff;
+  --ink: #12161c;
+  --ink-2: #485160;
+  --muted: #737d8c;
+  --line: #dce1e8;
+  --edge: #9aa3b0;
+  --control: #eef1f5;
+  --accent: #23344d;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
+  --neutral: #8a929e;
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #111317; --panel: #191c21; --ink: #eceff3; --ink-2: #b4bbc6; --muted: #8790a0;
+    --line: #2b3038; --edge: #5f6875; --control: #23272e; --accent: #c8d3e6;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+    --neutral: #7c8592;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111317; --panel: #191c21; --ink: #eceff3; --ink-2: #b4bbc6; --muted: #8790a0;
+  --line: #2b3038; --edge: #5f6875; --control: #23272e; --accent: #c8d3e6;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  --neutral: #7c8592;
+}
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-sans); font-size: 13px;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+header {
+  display: flex; flex-direction: column; gap: 10px;
+  padding-block: 12px 10px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  border-bottom: 1px solid var(--line); background: var(--panel);
+}
+.titlerow { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+h1 { font-size: 17px; font-weight: 600; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.meta { color: var(--muted); font-size: 12px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.meta code { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-2); }
+.stats { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-left: auto; font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.stats b { color: var(--ink); font-weight: 600; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.field { display: flex; align-items: center; gap: 6px; }
+.field > span { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+input[type="search"], select {
+  font: inherit; color: var(--ink); background: var(--control); border: 1px solid var(--line);
+  border-radius: 6px; padding: 5px 8px; min-height: 30px;
+}
+#pathSel { max-width: 300px; }
+#matrix { position: absolute; inset: 0; overflow: auto; background: var(--bg); z-index: 3; }
+.mxnote { margin: 0; padding: 10px 12px; color: var(--ink-2); font-size: 12px; max-width: 80ch; line-height: 1.5; }
+.mxwrap { padding: 0 12px 16px; }
+#matrix table { border-collapse: separate; border-spacing: 0; font-size: 11px; font-variant-numeric: tabular-nums; background: var(--panel); }
+#matrix th, #matrix td { border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
+#matrix thead th { position: sticky; top: 0; background: var(--panel); z-index: 2; vertical-align: bottom; padding: 6px 2px 4px; font-weight: 500; color: var(--ink-2); }
+#matrix thead th.corner { left: 0; z-index: 4; text-align: left; padding-left: 8px; font-family: var(--font-sans); text-transform: uppercase; letter-spacing: .06em; font-size: 10.5px; color: var(--muted); }
+#matrix .vh { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; font-family: var(--font-mono); display: inline-block; max-height: 250px; overflow: hidden; text-overflow: ellipsis; }
+#matrix .cdot { display: block; width: 8px; height: 8px; border-radius: 2px; margin: 0 auto 4px; }
+#matrix tbody th { position: sticky; left: 0; z-index: 1; background: var(--panel); text-align: left; font-family: var(--font-mono); font-weight: 500; padding: 3px 10px 3px 8px; white-space: nowrap; cursor: pointer; color: var(--ink); }
+#matrix tbody th:hover { background: var(--control); }
+#matrix .fam { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 7px; }
+#matrix td { min-width: 24px; height: 21px; text-align: center; cursor: pointer; color: var(--ink); }
+#matrix td:hover { outline: 2px solid var(--ink); outline-offset: -2px; }
+#matrix td.z { cursor: default; }
+#matrix td.z:hover, #matrix td.own:hover, #matrix td.tot:hover { outline: none; }
+#matrix td.own, #matrix td.tot { color: var(--ink-2); cursor: default; padding: 0 4px; }
+#matrix td.tot { border-right: 2px solid var(--line); }
+input[type="search"] { width: 240px; max-width: 60vw; font-family: var(--font-mono); font-size: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; min-height: 30px;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--control);
+  font-size: 12px; color: var(--ink-2); cursor: pointer; user-select: none;
+}
+.chip input { margin: 0; accent-color: var(--accent); }
+button {
+  font: inherit; font-size: 12px; color: var(--ink); background: var(--control);
+  border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; min-height: 30px; cursor: pointer;
+}
+button:hover { border-color: var(--muted); }
+button.primary { background: var(--accent); color: var(--panel); border-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+main { flex: 1; min-height: 0; display: flex; }
+#stage { position: relative; flex: 1; min-width: 0; }
+#cy { position: absolute; inset: 0; }
+#busy {
+  position: absolute; left: 50%; top: 14px; transform: translateX(-50%);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+  padding: 4px 12px; font-size: 12px; color: var(--ink-2);
+}
+#hint {
+  position: absolute; left: 12px; bottom: 10px; font-size: 11.5px; color: var(--muted);
+  background: color-mix(in srgb, var(--bg) 85%, transparent); padding: 3px 8px; border-radius: 6px;
+}
+#tip {
+  position: absolute; pointer-events: none; z-index: 5; max-width: 360px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.14); padding: 6px 8px; font-size: 11.5px; color: var(--ink);
+}
+#tip code { font-family: var(--font-mono); font-size: 11px; }
+#tip .dim { color: var(--muted); }
+
+aside {
+  width: 340px; flex: none; border-left: 1px solid var(--line); background: var(--panel);
+  overflow-y: auto; display: flex; flex-direction: column;
+}
+aside section { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+aside h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); font-weight: 600; margin: 0; }
+.legend { display: flex; flex-direction: column; gap: 2px; }
+.lrow {
+  display: grid; grid-template-columns: 12px 1fr auto auto; align-items: center; gap: 8px;
+  padding: 3px 4px; border-radius: 5px; cursor: pointer;
+}
+.lrow:hover { background: var(--control); }
+.lrow.off { opacity: 0.45; }
+.sw { width: 12px; height: 12px; border-radius: 3px; border: 1.5px solid; box-sizing: border-box; }
+.sw.neutral { border-style: dashed; }
+.lname { font-size: 12.5px; }
+.lcount { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.lrow button { min-height: 22px; padding: 1px 7px; font-size: 11px; }
+.key { display: grid; grid-template-columns: 34px 1fr; gap: 4px 8px; align-items: center; font-size: 11.5px; color: var(--ink-2); }
+.key svg { display: block; }
+
+#detail { flex: 1; }
+.dname { font-family: var(--font-mono); font-size: 13.5px; font-weight: 500; word-break: break-all; }
+.dsub { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-2); }
+dl { display: grid; grid-template-columns: 80px 1fr; gap: 4px 10px; margin: 0; font-size: 12px; }
+dt { color: var(--muted); }
+dd { margin: 0; word-break: break-word; }
+dd code, .io code { font-family: var(--font-mono); font-size: 11.5px; }
+.io { display: flex; flex-direction: column; gap: 1px; max-height: 260px; overflow-y: auto; }
+.io a {
+  display: grid; grid-template-columns: 10px 1fr; gap: 6px; align-items: baseline;
+  padding: 3px 4px; border-radius: 4px; color: var(--ink); text-decoration: none; cursor: pointer;
+}
+.io a:hover { background: var(--control); }
+.io .dot { width: 8px; height: 8px; border-radius: 2px; align-self: center; }
+.io .p { color: var(--muted); font-size: 11px; display: block; }
+.io .inst { color: var(--ink-2); }
+.empty { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; }
+h3 { font-size: 12px; font-weight: 600; margin: 6px 0 0; color: var(--ink-2); }
+
+@media (max-width: 760px) {
+  body { overflow: auto; height: auto; }
+  main { flex-direction: column; }
+  #stage { height: 68vh; flex: none; }
+  aside { width: auto; border-left: 0; border-top: 1px solid var(--line); }
+  .stats { margin-left: 0; }
+  input[type="search"] { width: 100%; max-width: none; }
+  .field.search { flex: 1 1 100%; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header>
+  <div class="titlerow">
+    <h1>@@TITLE@@</h1>
+    <div class="meta">
+      @@META@@
+    </div>
+    <div class="stats" id="stats"></div>
+  </div>
+  <div class="toolbar">
+    <label class="field"><span>View</span>
+      <select id="view">
+        <option value="modules">Modules</option>
+        <option value="paths">Paths &amp; shared blocks</option>
+        <option value="matrix">Path × block matrix</option>
+      </select>
+    </label>
+    <label class="field search"><span>Find</span>
+      <input type="search" id="q" list="labels" placeholder="module label, e.g. hltPFPuppi" autocomplete="off">
+      <datalist id="labels"></datalist>
+    </label>
+    <label class="field mv-only"><span>Group by</span>
+      <select id="groupBy">
+        <option value="subsystem">Subsystem</option>
+        <option value="package">CMSSW package</option>
+        <option value="task">Sequence</option>
+      </select>
+    </label>
+    <label class="field mv-only"><span>Layout</span>
+      <select id="layout">
+        <option value="RIGHT">Layered, left to right</option>
+        <option value="DOWN">Layered, top to bottom</option>
+        <option value="force">Force-directed</option>
+      </select>
+    </label>
+    <label class="field mv-only"><span>Path</span>
+      <select id="pathSel"><option value="">All paths</option></select>
+    </label>
+    <div class="chips">
+      <label class="chip mv-only"><input type="checkbox" id="show-ext" checked> External inputs</label>
+      <label class="chip mv-only"><input type="checkbox" id="show-infra" checked> Bookkeeping</label>
+      <label class="chip mv-only"><input type="checkbox" id="show-filters" checked> Path filters</label>
+      <label class="chip pv-only" hidden><input type="checkbox" id="show-common"> Blocks common to most paths</label>
+      <label class="chip pv-only" hidden><input type="checkbox" id="show-flow" checked> Block-to-block flow</label>
+      <label class="chip g-only"><input type="checkbox" id="show-labels"> Product names on edges</label>
+    </div>
+    <button id="expandAll" class="mv-only">Expand all</button>
+    <button id="collapseAll" class="mv-only">Collapse all</button>
+    <button id="fit" class="g-only">Fit to view</button>
+  </div>
+</header>
+
+<main>
+  <div id="stage">
+    <div id="cy" role="img" aria-label="Producer and consumer graph of the HLT menu @@MENU@@"></div>
+    <div id="busy" hidden>Laying out…</div>
+    <div id="hint">Start from the subsystem overview: double-click a box to expand it, or pick a path · click a module to trace its inputs and outputs · double-click a group to collapse or expand it · scroll to zoom</div>
+    <div id="tip" hidden></div>
+    <div id="matrix" hidden></div>
+  </div>
+  <aside>
+    <section>
+      <h2>Subsystems</h2>
+      <div class="legend" id="legend"></div>
+    </section>
+    <section class="g-only">
+      <h2>Edges</h2>
+      <div class="key pv-only" hidden>
+        <svg width="34" height="14" aria-hidden="true"><rect x="2" y="2" width="30" height="10" rx="3" fill="none" stroke="var(--muted)" stroke-width="1.5"/></svg><span>Shared block: a top-level sequence run by two or more paths</span>
+        <svg width="34" height="14" aria-hidden="true"><path d="M2 2 H26 L32 7 L26 12 H2 Z" fill="none" stroke="var(--muted)" stroke-width="1.5"/></svg><span>Path, with its own filters folded in</span>
+        <svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--edge)" stroke-width="2.5"/><path d="M27 1 L33 5 L27 9 Z" fill="var(--edge)"/></svg><span>Path runs the block; width is the number of its modules</span>
+        <svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--edge)" stroke-width="1.5" stroke-dasharray="5 3"/><path d="M27 1 L33 5 L27 9 Z" fill="var(--edge)"/></svg><span>One block reads products of another</span>
+      </div>
+      <div class="key mv-only">
+        <svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--edge)" stroke-width="1.5"/><path d="M27 1 L33 5 L27 9 Z" fill="var(--edge)"/></svg><span>Product consumed via an <code>InputTag</code></span>
+        <svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="var(--edge)" stroke-width="1.5" stroke-dasharray="1.5 2.5"/><path d="M27 1 L33 5 L27 9 Z" fill="var(--edge)"/></svg><span>Label passed as a plain string (e.g. <code>HitProducer</code>)</span>
+        <svg width="34" height="14" aria-hidden="true"><rect x="2" y="2" width="30" height="10" rx="3" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 2"/></svg><span>Alpaka module (portable CPU/GPU backend)</span>
+      </div>
+    </section>
+    <section id="detail">
+      <h2>Selection</h2>
+      <div id="detailBody"><p class="empty">Select a module to see its C++ plugin, package, sequences and paths, and every product it consumes or provides.</p></div>
+    </section>
+  </aside>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.2/cytoscape.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/elkjs@0.9.3/lib/elk.bundled.js"></script>
+<script>
+const D = /*@@DATA@@*/null;
+
+// ---------- model ----------
+const SUB = Object.fromEntries(D.subsystems.map(s => [s.id, s]));
+const MOD = {};
+D.modules.forEach(m => { MOD[m.id] = m; });
+D.external.forEach(e => {
+  MOD[e.id] = { id: e.id, type: "not produced here", kind: "External input", package: "—",
+                subsystem: "ext", containers: [], paths: [], inputs: [], external: true };
+});
+D.edges.forEach((e, i) => { e.i = i; });
+const OUT = {}, IN = {};
+D.edges.forEach(e => { (OUT[e.source] ||= []).push(e); (IN[e.target] ||= []).push(e); });
+const TASK_PARENT = {};
+Object.entries(D.taskChildren).forEach(([p, kids]) => kids.forEach(k => { TASK_PARENT[k] ||= p; }));
+
+const state = {
+  groupBy: "subsystem", layout: "RIGHT",
+  hide: new Set(), collapsed: new Set(D.subsystems.map(s => "g:" + s.id)), hideFilters: false, view: "modules", pvCommon: false, pvFlow: true,
+  labels: false, selected: null, isolate: null,
+};
+
+// ---------- theme ----------
+let T = {};
+function readTheme() {
+  const cs = getComputedStyle(document.documentElement);
+  const v = n => cs.getPropertyValue(n).trim();
+  T = { bg: v("--bg"), panel: v("--panel"), ink: v("--ink"), ink2: v("--ink-2"), muted: v("--muted"),
+        line: v("--line"), edge: v("--edge"), neutral: v("--neutral"),
+        s: [null, 1, 2, 3, 4, 5, 6, 7, 8].map(i => i && v("--s" + i)) };
+}
+function hex2rgb(h) { h = h.replace("#", ""); if (h.length === 3) h = h.split("").map(c => c + c).join(""); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); }
+function mix(a, b, t) { const A = hex2rgb(a), B = hex2rgb(b); return "#" + A.map((x, i) => Math.round(x * t + B[i] * (1 - t)).toString(16).padStart(2, "0")).join(""); }
+const subColor = sid => { const s = SUB[sid]; return s && s.slot ? T.s[s.slot] : T.neutral; };
+
+// ---------- grouping ----------
+function groupOf(m) {
+  if (state.groupBy === "subsystem") return "g:" + m.subsystem;
+  if (state.groupBy === "package") return "p:" + (m.external ? "External inputs" : m.package);
+  if (m.external) return "t:External inputs";
+  if (m.containers.length) return "t:" + m.containers[0];
+  return m.kind === "EDFilter" ? "t:Path filters (outside sequences)" : "t:Directly in paths";
+}
+function groupParent(gid) {
+  if (gid.startsWith("t:")) { const p = TASK_PARENT[gid.slice(2)]; return p ? "t:" + p : null; }
+  return null;
+}
+function groupLabel(gid) {
+  if (gid.startsWith("g:")) return SUB[gid.slice(2)].name;
+  return gid.slice(2);
+}
+function groupColor(gid) { return gid.startsWith("g:") ? subColor(gid.slice(2)) : T.muted; }
+function chain(gid) { const c = []; for (let g = gid; g; g = groupParent(g)) c.push(g); return c; }
+
+function visibleIds() {
+  return Object.values(MOD).filter(m => !state.hide.has(m.subsystem) && !(state.hideFilters && m.kind === "EDFilter") && (!state.isolate || state.isolate.has(m.id))).map(m => m.id);
+}
+function rep(id) {
+  const ch = chain(groupOf(MOD[id]));
+  let r = id;
+  ch.forEach(g => { if (state.collapsed.has(g)) r = g; });
+  return r;
+}
+
+// ---------- element construction ----------
+const measure = (() => { const c = document.createElement("canvas").getContext("2d"); return (txt, font) => { c.font = font; return c.measureText(txt).width; }; })();
+const MONO = '500 11px "IBM Plex Mono", ui-monospace, Menlo, monospace';
+const SANS = '600 12px "IBM Plex Sans", system-ui, sans-serif';
+
+function buildElements() {
+  const vis = visibleIds();
+  const nodes = [], groups = {}, collapsedNodes = {};
+  vis.forEach(id => {
+    const m = MOD[id], r = rep(id);
+    const ch = chain(groupOf(m));
+    // register every (non-hidden-by-collapse) ancestor group as a compound
+    for (const g of ch) {
+      if (state.collapsed.has(g)) break;
+      groups[g] ||= { n: 0 };
+      groups[g].n++;
+    }
+    if (r !== id) { (collapsedNodes[r] ||= { members: [] }).members.push(id); return; }
+    const parent = ch.find(g => !state.collapsed.has(g));
+    const color = subColor(m.subsystem);
+    const ext = !!m.external;
+    nodes.push({ data: {
+      id, label: id, parent: parent || undefined, w: Math.ceil(measure(id, MONO)) + 22, h: 26,
+      color, fill: ext ? T.panel : mix(color, T.panel, 0.2), sub: m.subsystem,
+    }, classes: [ext ? "ext" : "", m.alpaka ? "legacy" : ""].join(" ") });
+  });
+  // remove groups that are inside a collapsed ancestor
+  Object.keys(groups).forEach(g => { if (chain(g).slice(1).some(a => state.collapsed.has(a))) delete groups[g]; });
+  Object.entries(groups).forEach(([g, info]) => {
+    const p = groupParent(g);
+    const color = groupColor(g);
+    const neutral = g.startsWith("g:") && !SUB[g.slice(2)].slot;
+    nodes.push({ data: { id: g, label: groupLabel(g) + "  ·  " + info.n, parent: p && groups[p] ? p : undefined,
+      color, tint: mix(color, T.bg, g.startsWith("g:") ? 0.07 : 0.03), isGroup: true },
+      classes: "group" + (neutral || !g.startsWith("g:") ? " neutralgroup" : "") });
+  });
+  Object.entries(collapsedNodes).forEach(([g, info]) => {
+    const p = chain(g).slice(1).find(a => !state.collapsed.has(a));
+    const color = groupColor(g);
+    const l1 = groupLabel(g), l2 = info.members.length + " modules, collapsed";
+    nodes.push({ data: { id: g, label: l1 + "\n" + l2, parent: p && groups[p] ? p : undefined,
+      w: Math.ceil(Math.max(measure(l1, SANS), measure(l2, SANS))) + 30, h: 44,
+      color, fill: mix(color, T.panel, 0.32), members: info.members, isCollapsed: true }, classes: "collapsed" });
+  });
+  // edges, aggregated through collapsed groups
+  const visSet = new Set(vis), agg = {};
+  D.edges.forEach(e => {
+    if (!visSet.has(e.source) || !visSet.has(e.target)) return;
+    const s = rep(e.source), t = rep(e.target);
+    if (s === t) return;
+    const kind = e.kind || "InputTag";
+    const k = s + "→" + t + "→" + kind;
+    (agg[k] ||= { s, t, kind, items: [] }).items.push(e.i);
+  });
+  const edges = Object.entries(agg).map(([k, a]) => {
+    const single = a.items.length === 1 ? D.edges[a.items[0]] : null;
+    const insts = [...new Set(a.items.map(i => D.edges[i].instance).filter(Boolean))];
+    const label = single ? (single.instance || "") : (insts.length === 1 && a.items.length === insts.length ? insts[0] : "×" + a.items.length);
+    return { data: { id: "e:" + k, source: a.s, target: a.t, items: a.items, n: a.items.length, label },
+             classes: a.kind === "pathDecision" ? "path" : a.kind === "inferredString" ? "inferred" : "" };
+  });
+  return { nodes, edges };
+}
+
+// ---------- cytoscape ----------
+function style() {
+  return [
+    { selector: "node[w]", style: { width: "data(w)", height: "data(h)" } },
+    { selector: "node", style: {
+      shape: "round-rectangle",
+      "background-color": "data(fill)", "border-width": 1.5, "border-color": "data(color)",
+      label: "data(label)", "font-family": "IBM Plex Mono, ui-monospace, Menlo, monospace", "font-size": 11, "font-weight": 500,
+      color: T.ink, "text-valign": "center", "text-halign": "center", "min-zoomed-font-size": 6,
+    } },
+    { selector: "node.legacy", style: { "border-style": "dashed" } },
+    { selector: "node.ext", style: { "border-style": "dotted", "border-width": 2, "border-color": T.muted, color: T.ink2 } },
+    { selector: "node.collapsed", style: {
+      "font-family": "IBM Plex Sans, system-ui, sans-serif", "font-size": 12, "font-weight": 600,
+      "text-wrap": "wrap", "border-width": 2, "line-height": 1.35,
+    } },
+    { selector: "node.group", style: {
+      shape: "round-rectangle", "background-color": "data(tint)", "background-opacity": 1,
+      "border-width": 1, "border-color": "data(color)", "border-opacity": 0.55,
+      label: "data(label)", "font-family": "IBM Plex Sans, system-ui, sans-serif", "font-size": 20, "font-weight": 600,
+      "text-transform": "uppercase", color: T.ink2, "text-valign": "top", "text-halign": "center",
+      "text-margin-y": -6, padding: 12, "min-zoomed-font-size": 4,
+    } },
+    { selector: "node.group.neutralgroup", style: { "border-style": "dashed", "border-color": T.muted } },
+    { selector: "edge", style: {
+      width: 1.2, "line-color": T.edge, "target-arrow-color": T.edge, "target-arrow-shape": "triangle",
+      "arrow-scale": 0.75, "curve-style": "bezier", opacity: 0.8,
+      "font-family": "IBM Plex Mono, ui-monospace, monospace", "font-size": 9, color: T.ink2,
+      "text-background-color": T.panel, "text-background-opacity": 0.9, "text-background-padding": 2,
+      "text-background-shape": "round-rectangle", "min-zoomed-font-size": 7,
+    } },
+    { selector: "edge[n > 1]", style: { width: "mapData(n, 2, 40, 2, 6)" } },
+    { selector: "edge.path", style: { "line-style": "dashed", "line-dash-pattern": [6, 4] } },
+    { selector: "edge.inferred", style: { "line-style": "dotted" } },
+    { selector: "edge.showlabel", style: { label: "data(label)" } },
+    { selector: ".faded", style: { opacity: 0.12 } },
+    { selector: "node.group.faded", style: { opacity: 0.35 } },
+    { selector: "edge.hl", style: { "line-color": T.ink, "target-arrow-color": T.ink, width: 2, opacity: 1, label: "data(label)", "z-index": 9 } },
+    { selector: "edge.hl[n > 1]", style: { width: "mapData(n, 2, 40, 2.5, 6)" } },
+    { selector: "node.block", style: { "text-wrap": "wrap", "line-height": 1.3, "font-size": 12 } },
+    { selector: "node.block.common", style: { "border-style": "dashed" } },
+    { selector: "node.pathnode", style: { shape: "tag", "border-width": 2, "font-size": 13, "min-zoomed-font-size": 3 } },
+    { selector: "node.block", style: { "min-zoomed-font-size": 3 } },
+    { selector: "edge.flow", style: { "line-style": "dashed", "line-dash-pattern": [6, 4], opacity: 0.55, width: "mapData(n, 1, 60, 1, 4)" } },
+    { selector: "node.sel", style: { "border-width": 3, "border-color": T.ink, "z-index": 10 } },
+    { selector: "node.hover", style: { "border-width": 2.5 } },
+  ];
+}
+
+let cy;
+const elk = new ELK();
+
+async function render(keepView) {
+  const busy = document.getElementById("busy");
+  busy.hidden = false;
+  await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
+  if (state.view === "matrix") { busy.hidden = true; showMatrix(); return; }
+  const { nodes, edges } = state.view === "paths" ? buildPathElements() : buildElements();
+  cy.elements().remove();
+  cy.add(nodes); cy.add(edges);
+  applyLabels();
+  if (state.view === "paths") { pvLayout(); if (!keepView) cy.fit(undefined, 30); }
+  else if (state.layout === "force") {
+    await new Promise(res => {
+      const l = cy.layout({ name: "cose", animate: false, nodeRepulsion: () => 9000, idealEdgeLength: () => 70,
+        nestingFactor: 0.9, gravity: 0.6, componentSpacing: 60, padding: 30, randomize: true, fit: !keepView });
+      l.one("layoutstop", res); l.run();
+    });
+  } else {
+    await elkLayout(nodes, edges, keepView);
+  }
+  busy.hidden = true;
+  if (state.selected && cy.getElementById(state.selected).nonempty()) select(state.selected, false);
+  else if (state.selected && MOD[state.selected] && state.view === "modules") { const r = rep(state.selected); cy.getElementById(r).nonempty() ? select(r, false) : clearSel(); }
+  renderLegend();
+}
+
+async function elkLayout(nodes, edges, keepView) {
+  const byId = {}, root = { id: "root", children: [], edges: [], layoutOptions: {
+    "elk.algorithm": "layered", "elk.direction": state.layout,
+    "elk.hierarchyHandling": "INCLUDE_CHILDREN",
+    "elk.layered.spacing.nodeNodeBetweenLayers": state.view === "paths" ? "90" : "46",
+    "elk.spacing.nodeNode": "10", "elk.spacing.componentComponent": "40",
+    "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
+    "elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",
+    "elk.layered.considerModelOrder.strategy": "NODES_AND_EDGES",
+    "elk.edgeRouting": state.view === "paths" ? "POLYLINE" : "SPLINES",
+  } };
+  nodes.forEach(n => { byId[n.data.id] = { id: n.data.id, children: [],
+    width: n.data.w || 40, height: n.data.h || 30,
+    layoutOptions: n.data.elk || (n.data.isGroup ? { "elk.padding": "[top=46,left=14,bottom=14,right=14]" } : {}) }; });
+  // keep ELK model order in subsystem order so the left-to-right story reads naturally
+  const order = Object.fromEntries(D.subsystems.map((s, i) => [s.id, i]));
+  const sortKey = n => n.data.order ?? sortKey0(n);
+  const sortKey0 = n => { const m = MOD[n.data.id]; const sid = n.data.id.startsWith("g:") ? n.data.id.slice(2) : m ? m.subsystem : ""; return order[sid] ?? 99; };
+  [...nodes].sort((a, b) => sortKey(a) - sortKey(b)).forEach(n => {
+    const p = n.data.parent ? byId[n.data.parent] : root;
+    p.children.push(byId[n.data.id]);
+  });
+  edges.forEach(e => root.edges.push({ id: e.data.id, sources: [e.data.source], targets: [e.data.target] }));
+  const res = await elk.layout(root);
+  const pos = {};
+  (function walk(n, ox, oy) {
+    (n.children || []).forEach(c => {
+      const x = ox + c.x, y = oy + c.y;
+      if (c.children && c.children.length) walk(c, x, y);
+      else pos[c.id] = { x: x + c.width / 2, y: y + c.height / 2 };
+    });
+  })(res, 0, 0);
+  cy.nodes().filter(n => !n.isParent()).forEach(n => { if (pos[n.id()]) n.position(pos[n.id()]); });
+  if (!keepView) cy.fit(undefined, 30);
+}
+
+function applyLabels() {
+  cy.edges().toggleClass("showlabel", state.labels);
+}
+
+// ---------- selection ----------
+function lineage(id) {
+  // transitive upstream / downstream over the full module graph
+  const up = new Set(), down = new Set();
+  const walk = (start, map, key, acc) => { const st = [start]; while (st.length) { const x = st.pop(); (map[x] || []).forEach(e => { const y = e[key]; if (!acc.has(y)) { acc.add(y); st.push(y); } }); } };
+  walk(id, IN, "source", up); walk(id, OUT, "target", down);
+  return { up, down };
+}
+
+function clearSel() {
+  state.selected = null;
+  cy.elements().removeClass("faded hl sel");
+  document.getElementById("detailBody").innerHTML = '<p class="empty">Select a module to see its C++ plugin, package, sequences and paths, and every product it consumes or provides.</p>';
+}
+
+function select(id, center = true) {
+  if (state.view === "paths") return selectPV(id, center);
+  const node = cy.getElementById(id);
+  if (node.empty()) return;
+  state.selected = id;
+  cy.elements().removeClass("faded hl sel");
+  if (node.data("isGroup")) { showGroup(id); return; }
+  const members = node.data("isCollapsed") ? node.data("members") : [id];
+  // highlight the direct neighbourhood in the rendered graph, plus the transitive chain
+  const ids = new Set();
+  members.forEach(mid => { const { up, down } = lineage(mid); ids.add(mid); up.forEach(x => ids.add(x)); down.forEach(x => ids.add(x)); });
+  const shown = new Set([...ids].map(x => MOD[x] ? rep(x) : x));
+  cy.elements().addClass("faded");
+  cy.nodes().filter(n => !n.isParent() && shown.has(n.id())).removeClass("faded").ancestors().removeClass("faded");
+  cy.edges().filter(e => shown.has(e.source().id()) && shown.has(e.target().id()) &&
+    e.data("items").some(i => ids.has(D.edges[i].source) && ids.has(D.edges[i].target))).removeClass("faded").addClass("hl");
+  node.removeClass("faded").addClass("sel");
+  if (center) cy.animate({ center: { eles: node }, zoom: Math.max(cy.zoom(), 0.9) }, { duration: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 300 });
+  if (node.data("isCollapsed")) showGroup(id); else showModule(id, ids);
+}
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function dot(sid) { return `<span class="dot" style="background:${subColor(sid)}"></span>`; }
+function ioLink(target, main, sub) { return `<a data-go="${esc(target)}">${dot(MOD[target] ? MOD[target].subsystem : "ext")}<span><code>${main}</code>${sub ? `<span class="p">${sub}</span>` : ""}</span></a>`; }
+
+function showModule(id, chainIds) {
+  const m = MOD[id], s = SUB[m.subsystem];
+  const ins = (IN[id] || []), outs = (OUT[id] || []);
+  const inHtml = ins.map(e => ioLink(e.source, esc(e.source) + (e.instance ? `<span class="inst">:${esc(e.instance)}</span>` : ""),
+      e.kind === "pathDecision" ? "decision of path " + esc(e.path) : esc(e.param) + (e.inferred ? " (string)" : ""))).join("");
+  const outHtml = outs.map(e => ioLink(e.target, esc(e.target), (e.instance ? "reads :" + esc(e.instance) + " via " : "via ") + esc(e.param))).join("");
+  const products = [...new Set(outs.filter(e => e.kind !== "pathDecision").map(e => e.instance || "(default)"))];
+  const { up, down } = lineage(id);
+  document.getElementById("detailBody").innerHTML = `
+    <div class="dname">${esc(id)}</div>
+    <div class="dsub">${dot(m.subsystem)}${esc(s.name)}${m.alpaka ? " · Alpaka" : ""}</div>
+    <dl>
+      <dt>Plugin</dt><dd><code>${esc(m.type)}</code> <span style="color:var(--muted)">${esc(m.kind)}</span></dd>
+      <dt>Package</dt><dd><code>${esc(m.package)}</code></dd>
+      ${m.containers.length ? `<dt>Sequence</dt><dd><code>${m.containers.map(esc).join("</code>, <code>")}</code></dd>` : ""}
+      ${m.paths.length ? `<dt>Paths (${m.paths.length})</dt><dd><code>${m.paths.map(esc).join("</code>, <code>")}</code></dd>` : ""}
+      <dt>Products read</dt><dd>${products.length ? products.map(p => `<code>${esc(p)}</code>`).join(", ") : '<span style="color:var(--muted)">none consumed in this config</span>'}</dd>
+      <dt>Chain</dt><dd>${up.size} upstream, ${down.size} downstream</dd>
+    </dl>
+    <div class="actions">
+      <button class="primary" data-isolate="${esc(id)}">Show only this chain</button>
+      ${state.isolate ? '<button data-showall="1">Show everything</button>' : ""}
+    </div>
+    <h3>Consumes (${ins.length})</h3>
+    <div class="io">${inHtml || '<p class="empty">No inputs: reads only event setup or nothing.</p>'}</div>
+    <h3>Consumed by (${outs.length})</h3>
+    <div class="io">${outHtml || '<p class="empty">Nothing in this configuration reads its products. They are written to the event as an output.</p>'}</div>`;
+}
+
+function showGroup(gid) {
+  const node = cy.getElementById(gid);
+  const members = node.data("isCollapsed") ? node.data("members")
+    : visibleIds().filter(id => chain(groupOf(MOD[id])).includes(gid));
+  const sid = gid.startsWith("g:") ? gid.slice(2) : null;
+  const collapsed = state.collapsed.has(gid);
+  document.getElementById("detailBody").innerHTML = `
+    <div class="dname" style="font-family:var(--font-sans);font-weight:600">${esc(groupLabel(gid))}</div>
+    ${sid ? `<div class="dsub">${esc(SUB[sid].desc)}</div>` : ""}
+    <div class="actions"><button class="primary" data-toggle="${esc(gid)}">${collapsed ? "Expand group" : "Collapse group"}</button>
+    ${state.isolate ? '<button data-showall="1">Show everything</button>' : ""}</div>
+    <h3>Modules (${members.length})</h3>
+    <div class="io">${members.sort().map(id => ioLink(id, esc(id), esc(MOD[id].type))).join("")}</div>`;
+}
+
+function goTo(id) {
+  if (!MOD[id]) return;
+  if (state.view !== "modules") {
+    state.view = "modules"; document.getElementById("view").value = "modules";
+    state.isolate = null; pathSel.value = ""; syncControls();
+  }
+  if (state.hide.has(MOD[id].subsystem)) { state.hide.delete(MOD[id].subsystem); syncChips(); }
+  if (state.isolate && !state.isolate.has(id)) state.isolate = null;
+  let changed = false;
+  chain(groupOf(MOD[id])).forEach(g => { if (state.collapsed.delete(g)) changed = true; });
+  state.selected = id;
+  if (changed || cy.getElementById(id).empty()) render(true).then(() => select(id)); else select(id);
+}
+
+// ---------- legend & controls ----------
+function renderLegend() {
+  const counts = {};
+  Object.values(MOD).forEach(m => { counts[m.subsystem] = (counts[m.subsystem] || 0) + 1; });
+  const el = document.getElementById("legend");
+  el.innerHTML = D.subsystems.map(s => {
+    const gid = "g:" + s.id, c = subColor(s.id);
+    const canCollapse = state.groupBy === "subsystem";
+    const hidden = state.hide.has(s.id);
+    return `<div class="lrow${hidden ? " off" : ""}" data-sub="${s.id}" title="${esc(s.desc)}">
+      <span class="sw${s.slot ? "" : " neutral"}" style="border-color:${c};background:${s.slot ? mix(c, T.panel, 0.35) : "transparent"}"></span>
+      <span class="lname">${s.id === "gtmenu" ? "&nbsp;&nbsp;└ " : ""}${esc(s.name)}</span>
+      <span class="lcount">${counts[s.id] || 0}</span>
+      ${canCollapse && !hidden ? `<button data-toggle="${gid}" aria-label="${state.collapsed.has(gid) ? "Expand" : "Collapse"} ${esc(s.name)}">${state.collapsed.has(gid) ? "Expand" : "Collapse"}</button>` : "<span></span>"}
+    </div>`;
+  }).join("");
+}
+
+function toggleGroup(gid) {
+  state.collapsed.has(gid) ? state.collapsed.delete(gid) : state.collapsed.add(gid);
+  state.selected = gid.startsWith("g:") && state.collapsed.has(gid) ? gid : state.selected;
+  render(true);
+}
+
+const chipMap = { "show-ext": "ext", "show-infra": "infra" };
+function syncChips() { Object.entries(chipMap).forEach(([cid, sid]) => { document.getElementById(cid).checked = !state.hide.has(sid); }); }
+
+document.addEventListener("click", ev => {
+  const t = ev.target.closest("[data-go],[data-toggle],[data-isolate],[data-showall],.lrow");
+  if (!t) return;
+  if (t.dataset.go) goTo(t.dataset.go);
+  else if (t.dataset.toggle) { ev.stopPropagation(); toggleGroup(t.dataset.toggle); }
+  else if (t.dataset.isolate) {
+    const id = t.dataset.isolate, { up, down } = lineage(id);
+    state.isolate = new Set([id, ...up, ...down]); document.getElementById("pathSel").value = "";
+    state.collapsed.clear(); state.selected = id; render(false);
+  }
+  else if (t.dataset.showall) { state.isolate = null; document.getElementById("pathSel").value = ""; render(false); }
+  else if (t.classList.contains("lrow")) {
+    const sid = t.dataset.sub;
+    if (state.groupBy === "subsystem" && !state.hide.has(sid)) {
+      const n = cy.getElementById("g:" + sid);
+      if (n.nonempty()) { select(n.id(), false); cy.animate({ fit: { eles: n, padding: 40 } }, { duration: 300 }); }
+    }
+  }
+});
+
+Object.keys(chipMap).forEach(cid => document.getElementById(cid).addEventListener("change", ev => {
+  ev.target.checked ? state.hide.delete(chipMap[cid]) : state.hide.add(chipMap[cid]);
+  render(false);
+}));
+document.getElementById("show-filters").addEventListener("change", ev => { state.hideFilters = !ev.target.checked; render(false); });
+const pathSel = document.getElementById("pathSel");
+pathSel.insertAdjacentHTML("beforeend", Object.entries(D.paths).map(([p, ms]) => `<option value="${esc(p)}">${esc(p)} (${ms.length})</option>`).join(""));
+pathSel.addEventListener("change", () => {
+  const p = pathSel.value;
+  state.isolate = p ? new Set(D.paths[p]) : null;
+  state.collapsed.clear(); render(false);
+});
+document.getElementById("show-labels").addEventListener("change", ev => { state.labels = ev.target.checked; applyLabels(); });
+document.getElementById("groupBy").addEventListener("change", ev => {
+  state.groupBy = ev.target.value;
+  state.collapsed = new Set(allGroupIds().filter(g => !groupParent(g)));
+  render(false);
+});
+document.getElementById("layout").addEventListener("change", ev => { state.layout = ev.target.value; render(false); });
+function allGroupIds() {
+  return [...new Set(Object.values(MOD).flatMap(m => chain(groupOf(m))))];
+}
+document.getElementById("expandAll").addEventListener("click", () => { state.collapsed.clear(); render(false); });
+document.getElementById("collapseAll").addEventListener("click", () => {
+  const ids = allGroupIds();
+  // collapse only top-level groups so the overview shows one box per group
+  state.collapsed = new Set(ids.filter(g => !groupParent(g))); render(false);
+});
+document.getElementById("fit").addEventListener("click", () => cy.fit(undefined, 30));
+const q = document.getElementById("q");
+q.addEventListener("change", () => { if (MOD[q.value.trim()]) goTo(q.value.trim()); });
+q.addEventListener("keydown", ev => {
+  if (ev.key !== "Enter") return;
+  const v = q.value.trim().toLowerCase();
+  const hit = Object.keys(MOD).find(k => k.toLowerCase() === v) || Object.keys(MOD).find(k => k.toLowerCase().includes(v));
+  if (hit) { q.value = hit; goTo(hit); }
+});
+
+// ---------- path view: shared reconstruction blocks feeding paths ----------
+const PATH_IDS = Object.keys(D.paths);
+function topSeq(s) { while (TASK_PARENT[s]) s = TASK_PARENT[s]; return s; }
+const SUB_ORDER = Object.fromEntries(D.subsystems.map((s, i) => [s.id, i]));
+function dominant(ids) {
+  const c = {};
+  ids.forEach(id => { const s = MOD[id].subsystem; c[s] = (c[s] || 0) + 1; });
+  const main = Object.entries(c).filter(([s]) => s !== "infra" && s !== "l1" && s !== "ext").sort((a, b) => b[1] - a[1]);
+  if (main.length) return main[0][0];
+  const any = Object.entries(c).sort((a, b) => b[1] - a[1]);
+  return any.length ? any[0][0] : "infra";
+}
+const PV = (() => {
+  const raw = {}, rawOf = {};
+  D.modules.forEach(m => {
+    if (m.kind === "EDFilter" && !m.containers.length) return;      // path filter: belongs to its path
+    const b = m.containers.length ? topSeq(m.containers[0]) : SUB[m.subsystem].name + ": standalone producers";
+    (raw[b] ||= []).push(m.id); rawOf[m.id] = b;
+  });
+  const usedBy = {};
+  PATH_IDS.forEach(p => D.paths[p].forEach(id => { const b = rawOf[id]; if (b) (usedBy[b] ||= new Set()).add(p); }));
+  const nP = PATH_IDS.length, COMMON = "b:common";
+  const blocks = {}, blockOf = {};
+  Object.entries(raw).forEach(([b, mods]) => {
+    const n = (usedBy[b] || new Set()).size;
+    if (n <= 1) return;                                              // used by one path only: folded into that path
+    const id = n >= 0.75 * nP ? COMMON : "b:" + b;
+    blocks[id] ||= { id, name: id === COMMON ? "Common to most paths" : b, seqs: [], mods: [], paths: new Set() };
+    blocks[id].seqs.push(b);
+    mods.forEach(x => { blocks[id].mods.push(x); blockOf[x] = id; });
+  });
+  Object.values(blocks).forEach(B => {
+    B.sub = dominant(B.mods);
+    PATH_IDS.forEach(p => { if (D.paths[p].some(x => blockOf[x] === B.id)) B.paths.add(p); });
+  });
+  if (blocks[COMMON]) blocks[COMMON].sub = "infra";
+  const paths = {};
+  PATH_IDS.forEach(p => {
+    const own = D.paths[p].filter(x => !blockOf[x]);
+    const use = {};
+    D.paths[p].forEach(x => { const b = blockOf[x]; if (b) use[b] = (use[b] || 0) + 1; });
+    paths[p] = { id: "p:" + p, name: p, own, use, sub: dominant(own.length ? own : D.paths[p]),
+                 endpath: (D.endpaths || []).includes(p) };
+  });
+  // block -> block product flow
+  const flow = {};
+  D.edges.forEach(e => {
+    const a = blockOf[e.source], b = blockOf[e.target];
+    if (a && b && a !== b) { const k = a + "→" + b; (flow[k] ||= { s: a, t: b, n: 0 }).n++; }
+  });
+  const hasInput = {};
+  Object.values(flow).forEach(f => { if (f.s !== COMMON) hasInput[f.t] = true; });
+  return { blocks, blockOf, paths, flow, COMMON, hasInput };
+})();
+const pvPathOrder = PATH_IDS.slice().sort((a, b) =>
+  (SUB_ORDER[PV.paths[a].sub] - SUB_ORDER[PV.paths[b].sub]) || a.localeCompare(b));
+const pvBlockOrder = Object.values(PV.blocks).sort((a, b) =>
+  (b.id === PV.COMMON) - (a.id === PV.COMMON) || b.paths.size - a.paths.size || a.name.localeCompare(b.name)).map(B => B.id);
+
+function pvShown(bid) { return state.pvCommon || bid !== PV.COMMON; }
+function buildPathElements() {
+  const nodes = [], edges = [];
+  pvBlockOrder.filter(pvShown).forEach((bid, i) => {
+    const B = PV.blocks[bid], c = subColor(B.sub);
+    const l2 = `${B.mods.length} modules · ${B.paths.size} paths`;
+    nodes.push({ data: { id: bid, label: B.name + "\n" + l2, order: SUB_ORDER[B.sub] * 1000 + i,
+      w: Math.ceil(Math.max(measure(B.name, MONO), measure(l2, MONO)) * 12 / 11) + 24, h: 44,
+      color: c, fill: mix(c, T.panel, bid === PV.COMMON ? 0.08 : 0.25),
+      tip: `<div><code>${esc(B.name)}</code></div><div class="dim">${esc(SUB[B.sub].name)} · ${B.mods.length} modules · used by ${B.paths.size} paths</div>` },
+      elk: PV.hasInput[bid] ? {} : { "elk.layered.layering.layerConstraint": "FIRST" },
+      classes: "block" + (bid === PV.COMMON ? " common" : "") });
+  });
+  pvPathOrder.forEach((p, i) => {
+    const P = PV.paths[p], c = subColor(P.sub), n = D.paths[p].length;
+    nodes.push({ data: { id: P.id, label: p, order: 100000 + i, w: Math.ceil(measure(p, MONO) * 13 / 11) + 34, h: 30,
+      color: c, fill: mix(c, T.panel, 0.12),
+      tip: `<div><code>${esc(p)}</code></div><div class="dim">${P.endpath ? "EndPath" : "Path"} · ${n} modules, ${P.own.length} of them its own</div>` },
+      elk: { "elk.layered.layering.layerConstraint": "LAST" }, classes: "pathnode" });
+    Object.entries(P.use).forEach(([bid, k]) => {
+      if (!pvShown(bid)) return;
+      edges.push({ data: { id: "e:" + bid + "→" + P.id, source: bid, target: P.id, n: k, items: [], label: String(k),
+        tip: `<div><code>${esc(PV.blocks[bid].name)}</code> <span class="dim">→</span> <code>${esc(p)}</code></div><div class="dim">path runs ${k} of its ${PV.blocks[bid].mods.length} modules</div>` } });
+    });
+  });
+  if (state.pvFlow) Object.values(PV.flow).forEach(f => {
+    if (!pvShown(f.s) || !pvShown(f.t)) return;
+    edges.push({ data: { id: "f:" + f.s + "→" + f.t, source: f.s, target: f.t, n: f.n, items: [], label: "×" + f.n,
+      tip: `<div><code>${esc(PV.blocks[f.s].name)}</code> <span class="dim">feeds</span> <code>${esc(PV.blocks[f.t].name)}</code></div><div class="dim">${f.n} product dependencies</div>` },
+      classes: "flow" });
+  });
+  return { nodes, edges };
+}
+
+function pvLink(attr, val, main, sub, sid) {
+  return `<a ${attr}="${esc(val)}"><span class="dot" style="background:${subColor(sid)}"></span><span><code>${main}</code>${sub ? `<span class="p">${sub}</span>` : ""}</span></a>`;
+}
+function selectPV(id, center) {
+  const node = cy.getElementById(id);
+  if (node.empty()) return;
+  state.selected = id;
+  cy.elements().removeClass("faded hl sel");
+  const keep = new Set([id]);
+  if (id.startsWith("p:")) {
+    Object.keys(PV.paths[id.slice(2)].use).forEach(b => keep.add(b));
+  } else {
+    PV.blocks[id].paths.forEach(p => keep.add("p:" + p));
+    // upstream blocks via product flow
+    const st = [id];
+    while (st.length) { const x = st.pop(); Object.values(PV.flow).forEach(f => { if (f.t === x && !keep.has(f.s)) { keep.add(f.s); st.push(f.s); } }); }
+  }
+  cy.elements().addClass("faded");
+  cy.nodes().filter(n => keep.has(n.id())).removeClass("faded");
+  cy.edges().filter(e => keep.has(e.source().id()) && keep.has(e.target().id()) &&
+    (id.startsWith("b:") ? (e.target().id() === id || e.source().id() === id || e.hasClass("flow")) : (e.target().id() === id || e.hasClass("flow"))))
+    .removeClass("faded").addClass("hl");
+  node.removeClass("faded").addClass("sel");
+  if (center) cy.animate({ center: { eles: node }, zoom: Math.max(cy.zoom(), 0.8) }, { duration: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 300 });
+  id.startsWith("p:") ? showPVPath(id.slice(2)) : showPVBlock(id);
+}
+function showPVPath(p) {
+  const P = PV.paths[p], all = D.paths[p];
+  const used = Object.entries(P.use).sort((a, b) => b[1] - a[1]);
+  document.getElementById("detailBody").innerHTML = `
+    <div class="dname">${esc(p)}</div>
+    <div class="dsub">${dot(P.sub)}${esc(SUB[P.sub].name)} · ${P.endpath ? "EndPath" : "Path"}</div>
+    <dl>
+      <dt>Modules</dt><dd>${all.length} in total</dd>
+      <dt>Shared</dt><dd>${all.length - P.own.length} from ${used.length} shared blocks</dd>
+      <dt>Own</dt><dd>${P.own.length} (filters and modules no other path runs)</dd>
+    </dl>
+    <div class="actions"><button class="primary" data-openpath="${esc(p)}">Show this path's modules</button></div>
+    <h3>Shared blocks (${used.length})</h3>
+    <div class="io">${used.map(([b, k]) => pvLink("data-pvsel", b, esc(PV.blocks[b].name), `${k} of ${PV.blocks[b].mods.length} modules · shared with ${PV.blocks[b].paths.size - 1} other paths`, PV.blocks[b].sub)).join("")}</div>
+    <h3>Own modules (${P.own.length})</h3>
+    <div class="io">${P.own.map(x => ioLink(x, esc(x), esc(MOD[x].type))).join("") || '<p class="empty">None.</p>'}</div>`;
+}
+function showPVBlock(bid) {
+  const B = PV.blocks[bid];
+  const up = Object.values(PV.flow).filter(f => f.t === bid), down = Object.values(PV.flow).filter(f => f.s === bid);
+  document.getElementById("detailBody").innerHTML = `
+    <div class="dname">${esc(B.name)}</div>
+    <div class="dsub">${dot(B.sub)}${esc(SUB[B.sub].name)}</div>
+    <dl>
+      <dt>Modules</dt><dd>${B.mods.length}</dd>
+      <dt>Used by</dt><dd>${B.paths.size} of ${PATH_IDS.length} paths</dd>
+      ${B.seqs.length > 1 || B.seqs[0] !== B.name ? `<dt>Sequences</dt><dd><code>${B.seqs.map(esc).join("</code>, <code>")}</code></dd>` : ""}
+    </dl>
+    <h3>Paths (${B.paths.size})</h3>
+    <div class="io">${pvPathOrder.filter(p => B.paths.has(p)).map(p => pvLink("data-pvsel", "p:" + p, esc(p), `runs ${PV.paths[p].use[bid]} of these modules`, PV.paths[p].sub)).join("")}</div>
+    <h3>Reads products from (${up.length})</h3>
+    <div class="io">${up.map(f => pvLink("data-pvsel", f.s, esc(PV.blocks[f.s].name), `${f.n} dependencies`, PV.blocks[f.s].sub)).join("") || '<p class="empty">Only external inputs.</p>'}</div>
+    <h3>Feeds (${down.length})</h3>
+    <div class="io">${down.map(f => pvLink("data-pvsel", f.t, esc(PV.blocks[f.t].name), `${f.n} dependencies`, PV.blocks[f.t].sub)).join("") || '<p class="empty">No other shared block reads its products.</p>'}</div>
+    <h3>Modules (${B.mods.length})</h3>
+    <div class="io">${B.mods.slice().sort().map(x => ioLink(x, esc(x), esc(MOD[x].type))).join("")}</div>`;
+}
+
+// ---------- matrix view ----------
+function showMatrix() {
+  const cols = pvBlockOrder;
+  const head = cols.map(b => { const B = PV.blocks[b];
+    return `<th title="${esc(B.name)} · ${B.mods.length} modules · ${B.paths.size} paths"><span class="cdot" style="background:${subColor(B.sub)}"></span><span class="vh">${esc(B.name)}</span></th>`; }).join("");
+  const rows = pvPathOrder.map(p => { const P = PV.paths[p];
+    const cells = cols.map(b => { const k = P.use[b] || 0, B = PV.blocks[b];
+      if (!k) return `<td class="z"></td>`;
+      const frac = k / B.mods.length;
+      return `<td data-cell="${esc(p)}|${esc(b)}" style="background:${mix(subColor(B.sub), T.panel, 0.18 + 0.55 * frac)}" title="${esc(p)} runs ${k} of ${B.mods.length} modules of ${esc(B.name)}">${k}</td>`; }).join("");
+    return `<tr><th data-openpath="${esc(p)}" title="Show this path's modules"><span class="fam" style="background:${subColor(P.sub)}"></span>${esc(p)}</th><td class="own" title="${P.own.length} modules only this path runs">${P.own.length}</td><td class="tot">${D.paths[p].length}</td>${cells}</tr>`; }).join("");
+  document.getElementById("matrix").innerHTML = `
+    <p class="mxnote">Each cell counts the modules a path runs from a shared block (a top-level sequence used by at least two paths). Shading is the fraction of the block the path uses. Click a path name or a cell to open those modules in the module view.</p>
+    <div class="mxwrap"><table>
+      <thead><tr><th class="corner">Path</th><th class="num"><span class="vh">Own modules</span></th><th class="num"><span class="vh">Total modules</span></th>${head}</tr></thead>
+      <tbody>${rows}</tbody></table></div>`;
+}
+
+function openModules(p, ids) {
+  state.view = "modules"; document.getElementById("view").value = "modules";
+  pathSel.value = p; state.isolate = new Set(ids || D.paths[p]);
+  state.selected = null; state.collapsed.clear(); syncControls(); render(false);
+}
+function syncControls() {
+  const v = state.view;
+  document.querySelectorAll(".mv-only").forEach(el => { el.hidden = v !== "modules"; });
+  document.querySelectorAll(".pv-only").forEach(el => { el.hidden = v !== "paths"; });
+  document.querySelectorAll(".g-only").forEach(el => { el.hidden = v === "matrix"; });
+  document.getElementById("matrix").hidden = v !== "matrix";
+  document.getElementById("hint").textContent = v === "paths"
+    ? "Shared blocks on the left feed the paths on the right · click a path or block to trace it · scroll to zoom"
+    : v === "matrix" ? "" : HINT_MODULES;
+}
+const HINT_MODULES = document.getElementById("hint").textContent;
+document.getElementById("view").addEventListener("change", ev => {
+  state.view = ev.target.value; state.selected = null; clearSel(); syncControls();
+  if (state.view !== "matrix") render(false); else showMatrix();
+});
+document.getElementById("show-common").addEventListener("change", ev => { state.pvCommon = ev.target.checked; render(false); });
+document.getElementById("show-flow").addEventListener("change", ev => { state.pvFlow = ev.target.checked; render(false); });
+document.addEventListener("click", ev => {
+  const t = ev.target.closest("[data-pvsel],[data-openpath],[data-cell]");
+  if (!t) return;
+  if (t.dataset.pvsel) {
+    if (t.dataset.pvsel === PV.COMMON && !state.pvCommon) {
+      state.pvCommon = true; document.getElementById("show-common").checked = true;
+      if (state.view === "paths") { state.selected = PV.COMMON; render(true); return; }
+    }
+    if (state.view !== "paths") { state.view = "paths"; document.getElementById("view").value = "paths"; syncControls(); state.selected = t.dataset.pvsel; render(false); }
+    else selectPV(t.dataset.pvsel, true);
+  } else if (t.dataset.openpath) openModules(t.dataset.openpath);
+  else if (t.dataset.cell) {
+    const [p, b] = t.dataset.cell.split("|");
+    openModules(p, D.paths[p].filter(x => PV.blockOf[x] === b));
+  }
+});
+
+// Deterministic column layout for the path view: blocks in dataflow columns, paths in the last one.
+function pvLayout() {
+  const nodes = cy.nodes(), layer = {};
+  nodes.forEach(n => { layer[n.id()] = 0; });
+  const flows = cy.edges(".flow");
+  for (let it = 0; it < 12; it++) {
+    let changed = false;
+    flows.forEach(e => { const s = e.source().id(), t = e.target().id();
+      if (layer[t] < layer[s] + 1 && layer[s] + 1 <= 7) { layer[t] = layer[s] + 1; changed = true; } });
+    if (!changed) break;
+  }
+  const maxL = Math.max(0, ...nodes.filter(n => n.hasClass("block")).map(n => layer[n.id()]));
+  nodes.filter(".pathnode").forEach(n => { layer[n.id()] = maxL + 1; });
+  const cols = [];
+  nodes.forEach(n => { (cols[layer[n.id()]] ||= []).push(n); });
+  cols.forEach(c => c.sort((a, b) => a.data("order") - b.data("order")));
+  const pos = {};
+  const index = () => cols.forEach(c => c.forEach((n, i) => { pos[n.id()] = c.length > 1 ? i / (c.length - 1) : 0.5; }));
+  index();
+  const nb = {};
+  cy.edges().forEach(e => { const s = e.source().id(), t = e.target().id(), w = e.data("n") || 1;
+    (nb[s] ||= []).push([t, w]); (nb[t] ||= []).push([s, w]); });
+  const bary = n => { const l = nb[n.id()] || []; if (!l.length) return pos[n.id()];
+    let a = 0, w = 0; l.forEach(([x, k]) => { a += pos[x] * k; w += k; }); return a / w; };
+  for (let sweep = 0; sweep < 6; sweep++) {
+    const order = sweep % 2 ? cols.map((_, i) => i) : cols.map((_, i) => cols.length - 1 - i);
+    order.forEach(i => { if (i === maxL + 1 || !cols[i]) return;
+      const b = Object.fromEntries(cols[i].map(n => [n.id(), bary(n)]));
+      cols[i].sort((x, y) => b[x.id()] - b[y.id()]); index(); });
+  }
+  let x = 0;
+  const Hmax = Math.max(...cols.filter(Boolean).map(c => c.reduce((s, n) => s + n.data("h") + 16, -16)));
+  cols.forEach(c => {
+    if (!c) return;
+    const w = Math.max(...c.map(n => n.data("w")));
+    const hs = c.reduce((s, n) => s + n.data("h"), 0);
+    const gap = c.length > 1 ? Math.min(140, Math.max(16, (Hmax - hs) / (c.length - 1))) : 0;
+    const H = hs + gap * (c.length - 1);
+    let y = -H / 2;
+    c.forEach(n => { n.position({ x: x + w / 2, y: y + n.data("h") / 2 }); y += n.data("h") + gap; });
+    x += w + 120;
+  });
+}
+
+// ---------- boot ----------
+function stats() {
+  const prods = new Set(D.edges.filter(e => e.kind !== "pathDecision").map(e => e.source + ":" + e.instance));
+  const nf = D.modules.filter(m => m.kind === "EDFilter").length;
+  document.getElementById("stats").innerHTML =
+    `<span><b>${D.modules.length - nf}</b> producers</span><span><b>${nf}</b> path filters</span>` +
+    `<span><b>${prods.size}</b> products consumed</span><span><b>${D.edges.length}</b> dependencies</span>` +
+    `<span><b>${D.external.length}</b> external inputs</span><span><b>${Object.keys(D.paths).length}</b> paths</span><span><b>${D.modules.filter(m => m.alpaka).length}</b> Alpaka</span>`;
+  document.getElementById("labels").innerHTML = Object.keys(MOD).sort().map(k => `<option value="${esc(k)}"></option>`).join("");
+}
+
+function tipAt(ev, html) {
+  const tip = document.getElementById("tip");
+  tip.innerHTML = html; tip.hidden = false;
+  const r = document.getElementById("stage").getBoundingClientRect();
+  const x = Math.min(ev.renderedPosition.x + 14, r.width - tip.offsetWidth - 8);
+  const y = Math.min(ev.renderedPosition.y + 14, r.height - tip.offsetHeight - 8);
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+
+async function boot() {
+  readTheme();
+  stats();
+  try { await document.fonts.ready; } catch (e) {}
+  cy = cytoscape({ container: document.getElementById("cy"), style: style(), wheelSensitivity: 0.25,
+                   minZoom: 0.05, maxZoom: 4, boxSelectionEnabled: false, autoungrabify: false });
+  cy.on("tap", "node", ev => select(ev.target.id(), false));
+  cy.on("tap", ev => { if (ev.target === cy) clearSel(); });
+  cy.on("dbltap", "node", ev => {
+    const n = ev.target;
+    if (n.data("isGroup") || n.data("isCollapsed")) toggleGroup(n.id());
+  });
+  cy.on("mouseover", "edge", ev => {
+    if (ev.target.data("tip")) return tipAt(ev, ev.target.data("tip"));
+    const items = ev.target.data("items").map(i => D.edges[i]);
+    const rows = items.slice(0, 8).map(e => e.kind === "pathDecision"
+      ? `<div><code>${esc(e.source)}</code> <span class="dim">→ path</span> <code>${esc(e.path)}</code></div>`
+      : `<div><code>${esc(e.source)}${e.instance ? ":" + esc(e.instance) : ""}</code> <span class="dim">→</span> <code>${esc(e.target)}</code><div class="dim">${esc(e.param)}</div></div>`).join("");
+    tipAt(ev, rows + (items.length > 8 ? `<div class="dim">and ${items.length - 8} more</div>` : ""));
+  });
+  cy.on("mouseover", "node", ev => {
+    const n = ev.target; if (n.isParent()) return;
+    n.addClass("hover");
+    const m = MOD[n.id()];
+    if (m) tipAt(ev, `<div><code>${esc(m.id)}</code></div><div class="dim">${esc(m.type)} · ${esc(m.package)}</div>`);
+    else if (n.data("tip")) tipAt(ev, n.data("tip"));
+  });
+  cy.on("mouseout", "node,edge", ev => { ev.target.removeClass("hover"); document.getElementById("tip").hidden = true; });
+  cy.on("viewport", () => { document.getElementById("tip").hidden = true; });
+  await render(false);
+  const restyle = () => { readTheme(); cy.style(style()); render(true); };
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", restyle);
+  new MutationObserver(restyle).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+}
+boot();
+</script>
+</html>

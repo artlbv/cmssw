@@ -12,6 +12,9 @@
 <!-- test script hltMenuContentToCSVs -->
 <test name="test_hltMenuContentToCSVs" command="test_hltMenuContentToCSVs.sh"/>
 
+<!-- test script hltMenuGraph -->
+<test name="test_hltMenuGraph" command="test_hltMenuGraph.sh"/>
+
 <!-- test script hltFindDuplicates -->
 <test name="test_hltFindDuplicates" command="test_hltFindDuplicates.sh"/>
 
