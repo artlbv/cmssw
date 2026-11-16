@@ -19,12 +19,14 @@ SUBSYSTEMS = [
     dict(id="gtmenu", name="Menu seeds", slot=8, desc="P2GT condition filters, one per menu path"),
     dict(id="legacy", name="Legacy Run-3 emulation", slot=None,
          desc="Stage-2 calo, uGMT, uGT and ZDC emulators kept alongside Phase-2"),
-    dict(id="infra", name="Framework & bookkeeping", slot=None, desc="Beam spot and other helpers"),
+    dict(id="infra", name="Framework & bookkeeping", slot=None,
+         desc="Output modules and DQM/EDM bookkeeping, e.g. the end-paths cmsDriver adds"),
     dict(id="other", name="Unclassified", slot=None, desc="Modules no rule in menuGraphRulesL1.py matched"),
 ]
 
 # (subsystem id, label regexes, module kinds, plugin-type regexes); first match wins
 RULES = [
+    ("infra", [r"^MEtoEDMConverter$", r"^dqmEnv$", r"^dqmSaver", r"^DQM\w*output$"], ["OutputModule"], []),
     ("gtmenu", [], ["EDFilter"], []),
     ("truth", [r"Associator"], [], []),
     ("legacy", [r"Stage2", r"^l1tZDC", r"^simGmtCaloSum", r"^simGmtShower", r"^simGtExtFake"], [], []),
