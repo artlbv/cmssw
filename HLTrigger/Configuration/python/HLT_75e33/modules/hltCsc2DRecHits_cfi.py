@@ -47,6 +47,12 @@ hltCsc2DRecHits = cms.EDProducer("CSCRecHitDProducer",
     XTasymmetry_ME41 = cms.double(0.023),
     readBadChambers = cms.bool(True),
     readBadChannels = cms.bool(False),
-    stripDigiTag = cms.InputTag("simMuonCSCDigis","MuonCSCStripDigi"),
-    wireDigiTag = cms.InputTag("simMuonCSCDigis","MuonCSCWireDigi")
+    stripDigiTag = cms.InputTag("hltMuonCSCDigis","MuonCSCStripDigi"),
+    wireDigiTag = cms.InputTag("hltMuonCSCDigis","MuonCSCWireDigi")
 )
+
+# the phase2_ecal_devel workflows do not pack the CSC data (Configuration/StandardSequences/python/DigiToRaw_cff.py)
+from Configuration.Eras.Modifier_phase2_ecal_devel_cff import phase2_ecal_devel
+phase2_ecal_devel.toModify(hltCsc2DRecHits,
+    stripDigiTag = ("simMuonCSCDigis", "MuonCSCStripDigi"),
+    wireDigiTag = ("simMuonCSCDigis", "MuonCSCWireDigi"))
