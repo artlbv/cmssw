@@ -203,7 +203,9 @@ def seg_dist_min(verts):
 
 def layers_of(a):
     v, n = a["vec"], a["num"]
-    mix = "Mix" in a["name"]
+    # The current silicon cassette/module algorithms evaluate rinB at zo - tol1; Mix and the old
+    # (v9-v11 era) DDHGCalEEAlgo/DDHGCalHEAlgo evaluate it at zo.
+    use_tol = "Silicon" in a["name"]
     zFB, rMF, sB = v["ZFrontBottom"], v["RMinFront"], v["SlopeBottom"]
     zFT, rMT, sT = v.get("ZFrontTop"), v.get("RMaxFront"), v.get("SlopeTop")
     thick = v.get("Thickness", [])
@@ -213,29 +215,36 @@ def layers_of(a):
     first = int(n.get("FirstLayer", 1))
     zi = n["zMinBlock"]
     laymin = 0
+    nsens = 0  # sensitive-layer counter (= copy number - FirstLayer)
     out = []
     for i, (nl, lthick) in enumerate(zip(nlay, v["LayerThick"])):
         zo = zi + lthick
-        # Silicon algos evaluate at zo - tol1, Mix algos at zo
-        rinB = radius(zo if mix else zo - TOL1, zFB, rMF, sB)
+        rinB = radius(zo - TOL1 if use_tol else zo, zFB, rMF, sB)
         rinF = radius(zi + TOL1, zFB, rMF, sB)
         routF = radius(zi, zFT, rMT, sT) if zFT else float("nan")
         zz = zi
-        zsens = None
+        sens = []
         for ly in range(laymin, laymin + nl):
             if ly < len(ltype) and ltype[ly] < len(thick):
                 h = thick[ltype[ly]]
-                if ly < len(lsense) and lsense[ly] > 0 and zsens is None:
-                    zsens = zz + 0.5 * h
+                if ly < len(lsense) and lsense[ly] > 0:
+                    sens.append(zz + 0.5 * h)
                 zz += h
-        rec = {"det": "CE-E" if "EE" in os.path.basename(a["file"]) else "CE-H",
-               "algo": a["name"].split(":")[-1], "layer": first + i, "zFront": zi, "zBack": zo,
-               "zSens": zsens, "rMinFront": rinF, "rMinBack": rinB, "rMaxFront": routF,
-               "rMinSens": (radius(zsens, zFB, rMF, sB) if zsens is not None else float("nan"))}
-        wi = wafer_info(a, i)
-        if wi:
-            rec.update(wi)
-        out.append(rec)
+        if not sens:  # passive-only block: keep it as a placeholder row
+            sens = [None]
+        for zsens in sens:
+            rec = {"det": "CE-E" if "EE" in os.path.basename(a["file"]) else "CE-H",
+                   "algo": a["name"].split(":")[-1], "block": i, "layer": first + nsens,
+                   "zFront": zi, "zBack": zo, "zSens": zsens,
+                   "rMinFront": rinF, "rMinBack": rinB, "rMaxFront": routF,
+                   # rMinSens: what reco uses (HGCalDDDConstants::rangeR at the sensor z)
+                   "rMinSens": (radius(zsens, zFB, rMF, sB) if zsens is not None else float("nan"))}
+            if zsens is not None:
+                wi = wafer_info(a, nsens)
+                if wi:
+                    rec.update(wi)
+                nsens += 1
+            out.append(rec)
         zi = zo
         laymin += nl
     return out
@@ -309,11 +318,12 @@ def main():
                       f" RMinFront={['%.2f' % x for x in a['vec']['RMinFront']]} SlopeBottom={a['vec']['SlopeBottom']}")
             rows += layers_of(a)
     order = {"CE-E": 0, "CE-H": 1}
-    rows.sort(key=lambda r: (order[r["det"]], r["zFront"]))
+    rows.sort(key=lambda r: (order[r["det"]], r["zFront"], r["zSens"] or 0))
+    rows = [r for r in rows if r["zSens"] is not None]
     for i, r in enumerate(rows):
         r["globalLayer"] = i + 1
 
-    hdr = ["globalLayer", "det", "layer", "zFront", "zSens", "zBack", "rMinFront", "rMinSens", "rMinBack",
+    hdr = ["globalLayer", "det", "layer", "block", "zFront", "zSens", "zBack", "rMinFront", "rMinSens", "rMinBack",
            "rMaxFront", "nWafers", "rCentreMin", "rCentreFullMin", "rEdgeFullMin"]
     print("\n# Per-layer inner radius [mm]; rMin* = envelope (HGCalGeomTools::radius with ZFrontBottom/RMinFront);")
     print("# rCentreMin = innermost wafer centre (any type), rEdgeFullMin = nearest point of an innermost FULL hexagon")
