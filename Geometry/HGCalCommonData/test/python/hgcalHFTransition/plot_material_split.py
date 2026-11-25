@@ -2,7 +2,7 @@
 thermal screen (caloBase CALOECTS*), neutron moderator (CALOECModerator, polyethylene; in caloBase 2030/v7+ also its
 aluminium support rings CALOECSup1/2Moderator) and services (CEService). Dead material inside HGCAL as before.
 
-Usage: plot_material_split.py [v17|v10]   (default v17; v10 needs fetch_old_geometries.py, and stands for v10/v11,
+Usage: plot_material_split.py [v17|v10|v9]   (default v17; v10 needs fetch_old_geometries.py, and stands for v10/v11,
 which share the same caloBase and inner geometry)"""
 import math
 import os
@@ -23,6 +23,9 @@ GEOS = {
     "v17": dict(cfi=f"{CFI}/cmsExtendedGeometryRun4D110XML_cfi.py", src=CMSSW_SRC, colour="#2a78d6",
                 label="v17 / D110 (Spring24)", calo="caloBase 2030/v7 + hgcal v17",
                 moderator="neutron moderator (polyethylene + Al support rings)"),
+    "v9": dict(cfi=f"{WORK}/D35_cfi.py", src=f"{WORK}/v9src", colour="#e87ba4",
+               label="v9 / D35 (HGCAL TDR)", calo="caloBase 2026/v1 + hgcal v9, scenario D35",
+               moderator="neutron moderator"),
     "v10": dict(cfi=f"{WORK}/D41_cfi.py", src=f"{WORK}/v10src", colour="#eb6834",
                 label="v10 / v11 (L1 / HLT TDR)", calo="caloBase 2026/v2 + hgcal v10, scenario D41; v11/D49 is identical here",
                 moderator="neutron moderator (polyethylene)"),
