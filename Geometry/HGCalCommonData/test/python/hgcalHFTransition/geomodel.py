@@ -45,9 +45,16 @@ class Geometry:
             except ET.ParseError:
                 pass
         self.solids, self.lmat, self.children = {}, {}, {}
+        self.subtractions = {}
         for f in self.files:
             if os.path.basename(f) in ("caloBase.xml", "hgcal.xml"):
                 self._read_volumes(f)
+        for name in self.subtractions:          # resolve chains of subtractions to their base polycone
+            base = name
+            while base in self.subtractions:
+                base = self.subtractions[base]
+            if base in self.solids:
+                self.solids[name] = self.solids[base]
         self.unknown = set()
         self._read_blocks()
 
@@ -63,6 +70,11 @@ class Geometry:
                     if _strip(zs.tag) == "ZSection":
                         secs.append(tuple(self.C.eval(zs.get(k), ns) for k in ("z", "rMin", "rMax")))
                 self.solids[q(el.get("name"))] = secs
+            elif t == "SubtractionSolid":
+                # caloBase 2030/v7+ cuts a box-shaped notch out of the moderator polycones at r >= 1 m (x = +-XposNotch);
+                # for lines near the inner edge the solid is its base polycone, resolved after the file is read
+                base = [c.get("name") for c in el if _strip(c.tag) == "rSolid"][0]
+                self.subtractions[q(el.get("name"))] = q(base)
             elif t == "LogicalPart":
                 solid = mat = None
                 for c in el:
