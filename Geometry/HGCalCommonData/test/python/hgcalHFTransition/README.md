@@ -29,6 +29,24 @@ Full write-up with figures: https://claude.ai/artifact/RKRtArkqjbkPLJUn7nADvn (p
 - `plot_containment_geos.py` – visible energy fraction (shower-containment estimate) for v9, v10/v11
   and v17, overlaid with L1 calo-jet matching efficiencies read off published plots.
 
+Wafer-level silicon coverage (replaces the layer envelope as the definition of "active"):
+
+- `paths.py` – common locations (`CMSSW_SRC`, `HGCAL_HF_WORKDIR`).
+- `waferxy_build.py` – compiles CMSSW's own `HGCalWaferMask::waferXY` (copied from this checkout's
+  `src/HGCalWaferMask.cc`) into a small helper in the work directory; used for exact partial-wafer outlines.
+  Needs a C++17 compiler (`g++`, or set `CXX`).
+- `coverage.py` – places every wafer of v17 (D110) and v19 (D128) as the DDD algorithms do (wafer lists,
+  partial-wafer outlines, cassette shifts, layer rotation) and counts the silicon layers a line crosses vs (|η|, φ).
+- `plot_silicon_coverage.py` – silicon layers crossed vs the layer-envelope count, v17 and v19.
+- `silicon.py` – per sensor plane, the fraction of the ring at radius r covered by silicon, for v17/v19 (wafer lists)
+  and v9–v11 (old rule: full hexagonal wafers only, placed when all six corners lie inside the layer annulus,
+  as in `DDHGCalEEAlgo`/`DDHGCalHEAlgo`).
+- `containment_si.py` – containment estimate with an absorber block's deposit counted in proportion to that
+  coverage, smoothed by the lateral shower size (hadronic 60 mm, EM 25 mm); HF active for |η| ≥ 2.98 (below that
+  the muon-endcap steel shadows it). Writes both the envelope and the silicon curves for v9, v10, v11, v17, v19.
+- `plot_containment_silicon.py` – envelope vs silicon per geometry with the measured L1 calo-jet efficiencies,
+  and all geometries on one panel.
+
 ## Inner radius vs z
 
 `../hgcalInnerRadiusVsZ.py` (one level up) reconstructs, per sensor plane, the HGCAL inner radius,
@@ -54,12 +72,20 @@ python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_material_geo
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_dead_compare.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_containment_geos.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_layers_crossed.py
+python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/coverage.py
+python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_silicon_coverage.py
+python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/containment_si.py
+python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_containment_silicon.py
 ```
 
 The current-geometry XML (D110, D128) is read from this checkout; set `CMSSW_SRC` to use another one.
 Plots are written to the work directory.
 
 ## Model and caveats
+
+- The silicon model is pessimistic for partial losses (no jet cone, narrow lateral spread), the envelope model is
+  optimistic; L1 matching efficiencies (any L1 jet within ΔR, no p_T cut) saturate for partial losses and are not
+  expected to follow the visible fraction one-to-one.
 
 - Straight lines from the origin, z = 2.9–5.3 m; no vertex spread, magnetic field, lateral shower spread
   or jet cone.
