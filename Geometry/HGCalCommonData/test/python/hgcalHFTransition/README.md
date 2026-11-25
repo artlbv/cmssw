@@ -5,6 +5,8 @@ endcap calorimeter region from the DDD XML of several geometry scenarios and com
 that can reach active material with measured Phase-2 L1 calo-jet matching efficiencies at
 3 < |η| < 3.5.
 
+Full write-up with figures: https://claude.ai/artifact/RKRtArkqjbkPLJUn7nADvn (private; ask the owner for access).
+
 | HGCAL | Scenario | Samples |
 |---|---|---|
 | v9  | D35  | HGCAL TDR era (pre-L1-TDR samples) |
@@ -24,6 +26,20 @@ that can reach active material with measured Phase-2 L1 calo-jet matching effici
 - `plot_dead_compare.py` – total dead material of all geometries on one plot.
 - `plot_containment_geos.py` – visible energy fraction (shower-containment estimate) for v9, v10/v11
   and v17, overlaid with L1 calo-jet matching efficiencies read off published plots.
+
+## Inner radius vs z
+
+`../hgcalInnerRadiusVsZ.py` (one level up) reconstructs, per sensor plane, the HGCAL inner radius,
+layer z positions and innermost wafers from the DDD XML of any scenario, for both the current
+cassette algorithms (v17–v19) and the older pre-cassette ones (v9–v11). `geomodel.py` uses its XML
+parser and radius lookup.
+
+```bash
+python3 Geometry/HGCalCommonData/test/python/hgcalInnerRadiusVsZ.py \
+    --cfi Geometry/CMSCommonData/python/cmsExtendedGeometryRun4D128XML_cfi.py --csv D128.csv
+```
+
+For an old scenario, point it at the fetched files: `--cfi $HGCAL_HF_WORKDIR/D41_cfi.py --src $HGCAL_HF_WORKDIR/v10src`.
 
 ## Running
 
