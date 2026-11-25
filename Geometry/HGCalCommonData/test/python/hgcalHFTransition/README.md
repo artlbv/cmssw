@@ -24,6 +24,8 @@ Full write-up with figures: https://claude.ai/artifact/RKRtArkqjbkPLJUn7nADvn (p
   `cms-sw/cmssw` tags CMSSW_11_0_0 / CMSSW_12_0_0.
 - `plot_material_geos.py` – active vs dead interaction lengths per geometry (v9, v10/v11, v17, v19).
 - `plot_dead_compare.py` – total dead material of all geometries on one plot.
+- `plot_layers_crossed.py` – number of HGCAL sensor layers a straight line crosses vs |η| (outer and
+  inner edge), per geometry.
 - `plot_containment_geos.py` – visible energy fraction (shower-containment estimate) for v9, v10/v11
   and v17, overlaid with L1 calo-jet matching efficiencies read off published plots.
 
@@ -51,6 +53,7 @@ python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/fetch_old_geometr
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_material_geos.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_dead_compare.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_containment_geos.py
+python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_layers_crossed.py
 ```
 
 The current-geometry XML (D110, D128) is read from this checkout; set `CMSSW_SRC` to use another one.
