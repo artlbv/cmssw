@@ -24,8 +24,8 @@ Full write-up with figures: https://claude.ai/artifact/RKRtArkqjbkPLJUn7nADvn (p
   `cms-sw/cmssw` tags CMSSW_11_0_0 / CMSSW_12_0_0.
 - `plot_material_geos.py` – active vs dead interaction lengths per geometry (v9, v10/v11, v17, v19).
 - `plot_dead_compare.py` – total dead material of all geometries on one plot.
-- `plot_material_v17_split.py` – v17 material with the dead material outside HGCAL split into thermal screen,
-  neutron moderator (polyethylene + Al support rings) and services.
+- `plot_material_split.py [v17|v10]` – material of one geometry with the dead material outside HGCAL split into
+  thermal screen, neutron moderator and services (v10 stands for v10/v11).
 - `plot_layers_crossed.py` – number of HGCAL sensor layers a straight line crosses vs |η| (outer and
   inner edge), per geometry.
 - `plot_containment_geos.py` – visible energy fraction (shower-containment estimate) for v9, v10/v11
@@ -72,7 +72,8 @@ export HGCAL_HF_WORKDIR=$PWD/hgcal_hf_work      # default: ./hgcal_hf_work
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/fetch_old_geometries.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_material_geos.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_dead_compare.py
-python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_material_v17_split.py
+python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_material_split.py v17
+python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_material_split.py v10
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_containment_geos.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_layers_crossed.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/coverage.py
