@@ -314,6 +314,69 @@ gmtTkMuTable = cms.EDProducer(
     )
 )
 
+## ------------------------------------------------- TkMuon isolation (L1gmtTkMuon)
+## The Phase-2 GMT computes a TRACK-BASED isolation for each l1t::TrackerMuon: the sum
+## of the pT of the L1 tracker tracks near the muon, in
+## L1Trigger/Phase2L1GMT/interface/Isolation.h. Specifically: tracks with pT >= 3.75 GeV
+## (c_iso_pt_min = 120 x LSBpt 0.03125) inside a SQUARE BOX of half-width 0.2 in eta and
+## 0.2 in phi, |dz| < 0.68 cm, the muon's own track excluded. Isolation.h's own comments
+## say 3 GeV and 1 cm; both are stale.
+## There is no calorimeter and no PF/Puppi contribution, and there is no PF-based muon
+## isolation anywhere in the GMT: nothing in L1Trigger/Phase2L1GMT references
+## PFCandidate or Puppi, and by construction it cannot -- the GMT sees only muon stubs
+## and L1 tracker tracks, while PF/Puppi candidates are built downstream in the
+## Correlator. The tkEle/tkPho isolation is a different algorithm (Correlator Layer 2)
+## but also track-based, so those values differ from these for reasons of cone and
+## scale, not of input type.
+##
+## The L1Candidate hwIso() word inherited from staMuTable is NOT that isolation:
+## Isolation.h leaves mu.setHwIso(iso_) commented out ("Disable isolation bit, sending
+## isolation sumPT to GT"), so the cloned hwIso branch is identically zero. Redefine it
+## from the 6-bit sum actually sent to the GT, and keep the unsaturated sum next to it.
+## hwIso is defined from the GT word so that L1gmtTkMuon.hwIso and L1GTgmtTkMuon.hwIso
+## hold the same quantity in the same units.
+gmtTkMuTable.variables.hwIso = Var("hwIsoSumAp()", int,
+    doc="HW isolation sum as sent to the GT: 6 bits, LSB 0.25 GeV, saturates at 63")
+gmtTkMuTable.variables.hwIsoSum = Var("hwIsoSum()", int,
+    doc="HW isolation: sum of track pT in the isolation cone, full precision, LSB 0.03125 GeV, unsaturated")
+gmtTkMuTable.variables.iso = Var("phIso()", float,
+    doc="absolute isolation [GeV], from the 6-bit sum sent to the GT (saturates at 15.75 GeV)")
+gmtTkMuTable.variables.relIso = Var("phIso()/phPt()", float,
+    doc="relative isolation, from the 6-bit sum sent to the GT (saturates at 15.75 GeV)")
+
+### L1 PF / Puppi candidates, origin: Correlator Layer 1
+### Variables chosen to match the FastPUPPI L1PFCandTableProducer ntuples
+### (github.com/p2l1pfp/FastPUPPI), so the two can be compared directly, but with
+### pdgId/charge kept as integers and an explicit mantissa precision on the floats.
+### NOTE: these are the merged per-board outputs of l1tLayer1 (L1TPFCandMultiMerger);
+### the untruncated per-region lists live in the *:PuppiRegional RegionalOutputs.
+
+l1PuppiCandTable = cms.EDProducer(
+    "SimpleTriggerL1PFCandidateFlatTableProducer",
+    src = cms.InputTag('l1tLayer1','Puppi'),
+    name = cms.string("L1PuppiCand"),
+    doc = cms.string("L1 Puppi candidates, origin: Correlator Layer 1"),
+    cut = cms.string(""),
+    singleton = cms.bool(False),
+    variables = cms.PSet(
+        pt = Var("pt", float, precision=10, doc="pt [GeV]"),
+        eta = Var("eta", float, precision=10, doc="eta"),
+        phi = Var("phi", float, precision=10, doc="phi"),
+        mass = Var("mass", float, precision=8, doc="mass [GeV]"),
+        charge = Var("charge", int, doc="charge"),
+        pdgId = Var("pdgId", int, doc="PDG id"),
+        puppiWeight = Var("puppiWeight", float, precision=8, doc="Puppi weight"),
+        z0 = Var("z0", float, precision=10, doc="z0 [cm]"),
+        dxy = Var("dxy", float, precision=10, doc="dxy [cm]"),
+    )
+)
+
+l1PFCandTable = l1PuppiCandTable.clone(
+    src = cms.InputTag('l1tLayer1','PF'),
+    name = cms.string("L1PFCand"),
+    doc = cms.string("L1 PF candidates (pre-Puppi), origin: Correlator Layer 1"),
+)
+
 ### Standalone Muon from GMT, before ghost busting
 
 KMTFpromptMuTable = staMuTable.clone(
@@ -592,6 +655,9 @@ p2L1TablesTask = cms.Task(
     caloTauTable,
     nnCaloTauTable,
     nnPuppiTauTable,
+    # PF/Puppi candidates, Correlator Layer 1
+    l1PuppiCandTable,
+    l1PFCandTable,
     hpsTauTable,
     # GTT
     vtxTable,

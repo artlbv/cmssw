@@ -119,6 +119,37 @@ gtSaDispMuTable = gtTkMuTable.clone(
     doc = cms.string("GT GMT standalone displaced Muon"),
 )
 
+## ----------------------------------------------- TkMuon isolation (L1GTgmtTkMuon)
+## Defined HERE, after the two standalone-muon tables have been cloned off
+## gtTkMuTable, and not inside its variables PSet: L1GTProducer fills an isolation
+## only in produceGMTTkMuons. produceGMTSaPromptMuons and produceGMTSaDisplacedMuons
+## set no isolation at all, not even hwIsolationPT_, so on a GMTSaPromptMuons or
+## GMTSaDisplacedMuons candidate hwIsolationPT_toInt() throws on an unset Optional:
+##   Calling method for module SimpleP2GTCandidateFlatTableProducer/'gtSaMuTable'
+##   Object doesn't have isolationPT
+## L1GTgmtMuon and L1GTgmtDispMuon therefore get no isolation branches, which is
+## correct -- the quantity does not exist for them.
+##
+## Filled from TrackerMuon::apIso(), i.e. the same 6-bit GMT isolation sum
+## (LSB 0.25 GeV, saturates at 15.75 GeV) that L1gmtTkMuon.hwIso / .iso carry, so the
+## GMT and GT tables hold the same quantity in the same units by construction.
+## NOTE: TRACK-BASED isolation only -- a sum of L1 tracker track pT, with no
+## calorimeter and no PF/Puppi contribution. The tkElectron/tkPhoton isolation above
+## is ALSO track-based, not PF/Puppi: the Correlator Layer-2 egamma algorithm computes
+## TkIso, PfIso and PuppiIso (IsoType in layer1_emulator.h:201), but hwIsoTypeTkEle and
+## hwIsoTypeTkEm select the Tk variants (l1TkEgAlgoEmulator_cfi.py:126-127), so PfIso
+## and PuppiIso never reach the GT word. The muon and egamma values are still not
+## directly comparable -- different cone, PV handling and scales -- but the difference
+## is the algorithm, not the input type.
+gtTkMuTable.variables.hwIso = Var("hwIsolationPT_toInt()", int,
+    doc = "HW isolation sum received from GMT: 6 bits, LSB 0.25 GeV")
+gtTkMuTable.variables.iso = Var(
+    f"hwIsolationPT_toInt()*{scale_parameter.isolationPT_lsb.value()}", float,
+    doc = "absolute isolation [GeV]")
+gtTkMuTable.variables.relIso = Var(
+    f"hwIsolationPT_toInt()*{scale_parameter.isolationPT_lsb.value()} / pt", float,
+    doc = "relative isolation")
+
 # ## GT seededCone puppi Jets
 # gtSCJetsTable = cms.EDProducer(
 #     # "SimpleCandidateFlatTableProducer",

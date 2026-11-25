@@ -11,6 +11,7 @@
 <use name="SimDataFormats/CaloAnalysis"/>
 <use name="FWCore/Common"/>
 <use name="FWCore/Framework"/>
+<use name="HLTrigger/HLTcore"/>
 <use name="FWCore/ParameterSet"/>
 <use name="FWCore/Utilities"/>
 <use name="PhysicsTools/NanoAOD"/>
