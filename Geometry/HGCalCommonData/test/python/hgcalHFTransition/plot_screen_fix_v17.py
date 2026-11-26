@@ -14,6 +14,15 @@ from paths import WORK  # noqa: E402
 
 d = pickle.load(open(f"{WORK}/screen_fix_v17.pkl", "rb"))
 etas = d["etas"]
+# "scaled": weight the energy seen in HGCAL by the L1 jet-efficiency plateau of the D126 points below |eta| = 3 (~0.65),
+# and the energy reaching HF by 1 (the plateau those jets reach in HF), to compare with the raw efficiencies
+SCALED = len(sys.argv) > 1 and sys.argv[1] == "scaled"
+HG_PLATEAU = 0.65
+
+
+def vis(case):
+    tot, hg = d[case][2], d[case][3]
+    return HG_PLATEAU * hg + (tot - hg) if SCALED else tot
 INK, INK2, GRID, SURF = "#0b0b0b", "#52514e", "#e6e5e0", "#fcfcfb"
 BLUE, AQUA, GREY = "#2a78d6", "#1baf7a", "#a3a29c"
 # Full-simulation rerun with modified thermal-screen material (colleague's study, D126 = HGCAL v19): L1puppiJetSC4 with
@@ -60,10 +69,10 @@ for t in l1.get_texts():
     t.set_color(INK)
 
 # right: visible fraction
-a2.plot(etas, d["cmssw"][2], color=BLUE, lw=2.4, label="screen as in CMSSW (what the samples simulate)")
-a2.fill_between(etas, d["fixed"][2], d["fixed10"][2], color=AQUA, alpha=0.35, lw=0)
-a2.plot(etas, d["fixed"][2], color=AQUA, lw=2.2, label="corrected screen (real detector)")
-a2.plot(etas, d["air"][2], color=AMBER, lw=1.8, label="supports + screen → air (test)")
+a2.plot(etas, vis("cmssw"), color=BLUE, lw=2.4, label="screen as in CMSSW (what the samples simulate)")
+a2.fill_between(etas, vis("fixed"), vis("fixed10"), color=AQUA, alpha=0.35, lw=0)
+a2.plot(etas, vis("fixed"), color=AQUA, lw=2.2, label="corrected screen (real detector)")
+a2.plot(etas, vis("air"), color=AMBER, lw=1.8, label="supports + screen → air (test)")
 a2.errorbar(SC4_ETA - 0.012, SC4_NOM, yerr=_yerr(SC4_NOM, SC4_NOM_ERR), fmt="s", ms=5.0, mfc=SURF, mec=INK2, mew=1.2,
              ecolor=INK2, elinewidth=1.0, capsize=0, zorder=7, label="L1 PUPPI SC4 jet eff., full sim. D126, CMSSW screen")
 a2.errorbar(SC4_ETA, SC4_CRYO, yerr=_yerr(SC4_CRYO, SC4_CRYO_ERR), fmt="s", ms=5.0, color=AQUA, mec=INK,
@@ -73,8 +82,8 @@ a2.errorbar(SC4_ETA + 0.012, SC4_AIR, yerr=_yerr(SC4_AIR, SC4_AIR_ERR), fmt="s",
             ecolor=AMBER, elinewidth=1.0, capsize=0, zorder=7,
             label="L1 PUPPI SC4 jet eff., full sim. D126, supports + screen → air (test)")
 a2.set_ylim(0, 1.08)
-a2.set_ylabel("visible fraction / efficiency")
-a2.set_title("Visible fraction (wafer-level silicon), v17", loc="left", color=INK, fontsize=11)
+a2.set_ylabel(("HGCAL-rescaled visible fraction" if SCALED else "visible fraction") + " / efficiency")
+a2.set_title(("Visible fraction, HGCAL part × 0.65" if SCALED else "Visible fraction (wafer-level silicon)") + ", v17", loc="left", color=INK, fontsize=11)
 l2 = a2.legend(loc="upper left", bbox_to_anchor=(-0.02, -0.13), frameon=False, fontsize=8.2)
 for t in l2.get_texts():
     t.set_color(INK)
@@ -88,6 +97,9 @@ foot = ("Thermal screen: CMSSW mixture CEThermalScreen (1.772 g/cm³, mostly 'In
         "with the nominal screen, a Cryogel-proxy screen, and (test only) the HGCAL inner supports and screen set to air; L1 PUPPI SC4 jets with p_T ≥ 20 GeV matched to GenJets with p_T > 50 "
         "GeV; their plateau below |η| = 3 is ≈ 0.65, so compare the point series with each other. Error bars: statistical, "
         "read off the source plot; points offset by ±0.012 in |η| for visibility (bins are 0.1 wide).")
+if SCALED:
+    foot += (" Rescaled: energy seen in HGCAL active layers weighted by 0.65 (the D126 efficiency plateau below |η| = 3), "
+             "energy reaching HF by 1.")
 fig.canvas.draw()
 rr = fig.canvas.get_renderer()
 ybot = min(l1.get_window_extent(rr).y0, l2.get_window_extent(rr).y0) / fig.bbox.height - 0.02
@@ -97,4 +109,4 @@ for w in range(220, 40, -2):
     if t.get_window_extent(rr).width <= x1 - x0:
         break
     t.remove()
-fig.savefig(os.path.join(WORK, "hgcal_screen_fix_v17.png"), dpi=200, bbox_inches="tight", facecolor=SURF)
+fig.savefig(os.path.join(WORK, "hgcal_screen_fix_v17_scaled.png" if SCALED else "hgcal_screen_fix_v17.png"), dpi=200, bbox_inches="tight", facecolor=SURF)

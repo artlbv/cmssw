@@ -86,6 +86,7 @@ python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/containment_si.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_containment_silicon.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/screen_fix_v17.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_screen_fix_v17.py
+python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_screen_fix_v17.py scaled   # HGCAL part x 0.65
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_screen_fix_material_v17.py
 ```
 

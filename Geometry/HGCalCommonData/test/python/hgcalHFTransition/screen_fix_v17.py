@@ -100,15 +100,18 @@ if __name__ == "__main__":
     out = {"etas": etas}
     for case in ("cmssw", "fixed", "fixed10", "air"):
         sg = ScreenGeometry(g, case)
-        dead, scr, vis = [], [], []
+        dead, scr, vis, vis_hg = [], [], [], []
         for e in etas:
             t, s = dead_screen(sg, e)
             dl, dx, _, h, m = CS.path(sg, e, wh, we)
             hf = e >= CS.ETA_HF
             vis.append((1 - CS.F_EM) * CS.visible(dl, h, CS.HAD, hf) + CS.F_EM * CS.visible(dx, m, CS.EM, hf, conv=9 / 7))
+            # part of it deposited in HGCAL active layers (no HF): lets the plot rescale the HGCAL response separately
+            vis_hg.append((1 - CS.F_EM) * CS.visible(dl, h, CS.HAD, False)
+                          + CS.F_EM * CS.visible(dx, m, CS.EM, False, conv=9 / 7))
             dead.append(t)
             scr.append(s)
-        out[case] = (np.array(dead), np.array(scr), np.array(vis))
+        out[case] = (np.array(dead), np.array(scr), np.array(vis), np.array(vis_hg))
         print(case, "  ".join(f"{e:.2f}: dead {out[case][0][i]:.2f} (screen {out[case][1][i]:.2f}) vis {out[case][2][i]:.2f}"
                               for e in (3.0, 3.1, 3.2, 3.3, 3.4) for i in [int(round((e - 2.6) / 0.01))]))
     pickle.dump(out, open(f"{WORK}/screen_fix_v17.pkl", "wb"))
