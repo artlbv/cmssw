@@ -16,8 +16,6 @@ d = pickle.load(open(f"{WORK}/screen_fix_v17.pkl", "rb"))
 etas = d["etas"]
 INK, INK2, GRID, SURF = "#0b0b0b", "#52514e", "#e6e5e0", "#fcfcfb"
 BLUE, AQUA, GREY, PURPLE = "#2a78d6", "#1baf7a", "#a3a29c", "#8a3fbf"
-EFF = (np.arange(2.625, 4.0, 0.05), [0.979, 0.985, 0.985, 0.979, 0.980, 0.985, 0.970, 0.887, 0.657, 0.592, 0.276, 0.088,
-                                      0.134, 0.416, 0.637, 0.850, 0.976, 0.994, 1.0, 0.988] + [1.0] * 8)
 L1IN = [(2.6, 2.7, 0.77), (2.7, 2.8, 0.78), (2.8, 2.9, 0.73), (2.9, 3.0, 0.58), (3.0, 3.1, 0.27), (3.1, 3.2, 0.14),
         (3.2, 3.3, 0.19), (3.3, 3.4, 0.51), (3.4, 3.5, 0.84), (3.5, 3.6, 1.00)]
 # Full-simulation rerun with modified thermal-screen material (colleague's study, D126 = HGCAL v19): L1puppiJetSC4 with
@@ -28,6 +26,10 @@ SC4_CRYO = [0.70, 0.68, 0.515, 0.40, 0.27, 0.165, 0.765, 1.00, 1.00, 0.99]
 # statistical error bars read off the same plot (symmetric; clipped at efficiency 1)
 SC4_NOM_ERR = [0.05, 0.045, 0.05, 0.05, 0.045, 0.03, 0.065, 0.08, 0.04, 0.01]
 SC4_CRYO_ERR = [0.06, 0.04, 0.05, 0.065, 0.05, 0.06, 0.055, 0.03, 0.02, 0.02]
+# test case with the HGCAL inner supports and the thermal screen both replaced by air
+SC4_AIR = [0.615, 0.70, 0.55, 0.39, 0.73, 0.98, 1.00, 1.00, 1.00, 0.985]
+SC4_AIR_ERR = [0.05, 0.06, 0.05, 0.05, 0.06, 0.02, 0.02, 0.09, 0.02, 0.02]
+AMBER = "#d08a00"
 
 
 def _yerr(vals, errs):
@@ -62,15 +64,16 @@ for t in l1.get_texts():
 a2.plot(etas, d["cmssw"][2], color=BLUE, lw=2.4, label="screen as in CMSSW (what the samples simulate)")
 a2.fill_between(etas, d["fixed"][2], d["fixed10"][2], color=AQUA, alpha=0.35, lw=0)
 a2.plot(etas, d["fixed"][2], color=AQUA, lw=2.2, label="corrected screen (real detector)")
-a2.plot(EFF[0], EFF[1], "o", color=INK, ms=4.2, mec=SURF, mew=0.7, ls="none", zorder=6,
-        label="L1 calo-jet matching eff. (Spring24)")
 a2.plot([(lo + hi) / 2 for lo, hi, _ in L1IN], [f for _, _, f in L1IN], "D", ms=5.5, mfc=SURF, mec=PURPLE, mew=1.4,
         ls="none", zorder=7, label="L1 input energy / gen p_T (Spring24)")
-a2.errorbar(SC4_ETA - 0.008, SC4_NOM, yerr=_yerr(SC4_NOM, SC4_NOM_ERR), fmt="s", ms=5.0, mfc=SURF, mec=INK2, mew=1.2,
+a2.errorbar(SC4_ETA - 0.012, SC4_NOM, yerr=_yerr(SC4_NOM, SC4_NOM_ERR), fmt="s", ms=5.0, mfc=SURF, mec=INK2, mew=1.2,
              ecolor=INK2, elinewidth=1.0, capsize=0, zorder=7, label="L1 PUPPI SC4 jet eff., full sim. D126, CMSSW screen")
-a2.errorbar(SC4_ETA + 0.008, SC4_CRYO, yerr=_yerr(SC4_CRYO, SC4_CRYO_ERR), fmt="s", ms=5.0, color=AQUA, mec=INK,
+a2.errorbar(SC4_ETA, SC4_CRYO, yerr=_yerr(SC4_CRYO, SC4_CRYO_ERR), fmt="s", ms=5.0, color=AQUA, mec=INK,
              mew=0.6, ecolor="#12805a", elinewidth=1.0, capsize=0, zorder=8,
              label="L1 PUPPI SC4 jet eff., full sim. D126, Cryogel screen")
+a2.errorbar(SC4_ETA + 0.012, SC4_AIR, yerr=_yerr(SC4_AIR, SC4_AIR_ERR), fmt="s", ms=5.0, mfc=SURF, mec=AMBER, mew=1.3,
+            ecolor=AMBER, elinewidth=1.0, capsize=0, zorder=7,
+            label="L1 PUPPI SC4 jet eff., full sim. D126, supports + screen → air (test)")
 a2.set_ylim(0, 1.08)
 a2.set_ylabel("visible fraction / efficiency")
 a2.set_title("Visible fraction (wafer-level silicon), v17", loc="left", color=INK, fontsize=11)
@@ -83,10 +86,10 @@ foot = ("Thermal screen: CMSSW mixture CEThermalScreen (1.772 g/cm³, mostly 'In
         "Corrected: per wall a 2 mm aluminium shell and Cryogel Z aerogel (SiO2, 0.16 g/cm³, λ_I = 6.1 m, X0 = 1.7 m) filling "
         "the rest of the wall (line) or only a 10 mm blanket with air elsewhere (band edge); wall thickness taken from the "
         "CMSSW envelopes (20–119 mm). All other materials unchanged. Visible fraction: wafer-level silicon model, HF from |η| = "
-        "2.98. Spring24 points (circles, diamonds): samples with the CMSSW screen. Squares: full-simulation rerun (D126 = v19) "
-        "with the nominal and with a Cryogel-proxy screen, L1 PUPPI SC4 jets with p_T ≥ 20 GeV matched to GenJets with p_T > 50 "
-        "GeV; their plateau below |η| = 3 is ≈ 0.65, so compare the two square series with each other. Square error bars: statistical, "
-        "read off the source plot; points offset by ±0.008 in |η| for visibility (bins are 0.1 wide).")
+        "2.98. Diamonds: Spring24 samples (CMSSW screen). Squares: full-simulation rerun (D126 = v19) "
+        "with the nominal screen, a Cryogel-proxy screen, and (test only) the HGCAL inner supports and screen set to air; L1 PUPPI SC4 jets with p_T ≥ 20 GeV matched to GenJets with p_T > 50 "
+        "GeV; their plateau below |η| = 3 is ≈ 0.65, so compare the square series with each other. Square error bars: statistical, "
+        "read off the source plot; points offset by ±0.012 in |η| for visibility (bins are 0.1 wide).")
 fig.canvas.draw()
 rr = fig.canvas.get_renderer()
 ybot = min(l1.get_window_extent(rr).y0, l2.get_window_extent(rr).y0) / fig.bbox.height - 0.02
