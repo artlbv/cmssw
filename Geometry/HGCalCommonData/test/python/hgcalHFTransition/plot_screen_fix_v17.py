@@ -15,9 +15,7 @@ from paths import WORK  # noqa: E402
 d = pickle.load(open(f"{WORK}/screen_fix_v17.pkl", "rb"))
 etas = d["etas"]
 INK, INK2, GRID, SURF = "#0b0b0b", "#52514e", "#e6e5e0", "#fcfcfb"
-BLUE, AQUA, GREY, PURPLE = "#2a78d6", "#1baf7a", "#a3a29c", "#8a3fbf"
-L1IN = [(2.6, 2.7, 0.77), (2.7, 2.8, 0.78), (2.8, 2.9, 0.73), (2.9, 3.0, 0.58), (3.0, 3.1, 0.27), (3.1, 3.2, 0.14),
-        (3.2, 3.3, 0.19), (3.3, 3.4, 0.51), (3.4, 3.5, 0.84), (3.5, 3.6, 1.00)]
+BLUE, AQUA, GREY = "#2a78d6", "#1baf7a", "#a3a29c"
 # Full-simulation rerun with modified thermal-screen material (colleague's study, D126 = HGCAL v19): L1puppiJetSC4 with
 # assigned p_T >= 20 GeV, GenJet p_T > 50 GeV, one-to-one dR < 0.3; 0.1-wide |eta| bins; values read off the plot (+-0.01).
 SC4_ETA = np.arange(2.65, 3.6, 0.1)
@@ -64,8 +62,6 @@ for t in l1.get_texts():
 a2.plot(etas, d["cmssw"][2], color=BLUE, lw=2.4, label="screen as in CMSSW (what the samples simulate)")
 a2.fill_between(etas, d["fixed"][2], d["fixed10"][2], color=AQUA, alpha=0.35, lw=0)
 a2.plot(etas, d["fixed"][2], color=AQUA, lw=2.2, label="corrected screen (real detector)")
-a2.plot([(lo + hi) / 2 for lo, hi, _ in L1IN], [f for _, _, f in L1IN], "D", ms=5.5, mfc=SURF, mec=PURPLE, mew=1.4,
-        ls="none", zorder=7, label="L1 input energy / gen p_T (Spring24)")
 a2.errorbar(SC4_ETA - 0.012, SC4_NOM, yerr=_yerr(SC4_NOM, SC4_NOM_ERR), fmt="s", ms=5.0, mfc=SURF, mec=INK2, mew=1.2,
              ecolor=INK2, elinewidth=1.0, capsize=0, zorder=7, label="L1 PUPPI SC4 jet eff., full sim. D126, CMSSW screen")
 a2.errorbar(SC4_ETA, SC4_CRYO, yerr=_yerr(SC4_CRYO, SC4_CRYO_ERR), fmt="s", ms=5.0, color=AQUA, mec=INK,
@@ -86,9 +82,9 @@ foot = ("Thermal screen: CMSSW mixture CEThermalScreen (1.772 g/cm³, mostly 'In
         "Corrected: per wall a 2 mm aluminium shell and Cryogel Z aerogel (SiO2, 0.16 g/cm³, λ_I = 6.1 m, X0 = 1.7 m) filling "
         "the rest of the wall (line) or only a 10 mm blanket with air elsewhere (band edge); wall thickness taken from the "
         "CMSSW envelopes (20–119 mm). All other materials unchanged. Visible fraction: wafer-level silicon model, HF from |η| = "
-        "2.98. Diamonds: Spring24 samples (CMSSW screen). Squares: full-simulation rerun (D126 = v19) "
+        "2.98. Points: full-simulation rerun (D126 = v19) "
         "with the nominal screen, a Cryogel-proxy screen, and (test only) the HGCAL inner supports and screen set to air; L1 PUPPI SC4 jets with p_T ≥ 20 GeV matched to GenJets with p_T > 50 "
-        "GeV; their plateau below |η| = 3 is ≈ 0.65, so compare the square series with each other. Square error bars: statistical, "
+        "GeV; their plateau below |η| = 3 is ≈ 0.65, so compare the point series with each other. Error bars: statistical, "
         "read off the source plot; points offset by ±0.012 in |η| for visibility (bins are 0.1 wide).")
 fig.canvas.draw()
 rr = fig.canvas.get_renderer()
