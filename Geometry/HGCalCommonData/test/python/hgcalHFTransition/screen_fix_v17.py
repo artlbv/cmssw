@@ -12,6 +12,8 @@ Cases for the thermal-screen volumes (everything else unchanged):
   cmssw    : CEThermalScreen as defined in CMSSW
   fixed    : per wall, a 2 mm aluminium shell and aerogel filling the rest of the wall (upper estimate of the real design)
   fixed10  : per wall, a 2 mm aluminium shell and a 10 mm aerogel blanket, air elsewhere (lower estimate)
+  air      : test case, thermal screen AND the dead (non-active) volumes inside HGCAL, i.e. the inner supports, set to
+             air; matches the full-simulation "supports + screen air" test only approximately
 The wall thickness is the radial gap at that z between the screen volume's inner radius and the inner radius of the
 volume it contains (20 mm, 48.6 mm, 118.6 mm along the inner cylinder, 86.6 mm in the rear section).
 """
@@ -60,6 +62,8 @@ class ScreenGeometry:
         if a or not ld:
             return a, ld, xd
         vol = self.g.locate(z, r)
+        if self.case == "air" and (vol.startswith("hgcal:") or self.g.lmat[vol][1] == "caloBase:CEThermalScreen"):
+            return False, 0.0, 0.0
         if self.g.lmat[vol][1] != "caloBase:CEThermalScreen":
             return a, ld, xd
         if self.case in CASES:
@@ -94,7 +98,7 @@ if __name__ == "__main__":
     wh, we = SI.block_weight_fn(g, planes, CS.SIG_HAD), SI.block_weight_fn(g, planes, CS.SIG_EM)
     etas = np.round(np.arange(2.60, 4.001, 0.01), 4)
     out = {"etas": etas}
-    for case in ("cmssw", "fixed", "fixed10"):
+    for case in ("cmssw", "fixed", "fixed10", "air"):
         sg = ScreenGeometry(g, case)
         dead, scr, vis = [], [], []
         for e in etas:

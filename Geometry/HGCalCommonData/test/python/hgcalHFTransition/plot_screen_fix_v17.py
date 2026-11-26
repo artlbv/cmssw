@@ -51,6 +51,7 @@ a1.fill_between(etas, d["fixed10"][0], d["fixed"][0], color=AQUA, alpha=0.35, lw
 a1.plot(etas, d["fixed"][0], color=AQUA, lw=2.2, label="total dead, corrected screen (Al shell + aerogel)")
 a1.plot(etas, d["cmssw"][1], color=BLUE, lw=1.3, ls=(0, (4, 2.5)), label="thermal screen only, CMSSW")
 a1.plot(etas, d["fixed"][1], color=AQUA, lw=1.3, ls=(0, (4, 2.5)), label="thermal screen only, corrected")
+a1.plot(etas, d["air"][0], color=AMBER, lw=1.6, label="total dead, supports + screen → air (test)")
 a1.set_ylim(0, 7.6)
 a1.set_ylabel("dead material along the line, λ_I")
 a1.set_title("Dead material, v17", loc="left", color=INK, fontsize=11)
@@ -62,6 +63,7 @@ for t in l1.get_texts():
 a2.plot(etas, d["cmssw"][2], color=BLUE, lw=2.4, label="screen as in CMSSW (what the samples simulate)")
 a2.fill_between(etas, d["fixed"][2], d["fixed10"][2], color=AQUA, alpha=0.35, lw=0)
 a2.plot(etas, d["fixed"][2], color=AQUA, lw=2.2, label="corrected screen (real detector)")
+a2.plot(etas, d["air"][2], color=AMBER, lw=1.8, label="supports + screen → air (test)")
 a2.errorbar(SC4_ETA - 0.012, SC4_NOM, yerr=_yerr(SC4_NOM, SC4_NOM_ERR), fmt="s", ms=5.0, mfc=SURF, mec=INK2, mew=1.2,
              ecolor=INK2, elinewidth=1.0, capsize=0, zorder=7, label="L1 PUPPI SC4 jet eff., full sim. D126, CMSSW screen")
 a2.errorbar(SC4_ETA, SC4_CRYO, yerr=_yerr(SC4_CRYO, SC4_CRYO_ERR), fmt="s", ms=5.0, color=AQUA, mec=INK,
@@ -81,7 +83,7 @@ fig.suptitle("v17: effect of correcting the thermal-screen material (CEThermalSc
 foot = ("Thermal screen: CMSSW mixture CEThermalScreen (1.772 g/cm³, mostly 'Insulation' = 81 % Fe): λ_I = 67 cm, X0 = 9.2 cm. "
         "Corrected: per wall a 2 mm aluminium shell and Cryogel Z aerogel (SiO2, 0.16 g/cm³, λ_I = 6.1 m, X0 = 1.7 m) filling "
         "the rest of the wall (line) or only a 10 mm blanket with air elsewhere (band edge); wall thickness taken from the "
-        "CMSSW envelopes (20–119 mm). All other materials unchanged. Visible fraction: wafer-level silicon model, HF from |η| = "
+        "CMSSW envelopes (20–119 mm). All other materials unchanged. Test (amber): screen and all non-active HGCAL volumes on the line (inner supports) set to air. Visible fraction: wafer-level silicon model, HF from |η| = "
         "2.98. Points: full-simulation rerun (D126 = v19) "
         "with the nominal screen, a Cryogel-proxy screen, and (test only) the HGCAL inner supports and screen set to air; L1 PUPPI SC4 jets with p_T ≥ 20 GeV matched to GenJets with p_T > 50 "
         "GeV; their plateau below |η| = 3 is ≈ 0.65, so compare the point series with each other. Error bars: statistical, "
