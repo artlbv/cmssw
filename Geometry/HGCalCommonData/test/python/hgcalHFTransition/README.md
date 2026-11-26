@@ -49,6 +49,7 @@ Wafer-level silicon coverage (replaces the layer envelope as the definition of "
 - `screen_fix_v17.py` / `plot_screen_fix_v17.py` – v17 dead material and visible fraction with the thermal screen as
   defined in CMSSW (`CEThermalScreen`, 1.77 g/cm3, mostly iron-loaded "Insulation": λ_I = 67 cm, X0 = 9.2 cm) and with the
   real design (2 mm Al shell + Cryogel Z aerogel, 0.16 g/cm3), plus the rough λ = 45 cm used in the other plots.
+- `plot_screen_fix_material_v17.py` – v17 material budget stacked by component, CMSSW thermal screen vs real design.
 - `plot_containment_silicon.py` – envelope vs silicon per geometry with the measured L1 calo-jet efficiencies,
   and all geometries on one panel.
 
@@ -85,6 +86,7 @@ python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/containment_si.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_containment_silicon.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/screen_fix_v17.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_screen_fix_v17.py
+python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_screen_fix_material_v17.py
 ```
 
 The current-geometry XML (D110, D128) is read from this checkout; set `CMSSW_SRC` to use another one.
