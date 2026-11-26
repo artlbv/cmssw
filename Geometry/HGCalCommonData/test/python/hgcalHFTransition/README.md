@@ -46,6 +46,9 @@ Wafer-level silicon coverage (replaces the layer envelope as the definition of "
 - `containment_si.py` – containment estimate with an absorber block's deposit counted in proportion to that
   coverage, smoothed by the lateral shower size (hadronic 60 mm, EM 25 mm); HF active for |η| ≥ 2.98 (below that
   the muon-endcap steel shadows it). Writes both the envelope and the silicon curves for v9, v10, v11, v17, v19.
+- `screen_fix_v17.py` / `plot_screen_fix_v17.py` – v17 dead material and visible fraction with the thermal screen as
+  defined in CMSSW (`CEThermalScreen`, 1.77 g/cm3, mostly iron-loaded "Insulation": λ_I = 67 cm, X0 = 9.2 cm) and with the
+  real design (2 mm Al shell + Cryogel Z aerogel, 0.16 g/cm3), plus the rough λ = 45 cm used in the other plots.
 - `plot_containment_silicon.py` – envelope vs silicon per geometry with the measured L1 calo-jet efficiencies,
   and all geometries on one panel.
 
@@ -80,6 +83,8 @@ python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/coverage.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_silicon_coverage.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/containment_si.py
 python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_containment_silicon.py
+python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/screen_fix_v17.py
+python3 Geometry/HGCalCommonData/test/python/hgcalHFTransition/plot_screen_fix_v17.py
 ```
 
 The current-geometry XML (D110, D128) is read from this checkout; set `CMSSW_SRC` to use another one.
