@@ -56,7 +56,7 @@ for t in leg.get_texts():
 
 foot = ["Total dead material = HGCAL inner supports (Al, steel) + caloBase thermal screen, moderator and services, in interaction "
         "lengths along straight lines from the origin, z = 2.9–5.3 m, from the DDD XML of each scenario. Dots mark each curve's peak. "
-        "Thermal screen λ ≈ 45 cm assumed (rough). v9 (D35) has none of this material modelled. v19 (dashed) lies almost on v17."]
+        "Thermal screen as defined in CMSSW (CEThermalScreen, λ_I = 67 cm). v9 (D35) has none of this material modelled. v19 (dashed) lies almost on v17."]
 fig.canvas.draw()
 r = fig.canvas.get_renderer()
 abox = ax.get_window_extent(r)

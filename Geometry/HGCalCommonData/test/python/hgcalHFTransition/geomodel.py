@@ -17,15 +17,16 @@ import xml.etree.ElementTree as ET
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")))
 import hgcalInnerRadiusVsZ as H  # noqa: E402
 
-# (lambda_I, X0) in mm; thermal screen / services are rough
+# (lambda_I, X0) in mm. The caloBase mixtures are evaluated from their CMSSW definitions (materials 2021/v1, PDG elemental
+# values): CEThermalScreen 1.772 g/cm3 (85.5 % 'Insulation', 81 % Fe) and CEService 0.4819 g/cm3 (84 % air).
 MAT = {
     "materials:Aluminium": (397.0, 89.0),
     "materials:StainlessSteel": (167.7, 17.6),
     "materials:Copper": (153.2, 14.36),
     "materials:Lead": (175.9, 5.61),
     "materials:E_Polythene": (789.0, 503.0),
-    "caloBase:CEThermalScreen": (450.0, 250.0),
-    "caloBase:CEService": (1660.0, 870.0),
+    "caloBase:CEThermalScreen": (673.0, 92.3),
+    "caloBase:CEService": (1955.0, 616.0),
 }
 CE_E_LAMBDA, CE_E_X0 = 1.4, 26.0
 LAYER_VOLS = ("hgcal:HGCalEE", "hgcal:HGCalHEsil", "hgcal:HGCalHEmix")

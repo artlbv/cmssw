@@ -20,6 +20,11 @@ EFF = (np.arange(2.625, 4.0, 0.05), [0.979, 0.985, 0.985, 0.979, 0.980, 0.985, 0
                                       0.134, 0.416, 0.637, 0.850, 0.976, 0.994, 1.0, 0.988] + [1.0] * 8)
 L1IN = [(2.6, 2.7, 0.77), (2.7, 2.8, 0.78), (2.8, 2.9, 0.73), (2.9, 3.0, 0.58), (3.0, 3.1, 0.27), (3.1, 3.2, 0.14),
         (3.2, 3.3, 0.19), (3.3, 3.4, 0.51), (3.4, 3.5, 0.84), (3.5, 3.6, 1.00)]
+# Full-simulation rerun with modified thermal-screen material (colleague's study, D126 = HGCAL v19): L1puppiJetSC4 with
+# assigned p_T >= 20 GeV, GenJet p_T > 50 GeV, one-to-one dR < 0.3; 0.1-wide |eta| bins; values read off the plot (+-0.01).
+SC4_ETA = np.arange(2.65, 3.6, 0.1)
+SC4_NOM = [0.615, 0.645, 0.58, 0.40, 0.31, 0.065, 0.34, 0.71, 0.92, 1.00]
+SC4_CRYO = [0.70, 0.68, 0.515, 0.40, 0.27, 0.165, 0.765, 1.00, 1.00, 0.99]
 
 plt.rcParams.update({"font.size": 10, "axes.edgecolor": "#c3c2b7", "axes.labelcolor": INK2,
                      "xtick.color": INK2, "ytick.color": INK2})
@@ -39,7 +44,6 @@ a1.fill_between(etas, d["fixed10"][0], d["fixed"][0], color=AQUA, alpha=0.35, lw
 a1.plot(etas, d["fixed"][0], color=AQUA, lw=2.2, label="total dead, corrected screen (Al shell + aerogel)")
 a1.plot(etas, d["cmssw"][1], color=BLUE, lw=1.3, ls=(0, (4, 2.5)), label="thermal screen only, CMSSW")
 a1.plot(etas, d["fixed"][1], color=AQUA, lw=1.3, ls=(0, (4, 2.5)), label="thermal screen only, corrected")
-a1.plot(etas, d["previous"][0], color=GREY, lw=1.2, ls=(0, (1, 1.5)), label="total dead, previous rough screen λ (45 cm)")
 a1.set_ylim(0, 7.6)
 a1.set_ylabel("dead material along the line, λ_I")
 a1.set_title("Dead material, v17", loc="left", color=INK, fontsize=11)
@@ -55,6 +59,10 @@ a2.plot(EFF[0], EFF[1], "o", color=INK, ms=4.2, mec=SURF, mew=0.7, ls="none", zo
         label="L1 calo-jet matching eff. (Spring24)")
 a2.plot([(lo + hi) / 2 for lo, hi, _ in L1IN], [f for _, _, f in L1IN], "D", ms=5.5, mfc=SURF, mec=PURPLE, mew=1.4,
         ls="none", zorder=7, label="L1 input energy / gen p_T (Spring24)")
+a2.plot(SC4_ETA, SC4_NOM, "s", ms=5.0, mfc=SURF, mec=INK2, mew=1.2, ls="none", zorder=7,
+        label="L1 PUPPI SC4 jet eff., full sim. D126, CMSSW screen")
+a2.plot(SC4_ETA, SC4_CRYO, "s", ms=5.0, color=AQUA, mec=INK, mew=0.6, ls="none", zorder=8,
+        label="L1 PUPPI SC4 jet eff., full sim. D126, Cryogel screen")
 a2.set_ylim(0, 1.08)
 a2.set_ylabel("visible fraction / efficiency")
 a2.set_title("Visible fraction (wafer-level silicon), v17", loc="left", color=INK, fontsize=11)
@@ -67,7 +75,9 @@ foot = ("Thermal screen: CMSSW mixture CEThermalScreen (1.772 g/cm³, mostly 'In
         "Corrected: per wall a 2 mm aluminium shell and Cryogel Z aerogel (SiO2, 0.16 g/cm³, λ_I = 6.1 m, X0 = 1.7 m) filling "
         "the rest of the wall (line) or only a 10 mm blanket with air elsewhere (band edge); wall thickness taken from the "
         "CMSSW envelopes (20–119 mm). All other materials unchanged. Visible fraction: wafer-level silicon model, HF from |η| = "
-        "2.98. Measured points come from samples simulated with the CMSSW screen and are shown for reference.")
+        "2.98. Spring24 points (circles, diamonds): samples with the CMSSW screen. Squares: full-simulation rerun (D126 = v19) "
+        "with the nominal and with a Cryogel-proxy screen, L1 PUPPI SC4 jets with p_T ≥ 20 GeV matched to GenJets with p_T > 50 "
+        "GeV; their plateau below |η| = 3 is ≈ 0.65, so compare the two square series with each other.")
 fig.canvas.draw()
 rr = fig.canvas.get_renderer()
 ybot = min(l1.get_window_extent(rr).y0, l2.get_window_extent(rr).y0) / fig.bbox.height - 0.02

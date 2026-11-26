@@ -106,7 +106,7 @@ foot = [
     "Interaction lengths λ_I summed along straight lines from the origin, z = 2.9–5.3 m, per |η| (0.01 steps), from the DDD XML of "
     "each scenario: polycone volumes of caloBase + hgcal (deepest volume containing the point) and the HGCAL layer blocks of the "
     "geometry algorithms, active where the line is at or above the block's inner radius. CE-E set to 1.4 λ in total, CE-H from its "
-    "steel/copper thicknesses; thermal screen λ ≈ 45 cm assumed (rough). v9 (D35) has no supports, thermal screen or moderator "
+    "steel/copper thicknesses; thermal screen as defined in CMSSW (CEThermalScreen, λ_I = 67 cm). v9 (D35) has no supports, thermal screen or moderator "
     "modelled. HF (beyond z ≈ 11 m) not shown.",
 ]
 fig.canvas.draw()

@@ -9,7 +9,6 @@ SiO2). Interaction / radiation lengths from PDG elemental values (g/cm2):
   aluminium                           : lambda_I = 39.7 cm, X0 = 8.9 cm
 
 Cases for the thermal-screen volumes (everything else unchanged):
-  previous : the rough value used so far in these plots (lambda 45 cm, X0 25 cm)
   cmssw    : CEThermalScreen as defined in CMSSW
   fixed    : per wall, a 2 mm aluminium shell and aerogel filling the rest of the wall (upper estimate of the real design)
   fixed10  : per wall, a 2 mm aluminium shell and a 10 mm aerogel blanket, air elsewhere (lower estimate)
@@ -30,7 +29,7 @@ import containment_si as CS  # noqa: E402
 
 LAM_AL, X0_AL = 107.2 / 2.699 * 10, 24.01 / 2.699 * 10          # mm
 LAM_AERO, X0_AERO = 6110.0, 1690.0                                # mm (SiO2 at 0.16 g/cm3)
-CASES = {"previous": (450.0, 250.0), "cmssw": (673.0, 92.3)}       # fixed lambda / X0 in mm
+CASES = {"cmssw": (673.0, 92.3)}       # fixed lambda / X0 in mm (same as geomodel.MAT)
 
 
 class ScreenGeometry:
@@ -95,7 +94,7 @@ if __name__ == "__main__":
     wh, we = SI.block_weight_fn(g, planes, CS.SIG_HAD), SI.block_weight_fn(g, planes, CS.SIG_EM)
     etas = np.round(np.arange(2.60, 4.001, 0.01), 4)
     out = {"etas": etas}
-    for case in ("previous", "cmssw", "fixed", "fixed10"):
+    for case in ("cmssw", "fixed", "fixed10"):
         sg = ScreenGeometry(g, case)
         dead, scr, vis = [], [], []
         for e in etas:

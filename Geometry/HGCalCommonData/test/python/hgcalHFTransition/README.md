@@ -48,7 +48,7 @@ Wafer-level silicon coverage (replaces the layer envelope as the definition of "
   the muon-endcap steel shadows it). Writes both the envelope and the silicon curves for v9, v10, v11, v17, v19.
 - `screen_fix_v17.py` / `plot_screen_fix_v17.py` – v17 dead material and visible fraction with the thermal screen as
   defined in CMSSW (`CEThermalScreen`, 1.77 g/cm3, mostly iron-loaded "Insulation": λ_I = 67 cm, X0 = 9.2 cm) and with the
-  real design (2 mm Al shell + Cryogel Z aerogel, 0.16 g/cm3), plus the rough λ = 45 cm used in the other plots.
+  real design (2 mm Al shell + Cryogel Z aerogel, 0.16 g/cm3).
 - `plot_screen_fix_material_v17.py` – v17 material budget stacked by component, CMSSW thermal screen vs real design.
 - `plot_containment_silicon.py` – envelope vs silicon per geometry with the measured L1 calo-jet efficiencies,
   and all geometries on one panel.
@@ -103,8 +103,9 @@ Plots are written to the work directory.
 - Hadrons (70 %): first interaction in λ, gamma longitudinal profile Γ(2.2, 0.87/λ). Photons (30 %):
   conversion after 9/7 X0, profile Γ(3.85, 0.5/X0). Energy in crossed active HGCAL blocks, or leaking into
   HF beyond |η| = 3 (assumed fully active), counts as seen; energy in dead material is lost.
-- CE-E fixed at 1.4 λ / 26 X0; CE-H from its steel/copper thicknesses; thermal screen λ ≈ 45 cm,
-  X0 ≈ 25 cm assumed.
+- CE-E fixed at 1.4 λ / 26 X0; CE-H from its steel/copper thicknesses; the caloBase mixtures as defined in CMSSW
+  (thermal screen CEThermalScreen λ_I = 67 cm, X0 = 9.2 cm; services CEService λ_I = 1.96 m, X0 = 0.62 m). The real
+  thermal screen is much lighter (aluminium shell + aerogel), see screen_fix_v17.py.
 - The L1 efficiencies in `plot_containment_geos.py` were read off plot images (±0.01–0.03) and are not
   like-for-like: v9 calo jets not firmware-emulated; p_T > 100 GeV (v9, v10/v11) vs 100–300 GeV (v17);
   |η| bins ≈ 0.42, 0.25 and 0.05.

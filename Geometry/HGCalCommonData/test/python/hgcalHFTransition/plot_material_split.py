@@ -117,7 +117,7 @@ foot = (f"Interaction lengths summed along straight lines from the origin, z = 2
            "r ≥ 1 m are ignored. " if KEY == "v17" else "Moderator: CALOECModerator (polyethylene). ")
         + ("Services (HGCalService, CEService) are not crossed by these lines. " if cols["services"].max() < 0.005 else
            f"Services (HGCalService, CEService): at most {cols['services'].max():.2f} λ. ")
-        + "Thermal screen λ ≈ 45 cm assumed (rough).")
+        + "Thermal screen as defined in CMSSW (CEThermalScreen, λ_I = 67 cm).")
 fig.canvas.draw()
 rr = fig.canvas.get_renderer()
 box = ax.get_window_extent(rr)

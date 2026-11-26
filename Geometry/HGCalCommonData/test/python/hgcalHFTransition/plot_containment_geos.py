@@ -151,7 +151,7 @@ foot = [
     "Model: straight lines from the origin through the caloBase + hgcal volumes of each scenario (z 2.9–5.3 m). Hadrons (70%): first "
     "interaction in λ, profile Γ(2.2, 0.87/λ); photons (30%): conversion at 9/7 X0, profile Γ(3.85, 0.5/X0). Energy in crossed HGCAL "
     "active blocks or leaking into HF (|η| > 3, assumed fully active) counts as seen; energy in supports, thermal screen, moderator "
-    "and services is lost. Thermal screen λ ≈ 45 cm, X0 ≈ 25 cm assumed; CE-E set to 1.4 λ / 26 X0. No lateral spread, vertex spread, "
+    "and services is lost. Thermal screen as defined in CMSSW (λ_I = 67 cm, X0 = 9.2 cm); CE-E set to 1.4 λ / 26 X0. No lateral spread, vertex spread, "
     "field or ΔR = 0.4 cone.",
     "Efficiencies: v9 calo jets read off the L1 validation slide; v10/v11 calo jets (D49 samples) read off the menu V22 comparison; "
     "v17 calo jets (Spring24 D110 tt̄, PU 200, ΔR < 0.35) read off the HF-page plot; all vs gen η, both sides averaged.",
